@@ -1,0 +1,3 @@
+[submodule "docs"]
+	path = docs
+	url = git@github.com:hirumi7/verdi-docs.git
