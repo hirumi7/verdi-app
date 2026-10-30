@@ -1,0 +1,8 @@
+name: verdi_core
+description: Experimental offline Verdi domain core; no native persistence or UI.
+version: 0.1.0
+publish_to: none
+environment:
+  sdk: '>=3.11.1 <4.0.0'
+dev_dependencies:
+  test: ^1.25.0

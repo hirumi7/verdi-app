@@ -1,6 +1,6 @@
 # Verdi application
 
-This repository is the selected home for Verdi application code. The application has not been scaffolded yet. Product requirements and human review records live in the independent docs repository, pinned here at [docs/](docs/README.md).
+This repository is the selected home for Verdi application code. Development has started with an independently authored [pure Dart core](apps/mobile/packages/verdi_core/README.md) for the future Flutter customer app. There is no Flutter runner, native integration or admin scaffold yet. Product requirements and human review records live in the independent docs repository, pinned here at [docs/](docs/README.md).
 
 ## Start with the AI
 
@@ -36,4 +36,23 @@ When preparing a pin update, stage only the intended gitlink and use `--pin inde
 
 If the [selected checkpoint](docs/history/reviews/index.md) is `not_ready`, the full consumer handoff check must fail and application implementation remains blocked. An explicitly authorized docs-only publication or pin update can still proceed with that failure recorded; it is not an implementation-ready handoff. Do not weaken the check or relabel the checkpoint to obtain a pass. Structural checks, remote publication/access and interactive skill discovery are separate evidence.
 
-On Windows, use `.venv\Scripts\python.exe`. Application setup, tests and build commands have not been established; record them here when actual application code is introduced. No application CI is configured yet.
+On Windows, use `.venv\Scripts\python.exe`. No application CI is configured yet.
+
+## Core development checks
+
+Use Dart 3.13.7 (or that bundled in selected Flutter 3.47.8), then:
+
+```sh
+cd apps/mobile/packages/verdi_core
+dart pub get --enforce-lockfile
+dart format --output=none --set-exit-if-changed lib test example
+dart analyze
+dart test
+dart run example/care_walkthrough.dart
+```
+
+The package has no runtime dependencies and uses synthetic, memory-only state.
+These commands do not test native persistence, Flutter screens or store/OS behavior.
+The [delivery handoff](history/work/flutter-core-2026-10-30.md) records exact docs
+identity, scope, executed evidence and remaining criteria. Do not run upstream
+fresh-repository setup over this existing repository or copy unreviewed assets.

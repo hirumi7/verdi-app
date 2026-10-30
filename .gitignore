@@ -8,3 +8,9 @@ __pycache__/
 
 # Imported source material stays local.
 /claude-import/
+
+# Dart/Flutter generated local tooling and build output.
+.dart_tool/
+build/
+.packages
+.flutter-plugins-dependencies
