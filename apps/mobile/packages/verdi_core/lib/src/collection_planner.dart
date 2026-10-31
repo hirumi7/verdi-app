@@ -108,6 +108,7 @@ String _text(
 }) {
   final value = trim ? raw.trim() : raw;
   if (!_validUnicode(value) ||
+      value.contains('\u0000') ||
       value.characters.length > max ||
       (required && value.isEmpty))
     errors[path] = 'FIELD_INVALID';

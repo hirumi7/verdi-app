@@ -756,3 +756,44 @@ class DraftRepositoryHostApi {
     return pigeonVar_replyValue! as DraftWriteMessage;
   }
 }
+
+/// Bounded canonical envelopes preserve raw UTF-16 drafts. Native dispatch is a
+/// closed operation registry; this is not a SQL or filesystem transport.
+class CoreRepositoryHostApi {
+  /// Constructor for [CoreRepositoryHostApi]. The [binaryMessenger] named argument is
+  /// available for dependency injection. If it is left null, the default
+  /// BinaryMessenger will be used which routes to the host platform.
+  CoreRepositoryHostApi({
+    BinaryMessenger? binaryMessenger,
+    String messageChannelSuffix = '',
+  }) : pigeonVar_binaryMessenger = binaryMessenger,
+       pigeonVar_messageChannelSuffix = messageChannelSuffix.isNotEmpty
+           ? '.$messageChannelSuffix'
+           : '';
+
+  final BinaryMessenger? pigeonVar_binaryMessenger;
+  static const MessageCodec<Object?> pigeonChannelCodec = _PigeonCodec();
+
+  final String pigeonVar_messageChannelSuffix;
+
+  Future<String> callCore(String operation, String canonicalBody) async {
+    final pigeonVar_channelName =
+        'dev.flutter.pigeon.verdi_mobile.CoreRepositoryHostApi.callCore$pigeonVar_messageChannelSuffix';
+    final pigeonVar_channel = BasicMessageChannel<Object?>(
+      pigeonVar_channelName,
+      pigeonChannelCodec,
+      binaryMessenger: pigeonVar_binaryMessenger,
+    );
+    final Future<Object?> pigeonVar_sendFuture = pigeonVar_channel.send(
+      <Object?>[operation, canonicalBody],
+    );
+    final pigeonVar_replyList = await pigeonVar_sendFuture as List<Object?>?;
+
+    final Object? pigeonVar_replyValue = _extractReplyValueOrThrow(
+      pigeonVar_replyList,
+      pigeonVar_channelName,
+      isNullValid: false,
+    );
+    return pigeonVar_replyValue! as String;
+  }
+}

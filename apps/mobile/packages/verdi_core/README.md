@@ -1,7 +1,7 @@
 # Verdi core (development only)
 
-Original pure Dart domain primitives and a memory-only command harness intended
-for the Flutter customer app. The locked dependency graph and SDK 3.13.7 are the
+Pure Dart domain primitives, a memory-only test harness and normalized stored-row
+hydration/planning for the Flutter customer app. The locked dependency graph and SDK 3.13.7 are the
 tested baseline. Runtime dependencies are Dart's
 [characters](https://pub.dev/packages/characters) for grapheme-aware field bounds
 and [crypto](https://pub.dev/packages/crypto) for SHA-256 command hashing;
@@ -13,7 +13,7 @@ With Dart 3.13.7 (also bundled in the selected Flutter 3.47.8) on PATH:
 
 ```sh
 dart pub get --enforce-lockfile
-dart format --output=none --set-exit-if-changed lib test example
+dart format --output=none --set-exit-if-changed lib test example tool
 dart analyze
 dart test
 dart run example/care_walkthrough.dart
@@ -108,3 +108,15 @@ come from an independent Python oracle; both Dart and Swift execute the same
 20 cases. Canonical size/depth bounds preserve raw draft UTF-16 through JSON
 escapes; final field validation remains separate. The accepted raw-draft recovery
 regression is retained unchanged.
+
+
+## Native projection
+
+CoreStorageProjection hydrates stored facts directly, retaining original events,
+correction chains, IDs/revisions, anchors/overrides, retired state and invalid raw
+drafts. It reuses the existing planner to emit bounded row deltas with prior-row
+hashes and native recording-time descriptors. It never acknowledges durable
+writes. Native rows are reloaded after commit; native receipts and monotonic
+acknowledgements own recovery and Undo. `tool/generate_storage_vectors.dart`
+produces the shared 28-transition Swift fixture; `storage_test.dart` checks drift,
+lossless hydration, escaped size limits, same-instant writes and corruption.

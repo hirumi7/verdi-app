@@ -744,3 +744,42 @@ class DraftRepositoryHostApiSetup {
     }
   }
 }
+/// Bounded canonical envelopes preserve raw UTF-16 drafts. Native dispatch is a
+/// closed operation registry; this is not a SQL or filesystem transport.
+///
+/// Generated protocol from Pigeon that represents a handler of messages from Flutter.
+protocol CoreRepositoryHostApi {
+  func callCore(operation: String, canonicalBody: String) throws -> String
+}
+
+/// Generated setup class from Pigeon to handle messages through the `binaryMessenger`.
+class CoreRepositoryHostApiSetup {
+  static var codec: FlutterStandardMessageCodec { DraftBridgePigeonCodec.shared }
+  /// Sets up an instance of `CoreRepositoryHostApi` to handle messages through the `binaryMessenger`.
+  static func setUp(binaryMessenger: FlutterBinaryMessenger, api: CoreRepositoryHostApi?, messageChannelSuffix: String = "") {
+    let channelSuffix = messageChannelSuffix.count > 0 ? ".\(messageChannelSuffix)" : ""
+    #if os(iOS)
+      let taskQueue = binaryMessenger.makeBackgroundTaskQueue?()
+    #else
+      let taskQueue: FlutterTaskQueue? = nil
+    #endif
+    let callCoreChannel = taskQueue == nil
+      ? FlutterBasicMessageChannel(name: "dev.flutter.pigeon.verdi_mobile.CoreRepositoryHostApi.callCore\(channelSuffix)", binaryMessenger: binaryMessenger, codec: codec)
+      : FlutterBasicMessageChannel(name: "dev.flutter.pigeon.verdi_mobile.CoreRepositoryHostApi.callCore\(channelSuffix)", binaryMessenger: binaryMessenger, codec: codec, taskQueue: taskQueue)
+    if let api = api {
+      callCoreChannel.setMessageHandler { message, reply in
+        let args = message as! [Any?]
+        let operationArg = args[0] as! String
+        let canonicalBodyArg = args[1] as! String
+        do {
+          let result = try api.callCore(operation: operationArg, canonicalBody: canonicalBodyArg)
+          reply(wrapResult(result))
+        } catch {
+          reply(wrapError(error))
+        }
+      }
+    } else {
+      callCoreChannel.setMessageHandler(nil)
+    }
+  }
+}

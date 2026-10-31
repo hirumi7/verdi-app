@@ -61,7 +61,7 @@ Future<void> seed(CollectionRepository repository, String name) async {
 void main() {
   setUp(() async {
     await getIt.reset();
-    await configureDependencies();
+    await configureDependencies(environment: 'memory');
   });
   tearDown(() => getIt.reset());
 

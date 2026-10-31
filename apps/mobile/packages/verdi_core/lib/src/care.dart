@@ -1,6 +1,8 @@
 import 'calendar.dart';
 import 'errors.dart';
 
+part 'care_storage.dart';
+
 enum CareOutcome { actualCare, checkedNotNeeded, skipped }
 
 enum RoutineStatus { active, paused, retired }
@@ -119,8 +121,8 @@ final class RoutineUndoValues {
 }
 
 /// Immutable per-routine state for the first domain slice, not a persisted DTO.
-/// Only the named seed factories can construct it. Commands produce new values;
-/// callers must eventually use the guarded native transaction protocol to save.
+/// New routines use seed factories; CareStorage hydrates existing facts directly.
+/// Commands produce new values; native transactions own durable saves.
 final class RoutineCore {
   final String id;
   final String plantId;

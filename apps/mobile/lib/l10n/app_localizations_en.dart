@@ -22,11 +22,11 @@ class AppStringsEn extends AppStrings {
   String get settings => 'Settings';
 
   @override
-  String get developmentNotice => 'Development preview · temporary data';
+  String get developmentNotice => 'Development preview · on-device storage';
 
   @override
   String get developmentDetails =>
-      'This preview uses a temporary collection. Use sample information only. Closing the process loses its plants and drafts. Purchases, photos, backups and notifications are not connected yet.';
+      'Plants, care history and drafts stay on this device between launches. Purchases, photos, backups and notifications are not connected yet.';
 
   @override
   String get noPlants => 'No plants yet';
@@ -253,7 +253,7 @@ class AppStringsEn extends AppStrings {
   String get years => 'Years';
 
   @override
-  String get draftSaved => 'Draft saved for this session';
+  String get draftSaved => 'Draft saved';
 
   @override
   String get savingDraft => 'Saving draft…';
@@ -515,4 +515,47 @@ class AppStringsEn extends AppStrings {
   String affectedPlant(String name) {
     return 'Changed selection: $name';
   }
+
+  @override
+  String get openingPlants => 'Opening your plants';
+
+  @override
+  String get recoveryHeading => 'Recover unfinished actions';
+
+  @override
+  String get developmentStorage => 'Development storage • Saved on this device';
+
+  @override
+  String get retainedStorageError =>
+      'Your saved files are retained. Storage could not complete this action.';
+
+  @override
+  String get retryOpening => 'Retry opening';
+
+  @override
+  String get pendingActionExplanation =>
+      'An earlier action has no confirmed result. Review it before making new changes.';
+
+  @override
+  String get retryPendingAction => 'Retry action';
+
+  @override
+  String get cancelPendingAction => 'Cancel action';
+
+  @override
+  String get cancelPendingTitle => 'Cancel this pending action?';
+
+  @override
+  String get retainDraftExplanation =>
+      'Saved plants and the retained draft stay available.';
+
+  @override
+  String get keepPending => 'Keep pending';
+
+  @override
+  String get recoveredActionReview =>
+      'Review the recovered action before saving.';
+
+  @override
+  String get saveDraftAction => 'Save unfinished draft';
 }

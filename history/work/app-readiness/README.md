@@ -440,3 +440,107 @@ receipts, outbox and Undo. Complete that coherent repository before changing the
 main UI's registration. Full product features, physical/current submission
 host/store configuration and release evidence remain open. Simulator-first and
 prepared-but-unregistered store configuration remain the user's current choices.
+
+
+## Durable custom-core main UI delivery — 2026-10-31
+
+**Author:** Codex (AI assistant).
+**Date:** 2026-10-31 (Asia/Jakarta).
+
+Implementation contract: published docs
+`91d61be2201811e19d538e7c720a0be694e55c52`, adopted before code in app
+`2c4da6d`. App baseline `f344a996b20b068313d41fbcbd93db8790ff5bd6`, the
+isolated draft harness and existing tests are preserved. This delivers the
+currently exposed custom-core portion of REQ-006/007/008/009 with related
+REQ-014 Free-cap, REQ-015 local-storage and REQ-018 recovery presentation checks.
+All 18 accepted requirement files and decision records remain byte-identical;
+REQ-019 remains proposed. No complete requirement or release gate is closed.
+
+The main development entry now opens native `custom_core_v1` storage, resolves
+unfinished operations and hydrates current rows before showing the workspace.
+It no longer registers the memory repository. SQLite persists custom plants,
+all five standard routine kinds, pending heads, original care events, correction/
+void/restore audit, schedule changes and raw add/edit drafts. Native writes
+commit rows, revisions, receipts, outbox and frozen-body cleanup together.
+Stored hydration never replays seed commands. The memory store remains an
+explicit test environment and a disposable planner projection, not durability
+authority. Startup failure retains files and offers Retry without reset/fallback.
+
+The generated Pigeon API accepts bounded canonical envelopes through one serial
+Dart service isolate. Native code owns clock/zone, compiled statement registry,
+revision/identity/count/draft-set/Free-cap guards, preview grants and eight-second
+acknowledgement-bound Undo. Same-ID receipt lookup precedes stale guards and
+local preview lookup. Unknown outcomes reopen the native owner before recovery;
+queued later editor text survives retry. Restart presents unfinished actions for
+explicit retry/cancel, with fresh review for actions requiring confirmation.
+
+Independent reviewer `core_readiness_review` inspected design and source,
+reproduced hostile-plan/Unicode issues, reread fixes and checked final retry/UI
+logs. Final bounded review found no remaining blocking defect. Corrections include:
+
+- Before-row hashes bound escaped raw draft update size; exact delete counts and
+  owned edit-draft set include the empty set. Same-instant changes still bind
+  native timestamps. Native command-specific scopes reject field smuggling.
+- Strict raw-draft structure validation precedes freeze, while invalid draft
+  strings/null seeds/duplicate rows remain lossless. Native comparison is byte
+  exact; whitespace matches Dart, including FEFF. Final Text rejects NUL under
+  the existing contract, without rejecting raw draft NUL.
+- Unknown outcomes close poisoned sessions. Sticky submission/preparation IDs
+  and receipt-first confirmation preserve one operation across reconnect.
+  A freeze that was never acknowledged is not incorrectly abandoned.
+- Deleting one plant preserves unrelated Undo; slow native readback subtracts
+  elapsed time from the visible offer. Replays/restarts grant no new Undo.
+- A recovery dialog initially left a loading animation active behind it; the
+  busy state now pauses during confirmation. UI tests now scroll lazy lists and
+  settle scroll animation before accessing controls at large text sizes.
+
+Executed on Flutter 3.47.8/Dart 3.13.7, macOS14.6, Xcode16.2/SDK18.2 and
+iPhone16 simulator/iOS18.3, using the repository lockfiles:
+
+- Core: `dart analyze`, format check and `dart test`: 116 tests passed. New
+  tests verify all 21 wire commands over 28 shared transitions, direct hydration,
+  corrupt-row rejection, raw UTF16, large escaped drafts and native-fixture drift.
+- Native: `swift test`: 51 tests passed; `swift build -Xswiftc -warnings-as-errors`
+  passed. `xcodebuild -scheme VerdiNative -destination
+  'platform=iOS Simulator,name=iPhone 16,OS=18.3' -derivedDataPath
+  /tmp/verdi-native-ios-build test`: the same 51 tests passed. Includes actual
+  SQLite reopen/constraints/transaction recovery, hostile plans, exact deletion
+  guards, active cap, all-command row-hash replay and Undo deadline boundaries.
+- Flutter: format and `flutter analyze` passed; final `flutter test` passed
+  all 24 tests. The new startup failure test
+  proves retained recovery and reachable Retry at 320 px and 320% text.
+- Main UI: `flutter test integration_test/durable_core_test.dart -d DEVICE_ID
+  --no-uninstall --dart-define=VERDI_CORE_PHASE=seed`, then the same command with
+  `recover`: each passed 1/1 in separate retained-installation processes. Actual
+  UI add, complete, past care, correction, void, interval, archive and restore
+  were followed by restarted history/head reads, pending-action confirmation and
+  recovered draft editing. No uninstall/reset was used.
+- Actual native retry: `flutter test integration_test/native_retry_test.dart
+  -d DEVICE_ID --no-uninstall`: passed 1/1. Exercises loss before freeze, BUSY
+  before commit with later keystrokes, lost committed reply plus unavailable
+  receipt, confirmation replay after service restart and delayed Undo readback.
+  Faults here are injected at the service boundary around real native writes;
+  Swift tests separately inject native transaction faults.
+- `DART_BIN=PINNED_DART python3 tooling/pigeon/check_generation.py` passed for
+  Dart and Swift output. Localized and DI generated output is retained.
+- Preserved integration regression command: `flutter test
+  integration_test/collection_flow_test.dart integration_test/durable_draft_test.dart
+  -d DEVICE_ID --no-uninstall`: both passed (2/2). This retains the explicit memory
+  UI scenario and separate native draft namespace. `git diff --check` passed;
+  reviewed files contain no
+  imported source originals, credentials or generated build directories.
+
+Local logs: `/tmp/verdi-core-final-tests.log`, `/tmp/verdi-core-final-analyze.log`,
+`/tmp/verdi-core-native-final.log`, `/tmp/verdi-core-native-ios-final.log`,
+`/tmp/verdi-core-native-warnings.log`, `/tmp/verdi-flutter-final-analyze.log`,
+`/tmp/verdi-flutter-final-tests.log`, `/tmp/verdi-core-ui-seed-final.log`,
+`/tmp/verdi-core-ui-recover-final2.log`, `/tmp/verdi-core-native-retry.log` and
+`/tmp/verdi-core-preserved-integration.log`. They are local execution evidence,
+not a portable archived test report.
+
+Remaining: bundled species/catalog and species-change suggestions, media/journal,
+backup and generation replacement, notification delivery, StoreKit entitlements,
+admin and full product accessibility/performance verification. Simulator protection
+is explicitly unverified. Physical protection/first-unlock, real interruption,
+current submission toolchain and store/release evidence remain open. The DEBUG
+entry still refuses release mode; prepared store IDs remain unregistered.

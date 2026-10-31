@@ -190,6 +190,17 @@ final class RoutineHeadValues {
   final LocalDate? overrideDate;
   final RoutineStatus status;
   final bool archived;
+  const RoutineHeadValues._stored(
+    this.headId,
+    this.interval,
+    this.anchor,
+    this.firstCheckAnchor,
+    this.firstCheckDate,
+    this.nextCheck,
+    this.overrideDate,
+    this.status,
+    this.archived,
+  );
   RoutineHeadValues._(RoutineCore routine)
     : headId = routine.headId,
       interval = routine.interval,
@@ -214,6 +225,19 @@ final class ScheduleChange {
   final String recordedZone;
   final RoutineHeadValues before;
   final RoutineHeadValues after;
+  const ScheduleChange._stored(
+    this.id,
+    this.commandId,
+    this.plantId,
+    this.routineId,
+    this.careLabel,
+    this.kind,
+    this.changeDate,
+    this.changedAt,
+    this.recordedZone,
+    this.before,
+    this.after,
+  );
   ScheduleChange._(
     this.id,
     this.commandId,

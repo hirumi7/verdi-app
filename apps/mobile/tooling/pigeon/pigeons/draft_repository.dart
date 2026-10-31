@@ -123,3 +123,11 @@ abstract class DraftRepositoryHostApi {
     String payloadHash,
   );
 }
+
+/// Bounded canonical envelopes preserve raw UTF-16 drafts. Native dispatch is a
+/// closed operation registry; this is not a SQL or filesystem transport.
+@HostApi()
+abstract class CoreRepositoryHostApi {
+  @TaskQueue(type: TaskQueueType.serialBackgroundThread)
+  String callCore(String operation, String canonicalBody);
+}

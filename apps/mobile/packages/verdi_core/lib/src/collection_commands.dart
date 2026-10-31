@@ -6,7 +6,7 @@ String _outcomeName(CareOutcome outcome) => switch (outcome) {
   CareOutcome.skipped => 'skipped',
 };
 
-/// Closed command set for this fake harness. Native DTO parsing is separate.
+/// Closed current-core command set. Native validation independently guards storage.
 sealed class CoreCommand {
   const CoreCommand();
   String get type;

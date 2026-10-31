@@ -21,6 +21,7 @@
 		AD1000000000000000000001 /* VerdiNative in Frameworks */ = {isa = PBXBuildFile; productRef = AD1000000000000000000002 /* VerdiNative */; };
 		AD1000000000000000000003 /* DraftBridge.g.swift in Sources */ = {isa = PBXBuildFile; fileRef = AD1000000000000000000004 /* DraftBridge.g.swift */; };
 		AD1000000000000000000005 /* DraftRepositoryBridge.swift in Sources */ = {isa = PBXBuildFile; fileRef = AD1000000000000000000006 /* DraftRepositoryBridge.swift */; };
+		CB1000000000000000000005 /* CoreRepositoryBridge.swift in Sources */ = {isa = PBXBuildFile; fileRef = CB1000000000000000000006 /* CoreRepositoryBridge.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -74,6 +75,7 @@
 		78E0A7A72DC9AD7400C4905E /* FlutterGeneratedPluginSwiftPackage */ = {isa = PBXFileReference; lastKnownFileType = wrapper; name = FlutterGeneratedPluginSwiftPackage; path = Flutter/ephemeral/Packages/FlutterGeneratedPluginSwiftPackage; sourceTree = "<group>"; };
 		AD1000000000000000000004 /* DraftBridge.g.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DraftBridge.g.swift; sourceTree = "<group>"; };
 		AD1000000000000000000006 /* DraftRepositoryBridge.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DraftRepositoryBridge.swift; sourceTree = "<group>"; };
+		CB1000000000000000000006 /* CoreRepositoryBridge.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CoreRepositoryBridge.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -165,6 +167,7 @@
 				74858FAE1ED2DC5600515810 /* AppDelegate.swift */,
 				AD1000000000000000000004 /* DraftBridge.g.swift */,
 				AD1000000000000000000006 /* DraftRepositoryBridge.swift */,
+				CB1000000000000000000006 /* CoreRepositoryBridge.swift */,
 				7884E8672EC3CC0400C636F2 /* SceneDelegate.swift */,
 				74858FAD1ED2DC5600515810 /* Runner-Bridging-Header.h */,
 			);
@@ -385,6 +388,7 @@
 				74858FAF1ED2DC5600515810 /* AppDelegate.swift in Sources */,
 				AD1000000000000000000003 /* DraftBridge.g.swift in Sources */,
 				AD1000000000000000000005 /* DraftRepositoryBridge.swift in Sources */,
+				CB1000000000000000000005 /* CoreRepositoryBridge.swift in Sources */,
 				1498D2341E8E89220040F4C2 /* GeneratedPluginRegistrant.m in Sources */,
 				7884E8682EC3CC0700C636F2 /* SceneDelegate.swift in Sources */,
 			);

@@ -121,13 +121,13 @@ abstract class AppStrings {
   /// No description provided for @developmentNotice.
   ///
   /// In en, this message translates to:
-  /// **'Development preview · temporary data'**
+  /// **'Development preview · on-device storage'**
   String get developmentNotice;
 
   /// No description provided for @developmentDetails.
   ///
   /// In en, this message translates to:
-  /// **'This preview uses a temporary collection. Use sample information only. Closing the process loses its plants and drafts. Purchases, photos, backups and notifications are not connected yet.'**
+  /// **'Plants, care history and drafts stay on this device between launches. Purchases, photos, backups and notifications are not connected yet.'**
   String get developmentDetails;
 
   /// No description provided for @noPlants.
@@ -577,7 +577,7 @@ abstract class AppStrings {
   /// No description provided for @draftSaved.
   ///
   /// In en, this message translates to:
-  /// **'Draft saved for this session'**
+  /// **'Draft saved'**
   String get draftSaved;
 
   /// No description provided for @savingDraft.
@@ -981,6 +981,84 @@ abstract class AppStrings {
   /// In en, this message translates to:
   /// **'Changed selection: {name}'**
   String affectedPlant(String name);
+
+  /// No description provided for @openingPlants.
+  ///
+  /// In en, this message translates to:
+  /// **'Opening your plants'**
+  String get openingPlants;
+
+  /// No description provided for @recoveryHeading.
+  ///
+  /// In en, this message translates to:
+  /// **'Recover unfinished actions'**
+  String get recoveryHeading;
+
+  /// No description provided for @developmentStorage.
+  ///
+  /// In en, this message translates to:
+  /// **'Development storage • Saved on this device'**
+  String get developmentStorage;
+
+  /// No description provided for @retainedStorageError.
+  ///
+  /// In en, this message translates to:
+  /// **'Your saved files are retained. Storage could not complete this action.'**
+  String get retainedStorageError;
+
+  /// No description provided for @retryOpening.
+  ///
+  /// In en, this message translates to:
+  /// **'Retry opening'**
+  String get retryOpening;
+
+  /// No description provided for @pendingActionExplanation.
+  ///
+  /// In en, this message translates to:
+  /// **'An earlier action has no confirmed result. Review it before making new changes.'**
+  String get pendingActionExplanation;
+
+  /// No description provided for @retryPendingAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Retry action'**
+  String get retryPendingAction;
+
+  /// No description provided for @cancelPendingAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Cancel action'**
+  String get cancelPendingAction;
+
+  /// No description provided for @cancelPendingTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Cancel this pending action?'**
+  String get cancelPendingTitle;
+
+  /// No description provided for @retainDraftExplanation.
+  ///
+  /// In en, this message translates to:
+  /// **'Saved plants and the retained draft stay available.'**
+  String get retainDraftExplanation;
+
+  /// No description provided for @keepPending.
+  ///
+  /// In en, this message translates to:
+  /// **'Keep pending'**
+  String get keepPending;
+
+  /// No description provided for @recoveredActionReview.
+  ///
+  /// In en, this message translates to:
+  /// **'Review the recovered action before saving.'**
+  String get recoveredActionReview;
+
+  /// No description provided for @saveDraftAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Save unfinished draft'**
+  String get saveDraftAction;
 }
 
 class _AppStringsDelegate extends LocalizationsDelegate<AppStrings> {

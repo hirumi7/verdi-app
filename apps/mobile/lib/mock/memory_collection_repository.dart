@@ -5,7 +5,7 @@ import 'package:verdi_core/verdi_core.dart';
 
 import '../features/collection/data/repositories/collection_repository.dart';
 
-@LazySingleton(as: CollectionRepository, env: ['development'])
+@LazySingleton(as: CollectionRepository, env: ['memory'])
 class MemoryCollectionRepository implements CollectionRepository {
   final _random = Random.secure();
   final _elapsed = Stopwatch()..start();

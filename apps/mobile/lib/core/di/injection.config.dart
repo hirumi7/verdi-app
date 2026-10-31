@@ -21,7 +21,7 @@ import '../../features/collection/presentation/cubits/workspace_cubit.dart'
     as _i422;
 import '../../mock/memory_collection_repository.dart' as _i517;
 
-const String _development = 'development';
+const String _memory = 'memory';
 
 extension GetItInjectableX on _i174.GetIt {
   // initializes the registration of main-scope dependencies inside of GetIt
@@ -32,7 +32,7 @@ extension GetItInjectableX on _i174.GetIt {
     final gh = _i526.GetItHelper(this, environment, environmentFilter);
     gh.lazySingleton<_i816.CollectionRepository>(
       () => _i517.MemoryCollectionRepository(),
-      registerFor: {_development},
+      registerFor: {_memory},
     );
     gh.factory<_i186.PlantEditorCubit>(
       () => _i186.PlantEditorCubit(gh<_i816.CollectionRepository>()),

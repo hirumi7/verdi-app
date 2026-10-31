@@ -95,3 +95,7 @@ String commandHash(String commandType, Map<String, Object?> payload) => sha256
       ),
     )
     .toString();
+
+/// SHA-256 of an arbitrary canonical protocol value (rows, plans and effects).
+String canonicalValueHash(Object? value) =>
+    sha256.convert(utf8.encode(canonicalCommandJson(value))).toString();

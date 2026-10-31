@@ -1,6 +1,6 @@
 # Verdi application
 
-This repository is the selected home for Verdi application code. Development includes a [pure Dart core](apps/mobile/packages/verdi_core/README.md), a tested Flutter/iOS preview and a [native SQLite foundation](apps/mobile/packages/verdi_native/README.md). The preview still uses synthetic temporary data; production persistence integration and the internal admin remain unfinished. Product requirements and human review records live in the independent docs repository, pinned here at [docs/](docs/README.md).
+This repository is the selected home for Verdi application code. Development includes a [pure Dart core](apps/mobile/packages/verdi_core/README.md), a tested Flutter/iOS preview and a [native SQLite foundation](apps/mobile/packages/verdi_native/README.md). The main development UI saves custom plants, care, history and drafts in native SQLite. The full product feature set and internal admin remain unfinished. Product requirements and human review records live in the independent docs repository, pinned here at [docs/](docs/README.md).
 
 ## Start with the AI
 
@@ -45,15 +45,15 @@ Use Dart 3.13.7 (or that bundled in selected Flutter 3.47.8), then:
 ```sh
 cd apps/mobile/packages/verdi_core
 dart pub get --enforce-lockfile
-dart format --output=none --set-exit-if-changed lib test example
+dart format --output=none --set-exit-if-changed lib test example tool
 dart analyze
 dart test
 dart run example/care_walkthrough.dart
 dart run example/guarded_save_walkthrough.dart
 ```
 
-The package uses synthetic, memory-only state, with locked grapheme and hashing
-dependencies. The guarded-save example exercises draft integration and recovery
+The package supplies the canonical planner, stored-row hydration and an explicit
+memory test harness, with locked grapheme and hashing dependencies. The guarded-save example exercises draft integration and recovery
 from a simulated lost reply without duplicating a plant.
 These commands do not test native persistence, Flutter screens or store/OS behavior.
 
@@ -61,8 +61,9 @@ These commands do not test native persistence, Flutter screens or store/OS behav
 
 The adapted Flutter customer app is in `apps/mobile`. Use Flutter **3.47.8** with
 bundled Dart **3.13.7**. Read its `AGENTS.md` and `TEMPLATE_PROVENANCE.md` before
-changing setup. This entry uses a temporary synthetic collection; closing the
-process loses its data. It refuses release mode and is not a public release build.
+changing setup. This entry opens the permanent `custom_core_v1` native store,
+reconciles interrupted operations and hydrates the collection before opening the
+workspace. Failed startup retains files and offers Retry. It refuses release mode.
 
 ```sh
 cd apps/mobile
@@ -93,5 +94,31 @@ The [Swift package](apps/mobile/packages/verdi_native/README.md) owns real OS
 SQLite connection/bootstrap/transaction infrastructure. Run `swift test` and
 `swift build -Xswiftc -warnings-as-errors` from `apps/mobile/packages/verdi_native`.
 Its README supplies the iOS simulator package-test command and scope limits.
-The synthetic schema is not the product database, and the Flutter preview is not
-yet connected to it. No personal-data/release readiness is claimed.
+The permanent current-core schema is distinct from the preserved synthetic
+foundation and draft-harness schemas. Main UI data is in Application Support/
+VerdiCore; no backup/import/reset API is enabled. Simulator file protection remains
+unverified; device, store, missing-feature and release checks remain outstanding.
+
+
+## Durable main UI verification
+
+Run these separate processes against the same simulator installation (the Flutter
+runner otherwise uninstalls the app). Tests clean up only their named synthetic
+fixtures and retain other records. Run recovery immediately after seed:
+
+```sh
+cd apps/mobile
+flutter test integration_test/durable_core_test.dart -d DEVICE_ID --no-uninstall --dart-define=VERDI_CORE_PHASE=seed
+flutter test integration_test/durable_core_test.dart -d DEVICE_ID --no-uninstall --dart-define=VERDI_CORE_PHASE=recover
+flutter test integration_test/native_retry_test.dart -d DEVICE_ID --no-uninstall
+```
+
+The first two exercise the main startup, plant/care/history UI and retained draft/
+pending-action recovery. The retry test injects service-boundary failures around
+real native writes; native transaction-boundary failures are exercised separately
+in Swift. Test hooks are debug-only, expose no file paths or SQL, and are not UI
+controls. The memory environment is requested explicitly by unit/widget tests.
+
+Regenerate the 28-transition Dart/native storage fixture from `packages/verdi_core`
+with `dart run tool/generate_storage_vectors.dart`; the core test detects drift.
+Keep `tooling/pigeon/check_generation.py` passing for both generated API outputs.

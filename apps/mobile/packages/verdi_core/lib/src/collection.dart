@@ -12,6 +12,8 @@ part 'collection_commands.dart';
 part 'collection_planner.dart';
 part 'collection_undo.dart';
 part 'collection_reads.dart';
+part 'collection_storage.dart';
+part 'collection_storage_commands.dart';
 
 const _maxRevision = 9007199254740991;
 const _maxPayloadBytes = 1024 * 1024;

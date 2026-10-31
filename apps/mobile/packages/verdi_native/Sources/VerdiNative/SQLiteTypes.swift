@@ -5,6 +5,14 @@ enum SQLValue: Equatable {
     case null
     case integer(Int64)
     case text(String)
+    static func == (lhs: SQLValue, rhs: SQLValue) -> Bool {
+        switch (lhs, rhs) {
+        case (.null, .null): return true
+        case (.integer(let a), .integer(let b)): return a == b
+        case (.text(let a), .text(let b)): return a.utf8.elementsEqual(b.utf8)
+        default: return false
+        }
+    }
 }
 
 enum StorageFailure: Error, Equatable {

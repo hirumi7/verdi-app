@@ -4,8 +4,8 @@
   "today": "Today",
   "plants": "Plants",
   "settings": "Settings",
-  "developmentNotice": "Development preview · temporary data",
-  "developmentDetails": "This preview uses a temporary collection. Use sample information only. Closing the process loses its plants and drafts. Purchases, photos, backups and notifications are not connected yet.",
+  "developmentNotice": "Development preview · on-device storage",
+  "developmentDetails": "Plants, care history and drafts stay on this device between launches. Purchases, photos, backups and notifications are not connected yet.",
   "noPlants": "No plants yet",
   "noPlantsBody": "Give your first plant a place here, then choose when to check on it.",
   "addPlant": "Add a plant",
@@ -80,7 +80,7 @@
   "weeks": "Weeks",
   "months": "Months",
   "years": "Years",
-  "draftSaved": "Draft saved for this session",
+  "draftSaved": "Draft saved",
   "savingDraft": "Saving draft…",
   "saveFailed": "Could not save. Your entries are still here.",
   "keepEditing": "Keep editing",
@@ -251,5 +251,18 @@
         "type": "String"
       }
     }
-  }
+  },
+  "openingPlants": "Opening your plants",
+  "recoveryHeading": "Recover unfinished actions",
+  "developmentStorage": "Development storage • Saved on this device",
+  "retainedStorageError": "Your saved files are retained. Storage could not complete this action.",
+  "retryOpening": "Retry opening",
+  "pendingActionExplanation": "An earlier action has no confirmed result. Review it before making new changes.",
+  "retryPendingAction": "Retry action",
+  "cancelPendingAction": "Cancel action",
+  "cancelPendingTitle": "Cancel this pending action?",
+  "retainDraftExplanation": "Saved plants and the retained draft stay available.",
+  "keepPending": "Keep pending",
+  "recoveredActionReview": "Review the recovered action before saving.",
+  "saveDraftAction": "Save unfinished draft"
 }

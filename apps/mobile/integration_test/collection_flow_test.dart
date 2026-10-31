@@ -11,7 +11,7 @@ void main() {
     tester,
   ) async {
     await getIt.reset();
-    await configureDependencies();
+    await configureDependencies(environment: 'memory');
     await tester.pumpWidget(const VerdiApp());
     await tester.pumpAndSettle();
     Future<void> press(String label) async {

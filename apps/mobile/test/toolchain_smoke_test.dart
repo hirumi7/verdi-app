@@ -9,7 +9,7 @@ import 'package:verdi_mobile/mock/memory_collection_repository.dart';
 void main() {
   setUp(() async {
     await getIt.reset();
-    await configureDependencies();
+    await configureDependencies(environment: 'memory');
   });
   tearDown(() => getIt.reset());
 
