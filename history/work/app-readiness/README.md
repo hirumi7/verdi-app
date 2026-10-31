@@ -999,3 +999,17 @@ remains partial. Exhaustive syscall/control faults, physical power loss/protecti
 maximum-size/disk-exhaustion performance, accessibility, notifications, StoreKit
 and public release remain open. The next recovery work is bounded I/O fault
 injection, not another claim that simulator success proves release readiness.
+
+### Recovery evidence publication and docs pin
+
+**Author:** Codex (AI assistant). **Date:** 2026-11-01 (Asia/Jakarta).
+
+Recovery implementation `b10fa3f5d1955164efc4963b414dcb8af20edeee` is published.
+Docs evidence `e6ca35ae607a24ede6d7e18de121ff94a0a275cf` was published before this
+consumer pin adoption. Documentation aggregate passed8/8 with268 tooling tests
+(`/tmp/verdi-recovery-docs.log`); independent review confirmed scoped evidence and
+remaining gates. Canonical requirements, decisions and questions are unchanged.
+Final normal development build and launch on the disposable QA simulator also
+passes (`/tmp/verdi-recovery-normal-run.log`); no user collection was reset.
+Consumer/gitlink checks validate the published pin. No additional acceptance or
+whole-app release-readiness claim is made.
