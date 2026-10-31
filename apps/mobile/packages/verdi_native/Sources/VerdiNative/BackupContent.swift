@@ -19,8 +19,8 @@ enum BackupContent {
             return .object(result)
         }
     }
-    static func export(_ db: SQLiteDatabase, to root: URL, mediaRoot: URL, index: BackupIndex, instant: String, cancel: () throws -> Void) throws {
-        let output = try BackupWriter(root.appendingPathComponent("data.json"),limit:512*1024*1024)
+    static func export(_ db: SQLiteDatabase, to root: URL, mediaRoot: URL, index: BackupIndex, instant: String, io: BackupFileIO = BackupFileIO(), cancel: () throws -> Void) throws {
+        let output = try BackupWriter(root.appendingPathComponent("data.json"),limit:512*1024*1024,io:io)
         try db.read { sql in
             let revision = try CoreSchema.integer(sql.query("SELECT collection_revision FROM metadata")[0][0])
             let settings = try CanonicalParser.parse(CoreSchema.text(sql.query("SELECT payload_json FROM user_settings WHERE slot=1")[0][0]))
@@ -49,7 +49,7 @@ enum BackupContent {
         }
         let data = try BackupIO.hash(output.url,limit:512*1024*1024,cancel:cancel), counts = try counts(db)
         let catalog = try db.read { try $0.query("SELECT version FROM catalog_head").first?.first?.stringValue ?? "unavailable" }
-        let manifest = try BackupWriter(root.appendingPathComponent("manifest.json"),limit:16*1024*1024)
+        let manifest = try BackupWriter(root.appendingPathComponent("manifest.json"),limit:16*1024*1024,io:io)
         let prefix: [String:CanonicalValue] = ["format":.string("verdi-backup"),"formatVersion":.integer(2),"dataSchemaVersion":.integer(2),"profile":.string(profile),"createdAt":.string(instant),"appVersion":.string("verdi-development-2"),"catalogVersion":.string(catalog),"data":.object(["path":.string("data.json"),"sha256":.string(data.0),"bytes":.integer(data.1)]),"counts":counts]
         let encoded = try CanonicalValue.object(prefix).json()
         try manifest.write(String(encoded.dropLast())+",\"files\":[")

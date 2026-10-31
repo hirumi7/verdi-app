@@ -10,6 +10,7 @@ final class SQLiteDatabase {
     private let queueKey = DispatchSpecificKey<UInt8>()
     private var handle: OpaquePointer?
     private var usable = false
+    private var recoveryRequired = false
     private let controlProfile: Bool
     private let fault: ((SQLiteBoundary) throws -> Void)?
 
@@ -99,10 +100,10 @@ final class SQLiteDatabase {
     }
 
     @discardableResult
-    func transaction<T>(_ work: (SQLiteSession) throws -> T) throws -> T {
+    func transaction<T>(fault transactionFault: ((SQLiteBoundary) throws -> Void)? = nil, _ work: (SQLiteSession) throws -> T) throws -> T {
         try scheduled {
             try requireUsable()
-            return try atomic(work)
+            return try atomic(transactionFault:transactionFault, work)
         }
     }
 
@@ -159,10 +160,35 @@ final class SQLiteDatabase {
 
     func close() throws {
         try scheduled {
-            usable = false
+            usable = false; recoveryRequired = false
             guard handle != nil else { return }
             try fault?(.close)
             try closeHandle()
+        }
+    }
+
+    /// Recover only the installation control connection, on the same serialized
+    /// owner. An uncertain transaction is still reported as uncertain to its caller.
+    /// No captured worker can retain an independently writable stale connection.
+    func recoverControlConnection(at url:URL, schema:CompiledSchema) throws {
+        try scheduled {
+            guard controlProfile else {throw StorageFailure.invalidSchema}
+            if usable {return}
+            guard recoveryRequired else {throw StorageFailure.unavailable}
+            dispose()
+            let target = try Self.canonicalTarget(url)
+            try checkInput(url,schema)
+            var info = stat()
+            guard lstat(target,&info) == 0, info.st_mode & S_IFMT == S_IFREG else {throw StorageFailure.invalidPath}
+            do {
+                try openHandle(target,readOnly:true)
+                try validate(schema)
+                try closeHandle()
+                try openHandle(target,readOnly:false)
+                try validate(schema)
+                try configure()
+                usable = true; recoveryRequired = false
+            } catch {dispose();throw error}
         }
     }
 
@@ -281,11 +307,11 @@ final class SQLiteDatabase {
 
     private func control(_ sql: String) throws { _ = try raw(sql) }
 
-    private func atomic<T>(writable: Bool = true, _ work: (SQLiteSession) throws -> T) throws -> T {
+    private func atomic<T>(writable: Bool = true, transactionFault: ((SQLiteBoundary) throws -> Void)? = nil, _ work: (SQLiteSession) throws -> T) throws -> T {
         guard let handle else { throw StorageFailure.unavailable }
         let uncertainFailure: StorageFailure = writable ? .unknownOutcome : .unavailable
         guard sqlite3_get_autocommit(handle) != 0 else {
-            usable = false
+            usable = false; recoveryRequired = true
             throw uncertainFailure
         }
         try control(writable ? "BEGIN IMMEDIATE" : "BEGIN DEFERRED")
@@ -293,24 +319,24 @@ final class SQLiteDatabase {
         do {
             let result = try scoped(writable: writable, work)
             committing = true
-            if writable { try fault?(.beforeCommit) }
+            if writable { try fault?(.beforeCommit);try transactionFault?(.beforeCommit) }
             try control("COMMIT")
-            if writable { try fault?(.afterCommit) }
+            if writable { try fault?(.afterCommit);try transactionFault?(.afterCommit) }
             guard sqlite3_get_autocommit(handle) != 0 else { throw uncertainFailure }
             return result
         } catch {
             let original = error
             if sqlite3_get_autocommit(handle) != 0 {
                 if !committing { throw original } // SQLite automatically rolled back pre-commit work.
-                usable = false
+                usable = false; recoveryRequired = true
                 throw uncertainFailure
             }
             do {
-                try fault?(.beforeRollback)
+                try fault?(.beforeRollback);try transactionFault?(.beforeRollback)
                 try control("ROLLBACK")
                 guard sqlite3_get_autocommit(handle) != 0 else { throw uncertainFailure }
             } catch {
-                usable = false
+                usable = false; recoveryRequired = true
                 throw uncertainFailure
             }
             throw original

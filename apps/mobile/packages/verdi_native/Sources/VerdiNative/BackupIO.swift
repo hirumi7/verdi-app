@@ -2,6 +2,54 @@ import Foundation
 import Darwin
 import CryptoKit
 
+/// Instance-owned fault seams. No hooks or paths are exposed through platform APIs.
+enum BackupFileBoundary { case write, fileSync, fullSync, close, directorySync, rename, renamed, remove }
+final class BackupFileIO {
+    let fault: ((BackupFileBoundary, URL) throws -> Void)?
+    let writeOverride: ((Int32, UnsafeRawPointer, Int) -> Int)?
+    init(fault: ((BackupFileBoundary, URL) throws -> Void)? = nil,
+         write: ((Int32, UnsafeRawPointer, Int) -> Int)? = nil) {
+        self.fault = fault; self.writeOverride = write
+    }
+    func write(_ fd:Int32, _ pointer:UnsafeRawPointer, _ count:Int, at url:URL) throws -> Int {
+        try fault?(.write,url)
+        return writeOverride?(fd,pointer,count) ?? Darwin.write(fd,pointer,count)
+    }
+    func syncFile(_ fd:Int32, at url:URL) throws {
+        try fault?(.fileSync,url)
+        try BackupIO.require(fsync(fd) == 0,"DURABILITY_UNAVAILABLE")
+        try fault?(.fullSync,url)
+        try BackupIO.require(fcntl(fd,F_FULLFSYNC) == 0,"DURABILITY_UNAVAILABLE")
+    }
+    func close(_ fd:Int32, at url:URL) throws {
+        // Close exactly once, even if its result is ambiguous. Never retry an FD.
+        let result = Darwin.close(fd)
+        try fault?(.close,url)
+        try BackupIO.require(result == 0,"DURABILITY_UNAVAILABLE")
+    }
+    func syncDirectory(_ url:URL) throws {
+        try fault?(.directorySync,url)
+        let fd = Darwin.open(url.path,O_RDONLY | O_DIRECTORY | O_NOFOLLOW | O_CLOEXEC)
+        try BackupIO.require(fd >= 0,"IO_FAILURE")
+        let synced = fsync(fd), closed = Darwin.close(fd)
+        try BackupIO.require(synced == 0 && closed == 0,"DURABILITY_UNAVAILABLE")
+    }
+    func renameExclusive(_ source:URL, to target:URL) throws {
+        try fault?(.rename,target)
+        guard renamex_np(source.path,target.path,UInt32(RENAME_EXCL)) == 0 else {throw StorageFailure.filesystem(errno)}
+        try fault?(.renamed,target)
+        try syncDirectory(target.deletingLastPathComponent())
+        if source.deletingLastPathComponent() != target.deletingLastPathComponent() {try syncDirectory(source.deletingLastPathComponent())}
+    }
+    func remove(_ target:URL) throws {
+        try fault?(.remove,target)
+        if FileManager.default.fileExists(atPath:target.path) {try FileManager.default.removeItem(at:target)}
+        // A prior deletion may have succeeded while parent sync failed. Retry sync
+        // even when the name is already absent, before dropping its inventory row.
+        try syncDirectory(target.deletingLastPathComponent())
+    }
+}
+
 /// Backup paths originate in native UUIDs and compiled names, never archive paths.
 enum BackupIO {
     static let chunk = 65_536
@@ -42,19 +90,13 @@ enum BackupIO {
         let fd = try read(url); defer { Darwin.close(fd) }; var info = stat()
         try require(fstat(fd, &info) == 0, "IO_FAILURE"); return info.st_size
     }
-    static func flush(_ url: URL) throws {
+    static func flush(_ url: URL, io: BackupFileIO = BackupFileIO()) throws {
         let fd = try read(url)
-        let synced = fsync(fd) == 0 && fcntl(fd, F_FULLFSYNC) == 0
-        let closed = Darwin.close(fd) == 0
-        try require(synced && closed, "DURABILITY_UNAVAILABLE")
-        try syncDirectory(url.deletingLastPathComponent())
+        do {try io.syncFile(fd,at:url)} catch {Darwin.close(fd);throw error}
+        try io.close(fd,at:url)
+        try io.syncDirectory(url.deletingLastPathComponent())
     }
-    static func syncDirectory(_ url: URL) throws {
-        let fd = Darwin.open(url.path, O_RDONLY | O_DIRECTORY | O_NOFOLLOW | O_CLOEXEC)
-        try require(fd >= 0, "IO_FAILURE")
-        let synced = fsync(fd), closed = Darwin.close(fd)
-        try require(synced == 0 && closed == 0, "DURABILITY_UNAVAILABLE")
-    }
+    static func syncDirectory(_ url: URL) throws {try BackupFileIO().syncDirectory(url)}
     static func hash(_ url: URL, limit: Int64 = archiveLimit, cancel: () throws -> Void = {}) throws -> (String, Int64) {
         let fd = try read(url); defer { Darwin.close(fd) }
         var hash = SHA256(), buffer = [UInt8](repeating: 0, count: chunk), total: Int64 = 0
@@ -68,9 +110,9 @@ enum BackupIO {
         }
         return (hash.finalize().map { String(format: "%02x", $0) }.joined(), total)
     }
-    static func copy(_ source: URL, to destination: URL, limit: Int64, cancel: () throws -> Void = {}) throws {
+    static func copy(_ source: URL, to destination: URL, limit: Int64, io: BackupFileIO = BackupFileIO(), cancel: () throws -> Void = {}) throws {
         let input = try read(source); defer { Darwin.close(input) }
-        let output = try BackupWriter(destination, limit: limit)
+        let output = try BackupWriter(destination, limit: limit, io: io)
         var buffer = [UInt8](repeating: 0, count: chunk)
         while true {
             try cancel()
@@ -100,32 +142,41 @@ enum BackupIO {
 final class BackupWriter {
     let url: URL, limit: Int64
     private var fd: Int32
+    private let io: BackupFileIO
     private(set) var count: Int64 = 0
-    init(_ url: URL, limit: Int64) throws {
-        self.url = url; self.limit = limit
+    init(_ url: URL, limit: Int64, io: BackupFileIO = BackupFileIO()) throws {
+        self.url = url; self.limit = limit; self.io = io
         fd = Darwin.open(url.path, O_WRONLY | O_CREAT | O_EXCL | O_NOFOLLOW | O_CLOEXEC, S_IRUSR | S_IWUSR)
-        guard fd >= 0 else { throw CoreRepositoryError("IO_FAILURE") }
+        guard fd >= 0 else { throw StorageFailure.filesystem(errno) }
         do { try BackupIO.protect(url) } catch { Darwin.close(fd); fd = -1; throw error }
     }
     func write(_ text: String) throws { try write(Data(text.utf8)) }
     func write(_ bytes: Data) throws {
-        try BackupIO.require(fd >= 0 && count + Int64(bytes.count) <= limit, "BACKUP_LIMIT")
-        try bytes.withUnsafeBytes { raw in
-            var position = 0
-            while position < bytes.count {
-                let n = Darwin.write(fd, raw.baseAddress!.advanced(by: position), bytes.count-position)
-                if n < 0 && errno == EINTR { continue }
-                try BackupIO.require(n > 0, "IO_FAILURE"); position += n
+        do {
+            try BackupIO.require(fd >= 0 && count + Int64(bytes.count) <= limit, "BACKUP_LIMIT")
+            try bytes.withUnsafeBytes { raw in
+                var position = 0
+                while position < bytes.count {
+                    let n = try io.write(fd, raw.baseAddress!.advanced(by: position), bytes.count-position, at:url)
+                    if n < 0 && errno == EINTR { continue }
+                    if n < 0 {throw StorageFailure.filesystem(errno)}
+                    try BackupIO.require(n > 0, "IO_FAILURE"); position += n
+                }
             }
+            count += Int64(bytes.count)
+        } catch {
+            // A partial write cannot subsequently be published as a complete file.
+            let descriptor = fd; fd = -1
+            if descriptor >= 0 {Darwin.close(descriptor)}
+            throw error
         }
-        count += Int64(bytes.count)
     }
     func finish() throws {
         try BackupIO.require(fd >= 0, "IO_FAILURE")
-        let synced = fsync(fd) == 0 && fcntl(fd, F_FULLFSYNC) == 0
-        let closed = Darwin.close(fd) == 0; fd = -1
-        try BackupIO.require(synced && closed, "DURABILITY_UNAVAILABLE")
-        try BackupIO.syncDirectory(url.deletingLastPathComponent())
+        let descriptor = fd; fd = -1
+        do {try io.syncFile(descriptor,at:url)} catch {Darwin.close(descriptor);throw error}
+        try io.close(descriptor,at:url)
+        try io.syncDirectory(url.deletingLastPathComponent())
     }
     deinit { if fd >= 0 { Darwin.close(fd) } }
 }

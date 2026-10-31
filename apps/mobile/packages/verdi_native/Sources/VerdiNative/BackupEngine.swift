@@ -40,7 +40,7 @@ final class BackupEngine {
         let size=try BackupIO.size(source);try BackupIO.require(size > 0 && size <= BackupIO.archiveLimit,"BACKUP_LIMIT")
         try BackupIO.reserve(at:root,additional:size)
         let destination=root.appendingPathComponent(id+".zip")
-        try BackupIO.copy(source,to:destination,limit:BackupIO.archiveLimit)
+        try BackupIO.copy(source,to:destination,limit:BackupIO.archiveLimit,io:core.backupFileIO)
         withLock {selections[id]=(destination,core.now().addingTimeInterval(600))};return id
     }
     func call(_ method:String,_ request:String) throws -> String {
@@ -76,11 +76,17 @@ final class BackupEngine {
                     let handle=try CoreSchema.string(args["selectionHandle"])
                     let source=try withLock { () throws -> URL in
                         guard let selected=selections[handle], selected.1>core.now() else{throw CoreRepositoryError("SELECTION_EXPIRED")}
-                        selections.removeValue(forKey:handle);return selected.0
+                        return selected.0
                     }
-                    let jobRoot=try control.jobRoot(id), target=jobRoot.appendingPathComponent("source.zip")
-                    try BackupIO.require(renamex_np(source.path,target.path,UInt32(RENAME_EXCL))==0,"IO_FAILURE")
-                    try BackupIO.syncDirectory(jobRoot);try BackupIO.syncDirectory(source.deletingLastPathComponent())
+                    let selection = source.deletingPathExtension().lastPathComponent
+                    try CoreSchema.uuid(selection)
+                    // Bind native inventory before moving the file. The same job
+                    // can then resume either side of a failed/uncertain rename.
+                    try control.db.transaction {sql in
+                        try BackupIO.require(try sql.query("SELECT key FROM artifacts WHERE kind='selection' AND key=? AND owner IS NULL",[.text(selection)]).count == 1,"SELECTION_EXPIRED")
+                        try sql.execute("UPDATE artifacts SET owner=? WHERE kind='selection' AND key=?",[.text(id),.text(selection)])
+                    }
+                    withLock{_ = selections.removeValue(forKey:handle)}
                 }
                 dispatch(id,kind:kind,control:control) {
                     if kind == "export" {try self.export(id,control:control)} else {try self.validateImport(id,control:control)}
@@ -110,6 +116,9 @@ final class BackupEngine {
             let operation=try control.operation(id)
             try BackupIO.require(operation.object?["operation"]?.object?["kind"]?.text == "import" && operation.object?["operation"]?.object?["state"]?.object?["kind"]?.text == "failed","NOT_ELIGIBLE")
             try withLock {try BackupIO.require(running==nil && shared.isEmpty && !deleting.contains(id),"BUSY");running=id;cancelled.remove(id)}
+            // Publish an in-progress state before returning; otherwise a polling
+            // client can see the old failure and stop watching a running retry.
+            do {try state(id,progress("validating"),control)} catch {withLock{running=nil};throw error}
             dispatch(id,kind:"import",control:control) {try self.validateImport(id,control:control)}
         case "confirmImport":
             try exact(["operationId","preview","confirmed"]);try BackupIO.require(try args["confirmed"]?.json() == "true","NOT_ELIGIBLE")
@@ -139,12 +148,19 @@ final class BackupEngine {
     }
     func fail(_ id:String,kind:String,error:Error,control:BackupControl) throws {
         try failureWriteFault?()
+        try control.recoverConnection()
         let code=Self.code(error)
-        if kind == "import", let r=try control.db.read({try $0.query("SELECT phase FROM replacement WHERE job=?",[.text(id)]).first}), ["prepared","switched","verified"].contains(r[0].stringValue) {
-            // Do not acknowledge a no-commit failure at or beyond the durable boundary.
-            try control.recover(at:clock())
-            core.queue.sync {core.replacementAdmissionClosed=false}
-            return
+        if kind == "import", let row = try control.db.read({try $0.query("SELECT r.phase,j.state_json FROM replacement r JOIN jobs j ON j.id=r.job WHERE r.job=?",[.text(id)]).first}) {
+            let phase = row[0].stringValue
+            let current = try CanonicalParser.parse(CoreSchema.text(row[1])).object?["kind"]?.text
+            if ["prepared","switched","verified"].contains(phase) || (phase == "rolled_back" && current == "failed") {
+                // Preserve a committed outcome, including a lost rollback reply.
+                // A later same-ID retry in validating/staging must still record its
+                // own failure; an old rolled_back row does not describe that attempt.
+                try control.recover(at:clock())
+                core.queue.sync {core.replacementAdmissionClosed=false}
+                return
+            }
         }
         if code == "BACKUP_CANCELLED" {
             try state(id,kind == "import" ? .object(["kind":.string("cancelled"),"oldDatasetPreserved":.boolean(true)]) : .object(["kind":.string("cancelled"),"fileCreated":.boolean(false)]),control)
@@ -200,7 +216,7 @@ final class BackupEngine {
                 }
             }
             let target=try control.artifactURL(kind:kind,key:key)
-            if FileManager.default.fileExists(atPath:target.path) {try FileManager.default.removeItem(at:target);try BackupIO.syncDirectory(target.deletingLastPathComponent())}
+            try core.backupFileIO.remove(target)
             try control.db.transaction {try $0.execute("DELETE FROM artifacts WHERE kind=? AND key=?",[.text(kind),.text(key)])}
             if kind == "selection" {withLock{_ = selections.removeValue(forKey:key)}}
             if kind == "job" {withLock{handles=handles.filter{$0.value.0 != key}}}
@@ -230,6 +246,7 @@ final class BackupEngine {
             if e.code == "NOT_FOUND" {return "BACKUP_REFERENCE_INVALID"}
             return e.code
         }
+        if case StorageFailure.filesystem(let n)=error, n == ENOSPC || n == EDQUOT {return "DISK_FULL"}
         if case StorageFailure.sqlite(let n)=error, n&255 == 13 {return "DISK_FULL"}
         if error is CanonicalParseFailure || error is CanonicalFailure {return "BACKUP_SCHEMA_INVALID"}
         if case StorageFailure.sqlite(let n)=error, n&255 == 19 {return "BACKUP_REFERENCE_INVALID"}
@@ -272,13 +289,13 @@ final class BackupEngine {
         defer {try? db.close()}
         let index=try BackupIndex(root.appendingPathComponent("export-index.sqlite"))
         try state(id,progress("writing"),control)
-        try BackupContent.export(db,to:root,mediaRoot:mediaRoot,index:index,instant:clock(),cancel:{try self.check(id)})
+        try BackupContent.export(db,to:root,mediaRoot:mediaRoot,index:index,instant:clock(),io:core.backupFileIO,cancel:{try self.check(id)})
         let zip=root.appendingPathComponent("Verdi-backup.zip")
-        try BackupArchive.create(zip,dataRoot:root,mediaRoot:mediaRoot,index:index,cancel:{try self.check(id)})
+        try BackupArchive.create(zip,dataRoot:root,mediaRoot:mediaRoot,index:index,io:core.backupFileIO,cancel:{try self.check(id)})
         try state(id,progress("validating"),control)
         let verify=root.appendingPathComponent("verify");try BackupIO.directory(verify)
         let validationIndex=try BackupIndex(root.appendingPathComponent("verify-index.sqlite"))
-        try BackupArchive.extract(zip,to:verify,index:validationIndex,cancel:{try self.check(id)})
+        try BackupArchive.extract(zip,to:verify,index:validationIndex,io:core.backupFileIO,cancel:{try self.check(id)})
         let verified=try BackupContent.importData(root:verify,index:validationIndex,dataset:UUID().uuidString.lowercased(),instant:clock(),cancel:{try self.check(id)})
         try verified.close();try check(id)
         let digest=try BackupIO.hash(zip,cancel:{try self.check(id)})
@@ -305,20 +322,20 @@ final class BackupEngine {
     }
     func validateImport(_ id:String,control:BackupControl) throws {
         try state(id,progress("validating"),control)
-        let source=try control.jobRoot(id).appendingPathComponent("source.zip"), digest=try BackupIO.hash(source,cancel:{try self.check(id)})
+        let source=try importSource(id,control:control), digest=try BackupIO.hash(source,cancel:{try self.check(id)})
         let generation=UUID().uuidString.lowercased(), dataset=UUID().uuidString.lowercased(), root=control.generations.appendingPathComponent(generation)
         // A durable job registers the generation before any of its files are created.
         try control.db.transaction {try $0.execute("UPDATE jobs SET source_hash=?,new_generation=?,preview_json=NULL WHERE id=?",[.text(digest.0),.text(generation),.text(id)])}
         try control.registerArtifact(kind:"staging",key:generation,owner:id,expires:expiry())
         try BackupIO.directory(root);try BackupIO.excludeFromOSBackup(root)
         let index=try BackupIndex(root.appendingPathComponent("archive-index.sqlite"))
-        try BackupArchive.extract(source,to:root,index:index,cancel:{try self.check(id)})
+        try BackupArchive.extract(source,to:root,index:index,io:core.backupFileIO,cancel:{try self.check(id)})
         try state(id,progress("staging"),control)
         let db=try BackupContent.importData(root:root,index:index,dataset:dataset,instant:clock(),cancel:{try self.check(id)})
         do {
             let counts=try BackupContent.counts(db)
-            try db.checkpoint();try db.close();try BackupIO.flush(root.appendingPathComponent("core.sqlite"))
-            let marker=try BackupWriter(root.appendingPathComponent("initialized"),limit:32);try marker.write("verdi-generation-v2");try marker.finish()
+            try db.checkpoint();try db.close();try BackupIO.flush(root.appendingPathComponent("core.sqlite"),io:core.backupFileIO)
+            let marker=try BackupWriter(root.appendingPathComponent("initialized"),limit:32,io:core.backupFileIO);try marker.write("verdi-generation-v2");try marker.finish()
             try check(id);try core.backupFault?(.staged)
             var preview=try core.queue.sync { () throws -> [String:CanonicalValue] in
                 guard let current=core.database,!core.replacementAdmissionClosed else{throw CoreRepositoryError("BUSY")}
@@ -330,6 +347,21 @@ final class BackupEngine {
             try control.db.transaction {try $0.execute("UPDATE jobs SET preview_json=? WHERE id=?",[.text(try value.json()),.text(id)])}
             try state(id,.object(["kind":.string("preview_ready"),"preview":value]),control)
         } catch {try? db.close();throw error}
+    }
+    func importSource(_ id:String,control:BackupControl) throws -> URL {
+        let target = try control.jobRoot(id).appendingPathComponent("source.zip")
+        let rows = try control.db.read {try $0.query("SELECT key FROM artifacts WHERE kind='selection' AND owner=?",[.text(id)])}
+        try BackupIO.require(rows.count <= 1,"STORAGE_UNAVAILABLE")
+        if let row = rows.first {
+            let source = try control.artifactURL(kind:"selection",key:CoreSchema.text(row[0]))
+            if !FileManager.default.fileExists(atPath:target.path) {try core.backupFileIO.renameExclusive(source,to:target)}
+            // Also required on retry after rename succeeded but a parent sync failed.
+            try core.backupFileIO.syncDirectory(source.deletingLastPathComponent())
+            try core.backupFileIO.syncDirectory(target.deletingLastPathComponent())
+        }
+        // Older retained jobs already own source.zip without a selection binding.
+        _ = try BackupIO.size(target)
+        return target
     }
     func confirm(_ id:String,preview:CanonicalValue,control:BackupControl) throws {
         try check(id)
@@ -358,7 +390,7 @@ final class BackupEngine {
             try staged.checkpoint();try staged.close()
         } catch {try? staged.close();throw error}
         try BackupIO.excludeFromOSBackup(root,excluded:false)
-        try BackupIO.flush(root.appendingPathComponent("core.sqlite"))
+        try BackupIO.flush(root.appendingPathComponent("core.sqlite"),io:core.backupFileIO)
         let dbHash=try BackupIO.hash(root.appendingPathComponent("core.sqlite")).0
         try BackupIO.reserve(at:root,additional:0);try check(id)
         try core.queue.sync {

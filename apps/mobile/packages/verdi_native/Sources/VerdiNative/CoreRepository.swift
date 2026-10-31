@@ -31,6 +31,8 @@ public final class CoreRepository {
     var backupReadLease = false
     var replacementAdmissionClosed = false
     var platformLeases: [String:String] = [:]
+    var backupFileIO = BackupFileIO()
+    var backupControlFault: ((BackupControlWrite,SQLiteBoundary)throws->Void)?
     var backupFault: ((BackupBoundary) throws -> Void)?
     let queue = DispatchQueue(label: "verdi.native.core-repository")
     let mediaWorker = DispatchQueue(label:"verdi.native.media-files")
@@ -124,7 +126,7 @@ public final class CoreRepository {
         sessionID = ""; previews.removeAll(); grants.removeAll()
         if let database { try database.close(); self.database = nil }
         if BackupControl.exists(installationDirectory) {
-            if backupControl == nil {backupControl = try BackupControl(legacy:installationDirectory,fault:backupFault)}
+            if backupControl == nil {backupControl = try BackupControl(legacy:installationDirectory,fault:backupFault,transactionFault:backupControlFault,io:backupFileIO)}
             try backupControl!.recover(at:mediaClock())
             try backupControl!.requireStorage(backupControl!.activeID())
             directory = try backupControl!.activeURL()
@@ -186,9 +188,9 @@ public final class CoreRepository {
     }
     public func releasePlatformLease(_ id:String) {queue.sync {_=platformLeases.removeValue(forKey:id)}}
     func control() throws -> BackupControl {
-        if let backupControl {return backupControl}
+        if let backupControl {try backupControl.recoverConnection();return backupControl}
         guard database != nil, !datasetID.isEmpty else {throw CoreRepositoryError("SESSION_INVALID")}
-        let created=try BackupControl(legacy:installationDirectory,dataset:datasetID,fault:backupFault)
+        let created=try BackupControl(legacy:installationDirectory,dataset:datasetID,fault:backupFault,transactionFault:backupControlFault,io:backupFileIO)
         backupControl=created;return created
     }
     func metadata(_ sql: SQLiteSession) throws -> CanonicalValue {

@@ -136,7 +136,7 @@ final class BackupZIPPreflight {
 }
 
 enum BackupArchive {
-    static func extract(_ zip: URL, to root: URL, index: BackupIndex, cancel: @escaping () throws -> Void) throws {
+    static func extract(_ zip: URL, to root: URL, index: BackupIndex, io: BackupFileIO = BackupFileIO(), cancel: @escaping () throws -> Void) throws {
         let reader=try BackupZIPPreflight(zip,index:index,cancel:cancel)
         try reader.validate()
         let reserve = try index.database.read { sql in
@@ -150,7 +150,7 @@ enum BackupArchive {
             let destination: URL
             if path == "data.json" || path == "manifest.json" { destination = root.appendingPathComponent(path) }
             else { try BackupIO.canonicalMedia(path); let files = try MediaFiles(root:root); let (dir,_) = try files.parent(path,create:true); Darwin.close(dir); destination = root.appendingPathComponent(path) }
-            let writer=try BackupWriter(destination,limit:expanded)
+            let writer=try BackupWriter(destination,limit:expanded,io:io)
             var checksum:uLong=0,offset:Int64=0
             func accept(_ data:Data) throws {
                 try cancel();try writer.write(data)
@@ -198,7 +198,7 @@ enum BackupArchive {
         }
     }
 
-    static func create(_ destination: URL, dataRoot: URL, mediaRoot: URL, index: BackupIndex, cancel: () throws -> Void) throws {
+    static func create(_ destination: URL, dataRoot: URL, mediaRoot: URL, index: BackupIndex, io: BackupFileIO = BackupFileIO(), cancel: () throws -> Void) throws {
         do {
             let archive = try Archive(url:destination,accessMode:.create)
             try BackupIO.protect(destination)
@@ -218,6 +218,6 @@ enum BackupArchive {
             try add("manifest.json",dataRoot,.deflate); try add("data.json",dataRoot,.deflate)
             try index.eachFile { try add(CoreSchema.text($0[1]),mediaRoot,.none) }
         }
-        try BackupIO.flush(destination)
+        try BackupIO.flush(destination,io:io)
     }
 }

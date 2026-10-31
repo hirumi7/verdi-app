@@ -4,10 +4,14 @@ import CryptoKit
 
 enum BackupBoundary { case bootstrapRecord, bootstrapDatabase, bootstrapPublished, snapshot, staged, prepared, switched, verified }
 
+enum BackupControlWrite { case prepare, switchPointer, verify, rollback }
+
 /// One installation pointer; no content transaction spans two SQLite databases.
 final class BackupControl {
     let legacy: URL, root: URL, generations: URL, db: SQLiteDatabase
     let fault: ((BackupBoundary) throws -> Void)?
+    let io: BackupFileIO
+    let transactionFault: ((BackupControlWrite, SQLiteBoundary) throws -> Void)?
     static let definitions = [
         "CREATE TABLE artifacts(kind TEXT NOT NULL,key TEXT NOT NULL,owner TEXT,expires TEXT NOT NULL,PRIMARY KEY(kind,key))",
         "CREATE TABLE pointer(slot INTEGER PRIMARY KEY CHECK(slot=1),active TEXT NOT NULL,legacy TEXT NOT NULL)",
@@ -26,10 +30,10 @@ final class BackupControl {
     static func location(_ legacy:URL) -> URL {legacy.deletingLastPathComponent().appendingPathComponent(legacy.lastPathComponent+"-recovery")}
     static func exists(_ legacy:URL) -> Bool {FileManager.default.fileExists(atPath:location(legacy).appendingPathComponent("control.sqlite").path)}
     static func requiresRecovery(_ legacy:URL) -> Bool {FileManager.default.fileExists(atPath:location(legacy).appendingPathComponent("established").path)}
-    init(legacy:URL, dataset:String? = nil, fault:((BackupBoundary)throws->Void)? = nil) throws {
+    init(legacy:URL, dataset:String? = nil, fault:((BackupBoundary)throws->Void)? = nil, transactionFault:((BackupControlWrite,SQLiteBoundary)throws->Void)? = nil, io:BackupFileIO = BackupFileIO()) throws {
         self.legacy = legacy; root = Self.location(legacy)
         generations = legacy.deletingLastPathComponent().appendingPathComponent(legacy.lastPathComponent+"-generations")
-        self.fault = fault
+        self.io = io; self.fault = fault; self.transactionFault = transactionFault
         try BackupIO.directory(root);try BackupIO.directory(generations)
         let target = root.appendingPathComponent("control.sqlite"), marker = root.appendingPathComponent("established"), record = root.appendingPathComponent("bootstrap.json"), staging = root.appendingPathComponent("control.pending")
         if FileManager.default.fileExists(atPath:target.path) {
@@ -51,10 +55,9 @@ final class BackupControl {
                 generation = UUID().uuidString.lowercased()
                 let pendingRecord=root.appendingPathComponent("bootstrap.pending")
                 if FileManager.default.fileExists(atPath:pendingRecord.path) {try FileManager.default.removeItem(at:pendingRecord)}
-                let writer = try BackupWriter(pendingRecord,limit:4096)
+                let writer = try BackupWriter(pendingRecord,limit:4096,io:io)
                 try writer.write(CanonicalValue.object(["dataset":.string(dataset),"generation":.string(generation)]).json());try writer.finish()
-                try BackupIO.require(renamex_np(pendingRecord.path,record.path,UInt32(RENAME_EXCL)) == 0,"IO_FAILURE")
-                try BackupIO.syncDirectory(root)
+                try io.renameExclusive(pendingRecord,to:record)
             }
             try fault?(.bootstrapRecord)
             let staged = try SQLiteDatabase.create(at:staging,schema:Self.schema,controlProfile:true)
@@ -62,18 +65,21 @@ final class BackupControl {
                 try sql.execute("INSERT INTO generations VALUES(?,?,1)",[.text(generation),.text(dataset)])
                 try sql.execute("INSERT INTO pointer VALUES(1,?,?)",[.text(generation),.text(generation)])
             }
-            try staged.close();try BackupIO.flush(staging);try fault?(.bootstrapDatabase)
-            try BackupIO.require(renamex_np(staging.path,target.path,UInt32(RENAME_EXCL)) == 0,"IO_FAILURE")
-            try BackupIO.syncDirectory(root);try fault?(.bootstrapPublished)
+            try staged.close();try BackupIO.flush(staging,io:io);try fault?(.bootstrapDatabase)
+            try io.renameExclusive(staging,to:target);try fault?(.bootstrapPublished)
             db = try SQLiteDatabase.open(at:target,schema:Self.schema,controlProfile:true)
         }
         if !FileManager.default.fileExists(atPath:marker.path) {
-            let writer = try BackupWriter(marker,limit:32);try writer.write("verdi-control-v1");try writer.finish()
+            let writer = try BackupWriter(marker,limit:32,io:io);try writer.write("verdi-control-v1");try writer.finish()
         }
         try BackupIO.protect(target)
         try validatePointer()
     }
     deinit {try? db.close()}
+    func recoverConnection() throws {
+        try db.recoverControlConnection(at:root.appendingPathComponent("control.sqlite"),schema:Self.schema)
+        try validatePointer()
+    }
     func validatePointer() throws {
         try db.read { sql in
             let rows = try sql.query("SELECT p.active,p.legacy,g.legacy FROM pointer p JOIN generations g ON g.id=p.active")
@@ -134,7 +140,7 @@ final class BackupControl {
     }
     func prepare(job:String,new:String,dataset:String,dbHash:String,mediaHash:String,at:String) throws {
         let old = try activeID()
-        try db.transaction { sql in
+        try db.transaction(fault:{try self.transactionFault?(.prepare,$0)}) { sql in
             try sql.execute("INSERT INTO generations VALUES(?,?,0)",[.text(new),.text(dataset)])
             try sql.execute("INSERT OR REPLACE INTO replacement VALUES(1,?,?,?,'prepared',?,?)",[.text(job),.text(old),.text(new),.text(dbHash),.text(mediaHash)])
             try sql.execute("UPDATE jobs SET state_json=?,updated=? WHERE id=?",[.text(try CanonicalValue.object(["kind":.string("prepared"),"cancelAllowed":.boolean(false)]).json()),.text(at),.text(job)])
@@ -142,7 +148,7 @@ final class BackupControl {
         try fault?(.prepared)
     }
     func switchPointer(at:String) throws {
-        try db.transaction {sql in
+        try db.transaction(fault:{try self.transactionFault?(.switchPointer,$0)}) {sql in
             let r = try sql.query("SELECT job,new_generation FROM replacement WHERE phase='prepared'")
             try BackupIO.require(r.count == 1,"STORAGE_UNAVAILABLE")
             try sql.execute("UPDATE pointer SET active=? WHERE slot=1",[r[0][1]])
@@ -153,13 +159,14 @@ final class BackupControl {
     }
     /// Startup never guesses newest directory. Verified stores use normal recovery.
     func recover(at:String) throws {
+        try recoverConnection()
         guard let r = try db.read({try $0.query("SELECT job,old_generation,new_generation,phase,db_hash,media_hash FROM replacement").first}) else {return}
         let phase = try CoreSchema.text(r[3]);if ["verified","rolled_back"].contains(phase) {return}
         let job = try CoreSchema.text(r[0]), old = try CoreSchema.text(r[1]), new = try CoreSchema.text(r[2])
         if phase == "prepared" {
             try BackupIO.require(try activeID() == old,"STORAGE_UNAVAILABLE")
             try verifyOrdinary(old)
-            try db.transaction {sql in
+            try db.transaction(fault:{try self.transactionFault?(.rollback,$0)}) {sql in
                 try sql.execute("UPDATE replacement SET phase='rolled_back'")
                 try sql.execute("DELETE FROM generations WHERE id=? AND legacy=0",[.text(new)])
                 try sql.execute("UPDATE jobs SET state_json=?,updated=? WHERE id=?",[.text(try Self.failure(code:"IO_FAILURE",dataset:nil,recovery:"open_recovery",preserved:true).json()),.text(at),.text(job)])
@@ -178,7 +185,7 @@ final class BackupControl {
                 content = (try opened.read {try CoreSchema.text($0.query("SELECT dataset_id FROM metadata")[0][0])},try BackupContent.counts(opened))
                 try opened.close()
             } catch {try? opened.close();throw error}
-            try db.transaction { sql in
+            try db.transaction(fault:{try self.transactionFault?(.verify,$0)}) { sql in
                 try sql.execute("UPDATE replacement SET phase='verified'")
                 let state:CanonicalValue = .object(["kind":.string("complete"),"datasetId":.string(content.0),"counts":content.1,"notice":.null])
                 try sql.execute("UPDATE jobs SET state_json=?,updated=? WHERE id=?",[.text(try state.json()),.text(at),.text(job)])
@@ -186,9 +193,10 @@ final class BackupControl {
             try fault?(.verified)
         } catch {
             // A failed verification may only select an independently valid old store.
+            try recoverConnection()
             if try db.read({try $0.query("SELECT phase FROM replacement")[0][0]}) == .text("verified") {throw error}
             try verifyOrdinary(old)
-            try db.transaction {sql in
+            try db.transaction(fault:{try self.transactionFault?(.rollback,$0)}) {sql in
                 try sql.execute("UPDATE pointer SET active=?",[.text(old)])
                 try sql.execute("UPDATE replacement SET phase='rolled_back'")
                 try sql.execute("DELETE FROM generations WHERE id=? AND legacy=0",[.text(new)])

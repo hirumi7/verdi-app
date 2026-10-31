@@ -1013,3 +1013,64 @@ Final normal development build and launch on the disposable QA simulator also
 passes (`/tmp/verdi-recovery-normal-run.log`); no user collection was reset.
 Consumer/gitlink checks validate the published pin. No additional acceptance or
 whole-app release-readiness claim is made.
+
+### Backup I/O faults — bounded verification plan
+
+**Author:** Codex (AI assistant). **Date:** 2026-11-01 (Asia/Jakarta).
+
+Continue REQ-012 AC2/6/7 at accepted, ready docs pin
+`e6ca35ae607a24ede6d7e18de121ff94a0a275cf`. Its input manifest matches. Independent
+AI reviewer core_readiness_review confirmed that file/control failure injection
+and uncertain-commit recovery are already owned by the existing backup and SQLite
+contracts; no product decisions or accepted bytes change.
+
+Use an instance-owned, module-internal file-I/O dependency with real defaults;
+exercise partial/EINTR writes, write/flush/full-flush/close/parent-sync errors,
+exclusive rename ambiguity and cleanup failure. Inject SQLite before/after commit
+at prepare, pointer switch, verification and rollback. Inspect durable phase,
+pointer, semantic rows and photo hashes, retry the same operation, and verify
+same-instance reopening plus a fresh native owner. A poisoned connection may be
+reopened only through its serialized owner with schema/durability revalidation;
+never replace an object while captured workers can mutate a stale connection.
+
+Tests must retain both sets during unresolved recovery and preserve ordinary care
+and all existing drafts/history. No physical disk-filling or user simulator reset.
+ZIPFoundation internal writes, MediaFiles internals, exhaustive SQLite VFS faults,
+physical power loss and maximum-size testing remain explicitly outside this matrix.
+
+The bounded matrix found and fixed partial writers that could still finish,
+retry returning stale failed status, and cleanup dropping its parent-sync
+obligation after a prior removal. Source selection inventory is now bound to the
+import job before exclusive rename; same-ID retry can recover either side of the
+move after native-owner restart. Native paths and capabilities remain private.
+
+Uncertain control writes retire the connection and reopen/revalidate on the same
+serialized SQLite owner, preserving captured worker ownership and the first
+unknown outcome. No mutation is automatically replayed, no missing control is
+created, and explicit close is final. Tests cover before/after commit at prepare,
+pointer switch, verification and rollback, plus failed rollback and failed reopen
+with repair. Durable rolled-back/verified state resolves lost replies. Review
+caught a rollback admission latch and a stale rollback record hiding new same-ID
+failures; both are fixed and regression-tested through normal draft saves and
+repeated retry to confirmed completion. All old/new fixtures remain synthetic.
+
+Verification at final implementation: full macOS native suite **126 passed**;
+iOS18.3 SE3 native suite **117 passed** (nine macOS-only subprocess/harness tests
+excluded); strict Swift build passes. The fourteen new tests contain multiple
+fault cases. Real Flutter rich-collection restart, Photos and replacement-draft
+review integration passes on the disposable iPhone16 QA simulator. Commands:
+
+- `swift test --package-path apps/mobile/packages/verdi_native`
+- From the native package: `swift build -Xswiftc -warnings-as-errors`
+- From the native package: `xcodebuild -scheme VerdiNative -destination 'platform=iOS Simulator,id=993B7FB1-DD39-4922-9DF9-6AB0CE25DEDD' -derivedDataPath /tmp/verdi-native-ios-build test`
+- From apps/mobile: `flutter test integration_test/backup_restore_test.dart -d CD70BD52-1239-4C9E-A998-8D8962DA0354 --no-uninstall --dart-define=VERDI_BACKUP_PHASE=rich`
+
+Environment remains macOS14.6/Xcode16.2/Flutter3.47.8/Dart3.13.7. Logs:
+`/tmp/verdi-io-native-full.log`, `verdi-io-native-ios.log`,
+`verdi-io-swift-build.log`, `verdi-io-flutter-integration.log`; focused/regression
+logs `verdi-io-focused.log`, `verdi-io-control.log`, `verdi-io-retry.log`.
+Independent AI reviewer core_readiness_review reports no remaining scoped source
+blocker. No Dart/UI/Pigeon source changed; earlier analyzer/unit checks are
+inherited evidence, not rerun claims. REQ-012 remains partial. Remaining work
+includes directory-creation/third-party-internal/VFS fault coverage, maximum-size,
+physical protection/power loss, accessibility, notifications, StoreKit and release.
