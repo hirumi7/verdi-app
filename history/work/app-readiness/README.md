@@ -700,3 +700,16 @@ Mounted docs verification also passed **8/8** with **268 tooling tests**
 (`/tmp/verdi-catalog-mounted-docs-final.log`); staged consumer and clean-gitlink
 checks passed at `1737da78dfeb76d995ae399cb701f0aa50ad94e2`. Code and tests are
 unchanged from the published, verified implementation commit.
+
+## Photos and journal implementation contract — 2026-10-31
+
+**Author:** Codex (AI assistant). **Date:** 2026-10-31 (Asia/Jakarta).
+
+Published docs `3bd62013d57bd4f9c10d619cf51937137ad5d4e7` is the implementation
+contract for REQ-011 journal/normal photos and REQ-006 covers, preserving REQ-007,
+REQ-008, REQ-015 and REQ-018. Independent design review closed migration, ownership,
+file publication/recovery and deletion-race findings. Docs aggregate passed 8/8
+(including 268 tooling tests); staged consumer and clean gitlink checks passed.
+Live Figma journal/editor/viewer references were inspected. This pin establishes
+bounded design readiness only; no new application behavior is verified yet.
+Optimization, comparison/cards and backup remain separate undelivered scopes.
