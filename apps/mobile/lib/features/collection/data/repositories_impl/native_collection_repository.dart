@@ -99,6 +99,9 @@ final class NativeCollectionRepository implements CollectionRepository {
   }
 
   @override
+  Future<CatalogState> catalog({bool retry = false}) => _call('catalog', retry);
+
+  @override
   String newId() => _uuid();
   Future<void> _connect() =>
       _connecting ??= _start().whenComplete(() => _connecting = null);
@@ -350,6 +353,52 @@ final class _Worker {
     );
   }
 
+  Future<CatalogState> loadCatalog({bool retry = false}) async {
+    if (retry) await native('retryCatalog');
+    for (var attempt = 0; attempt < 3; attempt++) {
+      try {
+        final meta = _map(await native('catalogMeta'));
+        final version = meta['version'] as String?;
+        if (version == null) {
+          return projection.reader.catalog = CatalogState(
+            limitation: 'CATALOG_UNAVAILABLE',
+          );
+        }
+        final manifest = _map(meta['manifest']);
+        final entries = <CatalogEntry>[];
+        String? after;
+        do {
+          final page = _map(
+            await native('catalogRows', {'version': version, 'after': after}),
+          );
+          entries.addAll(
+            (page['entries'] as List).map(
+              (e) => CatalogEntry(version, _map(e)),
+            ),
+          );
+          after = page['nextCursor'] as String?;
+        } while (after != null);
+        final finalMeta = _map(await native('catalogMeta'));
+        if (finalMeta['version'] != version) continue;
+        return projection.reader.catalog = CatalogState(
+          version: version,
+          entries: entries,
+          popularIds: (manifest['popularIds'] as List).cast<String>(),
+          manifest: manifest,
+          limitation: finalMeta['limitation'] as String?,
+        );
+      } on CommandRejected catch (error) {
+        if (['CATALOG_UNAVAILABLE', 'CATALOG_INVALID'].contains(error.code)) {
+          return projection.reader.catalog = CatalogState(
+            limitation: 'CATALOG_UNAVAILABLE',
+          );
+        }
+        if (error.code != 'CATALOG_CHANGED') rethrow;
+      }
+    }
+    throw CommandRejected('CATALOG_CHANGED');
+  }
+
   Future<void> hydrate() async {
     for (var attempt = 0; attempt < 3; attempt++) {
       try {
@@ -445,6 +494,7 @@ final class _Worker {
   ) async {
     await gate(existing ? id : null);
     await hydrate();
+    if (command is SavePlant) await loadCatalog();
     FrozenCommand intent;
     if (existing) {
       try {
@@ -596,6 +646,8 @@ final class _Worker {
     }
     final reader = projection.reader, dataset = projection.datasetId;
     switch (request.operation) {
+      case 'catalog':
+        return loadCatalog(retry: value == true);
       case 'close':
         return native('close');
       case 'pending':

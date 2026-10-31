@@ -26,6 +26,9 @@ void main() {
       (w) => w is TextField && w.decoration?.labelText == label,
     );
     await press('Add a plant');
+    if (find.text('Search species').evaluate().isNotEmpty) {
+      await press('Add a custom plant');
+    }
     await tester.enterText(field('Plant name'), 'Simulator fern');
     await tester.pump();
     await tester.enterText(field('Custom species name'), 'Synthetic fern');

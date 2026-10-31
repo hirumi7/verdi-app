@@ -2,17 +2,18 @@
 
 The main Flutter development UI uses `CoreRepository`, the permanent normalized
 `custom_core_v1` profile reviewed in docs contract
-`91d61be2201811e19d538e7c720a0be694e55c52` and
+`63b6062da0d1d868617f0b90aa26054ca2e0adcd` and
 [native core owner](../../../../docs/technical/native-core-repository.md).
-It persists current custom plants, standard routines/heads, original care events,
+Schema v2 additively upgrades the same v1 installation and preserves its rows,
+dataset, pending bodies and receipts. It persists custom/catalog plants, versioned
+selections and original/applied suggestion snapshots, standard routines/heads, original care events,
 corrections, schedule audit and raw drafts. Frozen intent/reservation/receipt and
 outbox updates share each guarded transaction. Native owns previews, clock,
 Free-cap checks and acknowledgement/Undo deadlines. The generated bridge and one
 Dart service isolate connect the main UI. Schema mismatch/corruption never resets.
 
 The earlier foundation and isolated draft harness remain separate and tested.
-Their historical contracts appear below. This profile does not enable catalog,
-media, backup/import/generation switching, notifications, purchases or release.
+Their historical contracts appear below. This profile does not enable media, backup/import/generation switching, notifications, purchases or release.
 
 The package has no remote dependencies. It links the OS SQLite3 library and uses
 one serial Dispatch queue per connection, FULLMUTEX, WAL/FULL, foreign keys and a
@@ -130,3 +131,15 @@ rollback/unknown receipt resolution, pending freeze restart, native expiry,
 large escaped raw drafts, Unicode identity, malformed payloads, active cap,
 exact delete-draft sets and unrelated-plant Undo preservation. Test fault injection
 is internal to the Swift package. The public channel has no fault or reset API.
+
+## Bundled catalog verification
+
+The internal fixed bundle provider validates the package before installation.
+A failed candidate retains the previous catalog; catalog-only read corruption
+does not disable user-data operations. New selections validate against the native
+current entry; unchanged stored selections retain their offline-edit exception.
+`CatalogTests` checks the real 24-entry bundle, rights/review/hash/asset rejection.
+`CoreRepositoryTests` replays the Dart catalog fixture, tests original suggestion
+retention, atomic apply/rollback, corrupt reads, v1 pending-command migration and
+older-reader rejection. Regenerate shared transitions with
+`dart run tool/generate_catalog_vectors.dart` from the core package.

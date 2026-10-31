@@ -558,4 +558,91 @@ class AppStringsEn extends AppStrings {
 
   @override
   String get saveDraftAction => 'Save unfinished draft';
+
+  @override
+  String get searchSpecies => 'Search species';
+
+  @override
+  String get popularSpecies => 'Popular';
+
+  @override
+  String get catalogLimited => 'Some plant guides are unavailable';
+
+  @override
+  String get catalogCustomAvailable =>
+      'You can still add a custom plant. Your saved plants and care history are kept.';
+
+  @override
+  String noSpeciesMatches(String query) {
+    return 'No matches for “$query”';
+  }
+
+  @override
+  String get customPlant => 'Add a custom plant';
+
+  @override
+  String get speciesInformation => 'Species information';
+
+  @override
+  String get genericIllustration => 'Generic illustration';
+
+  @override
+  String get difficulty => 'Difficulty';
+
+  @override
+  String get suggestionOnly =>
+      'A starting suggestion for checks. Adjust it to your plant and conditions.';
+
+  @override
+  String get sourcesCredits => 'Sources and credits';
+
+  @override
+  String get catalogCredits =>
+      'Care summaries: Verdi. Generic illustration: Verdi design import. Names and source references are included for attribution. Source websites require an internet connection.';
+
+  @override
+  String get changeSpecies => 'Change species';
+
+  @override
+  String get keepRoutine => 'Keep current routine';
+
+  @override
+  String get applySuggestion => 'Apply suggestion';
+
+  @override
+  String get chooseSpeciesRoutine =>
+      'Choose what happens to each existing routine.';
+
+  @override
+  String get originalSuggestion => 'Original suggestion';
+
+  @override
+  String get appliedSuggestion => 'Last applied suggestion';
+
+  @override
+  String get catalogIdentity => 'Catalog species';
+
+  @override
+  String get customIdentity => 'User-supplied species and observations';
+
+  @override
+  String get chooseSpecies => 'Choose species';
+
+  @override
+  String get catalogStale =>
+      'This guide changed. Choose the species again or use a custom plant; your other fields are kept.';
+
+  @override
+  String get selectedSpecies => 'Selected species';
+
+  @override
+  String get contentReviewed => 'Content reviewed';
+
+  @override
+  String get category => 'Category';
+
+  @override
+  String createCustomQuery(String query) {
+    return 'Create “$query” as a custom plant';
+  }
 }

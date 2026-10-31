@@ -87,13 +87,31 @@ void main() {
       throw StateError('UI did not leave its loading state');
     }
 
+    Finder field(String label) => find.byWidgetPredicate(
+      (w) => w is TextField && w.decoration?.labelText == label,
+    );
+
     Future<void> press(String label, {bool first = false}) async {
       await settle();
       if (find.text(label).evaluate().isEmpty) {
+        // The species picker contains a scrollable search editor as well as
+        // its list. Scroll the list, not the text field's internal viewport.
+        final picker = find.text('Search species').evaluate().isNotEmpty;
+        if (picker) {
+          FocusManager.instance.primaryFocus?.unfocus();
+          await settle();
+        }
         await tester.scrollUntilVisible(
           find.text(label),
           300,
-          scrollable: find.byType(Scrollable).last,
+          scrollable: picker
+              ? find
+                    .descendant(
+                      of: find.byType(ListView),
+                      matching: find.byType(Scrollable),
+                    )
+                    .first
+              : find.byType(Scrollable).last,
           maxScrolls: 30,
         );
         await settle();
@@ -105,11 +123,20 @@ void main() {
       await tester.pumpAndSettle();
       await tester.tap(target);
       await settle();
+      if (label == 'Add a custom plant') {
+        // The native acknowledgement is asynchronous and the picker progress
+        // bar may be outside its viewport after scrolling to custom entry.
+        for (
+          var i = 0;
+          i < 100 && field('Plant name').evaluate().isEmpty;
+          i++
+        ) {
+          await tester.pump(const Duration(milliseconds: 100));
+        }
+        expect(field('Plant name'), findsOneWidget);
+      }
     }
 
-    Finder field(String label) => find.byWidgetPredicate(
-      (w) => w is TextField && w.decoration?.labelText == label,
-    );
     await settle();
     if (phase == 'recover') {
       expect(find.text('Recover unfinished actions'), findsOneWidget);
@@ -141,6 +168,9 @@ void main() {
       );
       await press('Plants');
       await press('Add a plant');
+      if (find.text('Search species').evaluate().isNotEmpty) {
+        await press('Add a custom plant');
+      }
       expect(
         tester.widget<TextField>(field('Plant name')).controller!.text,
         'Unfinished native draft',
@@ -149,6 +179,17 @@ void main() {
       return;
     }
     await press('Add a plant');
+    if (find.text('Search species').evaluate().isNotEmpty) {
+      await press('Add a custom plant');
+    }
+    expect(
+      field('Plant name'),
+      findsOneWidget,
+      reason: tester
+          .widgetList<Text>(find.byType(Text))
+          .map((w) => w.data)
+          .join(' | '),
+    );
     await tester.enterText(field('Plant name'), 'Durable UI fern');
     await tester.pump();
     await tester.enterText(
@@ -241,6 +282,9 @@ void main() {
     await tester.pageBack();
     await settle();
     await press('Add a plant');
+    if (find.text('Search species').evaluate().isNotEmpty) {
+      await press('Add a custom plant');
+    }
     await tester.enterText(field('Plant name'), 'Unfinished native draft');
     await tester.pump();
     FocusManager.instance.primaryFocus?.unfocus();

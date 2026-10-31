@@ -15,6 +15,8 @@ abstract class PlantEditorState with _$PlantEditorState {
     CustomPlantFields? fields,
     PlantDraft? draft,
     @Default(true) bool loading,
+    @Default(false) bool picking,
+    @Default([]) List<RoutineRead> existingRoutines,
     @Default(false) bool saving,
     @Default(false) bool dirty,
     String? errorCode,
@@ -46,13 +48,15 @@ class PlantEditorCubit extends Cubit<PlantEditorState> {
       if (isClosed) return;
       _draftId = editor.draft?.id ?? _repository.newId();
       _baseRevision = editor.draft?.basePlantRevision ?? editor.plantRevision;
-      if (plantId != null) {
-        final plant = (await _repository.detail(plantId)).plant;
+      final detail = plantId == null ? null : await _repository.detail(plantId);
+      if (detail != null) {
+        final plant = detail.plant;
         _original = CustomPlantFields(
           name: plant.name,
           speciesName: plant.speciesName,
           light: plant.light,
           toxicity: plant.toxicity,
+          catalogSelection: plant.catalogSelection,
         );
       }
       if (isClosed) return;
@@ -61,6 +65,12 @@ class PlantEditorCubit extends Cubit<PlantEditorState> {
           fields: editor.initialFields,
           draft: editor.draft,
           loading: false,
+          picking: plantId == null && editor.draft == null,
+          existingRoutines:
+              detail?.routines
+                  .where((r) => r.routine.status != RoutineStatus.retired)
+                  .toList() ??
+              [],
           dirty: editor.draft != null,
         ),
       );
@@ -81,16 +91,31 @@ class PlantEditorCubit extends Cubit<PlantEditorState> {
     CustomLight? light,
     CustomToxicity? toxicity,
     List<RoutineInput>? routines,
+    CatalogSelection? selection,
+    bool custom = false,
+    bool resetChoices = false,
+    Iterable<String>? keep,
+    Map<String, CareInterval>? apply,
   }) {
     final old = state.fields!;
-    final nextSpecies = species ?? old.speciesName;
+    final selected = custom ? null : selection ?? old.catalogSelection;
+    final nextSpecies =
+        selected?.speciesNameSnapshot ?? species ?? old.speciesName;
     final nextLight = light ?? old.light;
     final nextToxicity = toxicity ?? old.toxicity;
     final changed =
         _original != null &&
         (nextSpecies.trim() != _original!.speciesName ||
             nextLight != _original!.light ||
-            nextToxicity != _original!.toxicity);
+            nextToxicity != _original!.toxicity ||
+            !(selected?.same(_original!.catalogSelection) ??
+                _original!.catalogSelection == null));
+    final identityEdited =
+        nextSpecies != old.speciesName ||
+        nextLight != old.light ||
+        nextToxicity != old.toxicity ||
+        !(selected?.same(old.catalogSelection) ?? old.catalogSelection == null);
+    final clearChoices = resetChoices || identityEdited;
     final fields = CustomPlantFields(
       name: name ?? old.name,
       speciesName: nextSpecies,
@@ -100,7 +125,13 @@ class PlantEditorCubit extends Cubit<PlantEditorState> {
       toxicity: nextToxicity,
       routines: routines ?? old.routines,
       baseRoutineRevisions: old.baseRoutineRevisions,
-      keepRoutineIds: changed ? old.baseRoutineRevisions.keys : const [],
+      catalogSelection: selected,
+      keepRoutineIds: changed && !clearChoices
+          ? keep ?? old.keepRoutineIds
+          : const [],
+      applyRoutineIntervals: changed && !clearChoices
+          ? apply ?? old.applyRoutineIntervals
+          : const {},
     );
     _version++;
     emit(
@@ -118,6 +149,67 @@ class PlantEditorCubit extends Cubit<PlantEditorState> {
         await flush();
       } catch (_) {}
     });
+  }
+
+  void openPicker() => emit(state.copyWith(picking: true));
+  void closePicker() => emit(state.copyWith(picking: false));
+  bool get identityChanged {
+    final f = state.fields, original = _original;
+    return f != null &&
+        original != null &&
+        (f.speciesName.trim() != original.speciesName ||
+            f.light != original.light ||
+            f.toxicity != original.toxicity ||
+            !(f.catalogSelection?.same(original.catalogSelection) ??
+                original.catalogSelection == null));
+  }
+
+  Future<void> select(CatalogEntry entry) async {
+    try {
+      final catalog = await _repository.catalog();
+      final current = catalog.entry(entry.id);
+      if (catalog.version != entry.version ||
+          current?.active != true ||
+          !entry.selection.same(current!.selection)) {
+        throw CommandRejected('CATALOG_SELECTION_STALE');
+      }
+      update(
+        selection: entry.selection,
+        light: CustomLight.unknown,
+        toxicity: CustomToxicity.unknown,
+        resetChoices: true,
+      );
+      await flush();
+      if (!isClosed) closePicker();
+    } catch (error) {
+      reportError(error);
+      rethrow;
+    }
+  }
+
+  Future<void> selectCustom(String query) async {
+    final f = state.fields!;
+    update(
+      custom: true,
+      species: f.catalogSelection == null && f.speciesName.isNotEmpty
+          ? f.speciesName
+          : query.trim(),
+      resetChoices: f.catalogSelection != null,
+    );
+    await flush();
+    if (!isClosed) closePicker();
+  }
+
+  void chooseRoutine(String id, CareInterval? interval) {
+    final f = state.fields!;
+    final keep = f.keepRoutineIds.toSet()..remove(id);
+    final apply = {...f.applyRoutineIntervals}..remove(id);
+    if (interval == null) {
+      keep.add(id);
+    } else {
+      apply[id] = interval;
+    }
+    update(keep: keep, apply: apply);
   }
 
   Future<void> flush() async {
@@ -257,11 +349,17 @@ class PlantEditorCubit extends Cubit<PlantEditorState> {
         speciesName: savedPlant.speciesName,
         light: savedPlant.light,
         toxicity: savedPlant.toxicity,
+        catalogSelection: savedPlant.catalogSelection,
       );
     }
     emit(
       state.copyWith(
         draft: reviewed.draft,
+        existingRoutines:
+            review.detail?.routines
+                .where((r) => r.routine.status != RoutineStatus.retired)
+                .toList() ??
+            [],
         fields: CustomPlantFields(
           name: f.name,
           speciesName: f.speciesName,
@@ -270,6 +368,7 @@ class PlantEditorCubit extends Cubit<PlantEditorState> {
           light: f.light,
           toxicity: f.toxicity,
           routines: f.routines,
+          catalogSelection: f.catalogSelection,
           baseRoutineRevisions: bases,
         ),
       ),

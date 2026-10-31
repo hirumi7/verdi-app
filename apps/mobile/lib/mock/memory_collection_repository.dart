@@ -33,6 +33,10 @@ class MemoryCollectionRepository implements CollectionRepository {
   }
 
   @override
+  Future<CatalogState> catalog({bool retry = false}) async =>
+      coordinator.catalog;
+
+  @override
   String newId() {
     final b = List<int>.generate(16, (_) => _random.nextInt(256));
     b[6] = (b[6] & 15) | 64;

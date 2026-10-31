@@ -139,6 +139,7 @@ final class RoutineCore {
   final RoutineStatus status;
   final bool archived;
   final List<CareEvent> events;
+  final String? originalSuggestionId, appliedSuggestionId;
 
   RoutineCore._({
     required this.id,
@@ -156,7 +157,31 @@ final class RoutineCore {
     required this.status,
     required this.archived,
     required Iterable<CareEvent> events,
+    this.originalSuggestionId,
+    this.appliedSuggestionId,
   }) : events = List.unmodifiable(events);
+
+  /// Storage/selection metadata; no care or revision is fabricated.
+  RoutineCore withSuggestions(String? original, String? applied) =>
+      RoutineCore._(
+        id: id,
+        plantId: plantId,
+        headId: headId,
+        careLabel: careLabel,
+        revision: revision,
+        headRevision: headRevision,
+        interval: interval,
+        anchor: anchor,
+        firstCheckAnchor: firstCheckAnchor,
+        firstCheckDate: firstCheckDate,
+        nextCheck: nextCheck,
+        overrideDate: overrideDate,
+        status: status,
+        archived: archived,
+        events: events,
+        originalSuggestionId: original,
+        appliedSuggestionId: applied,
+      );
 
   factory RoutineCore.unknown({
     required String id,
@@ -329,6 +354,8 @@ final class RoutineCore {
     status: status ?? this.status,
     archived: archived ?? this.archived,
     events: events ?? this.events,
+    originalSuggestionId: originalSuggestionId,
+    appliedSuggestionId: appliedSuggestionId,
   );
 
   void _editable() {
@@ -543,6 +570,8 @@ final class RoutineCore {
       status: before.status,
       archived: before.archived,
       events: revised,
+      originalSuggestionId: originalSuggestionId,
+      appliedSuggestionId: appliedSuggestionId,
     );
   }
 

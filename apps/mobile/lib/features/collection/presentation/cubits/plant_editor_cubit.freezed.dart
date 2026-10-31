@@ -17,6 +17,8 @@ mixin _$PlantEditorState {
   CustomPlantFields? get fields;
   PlantDraft? get draft;
   bool get loading;
+  bool get picking;
+  List<RoutineRead> get existingRoutines;
   bool get saving;
   bool get dirty;
   String? get errorCode;
@@ -44,6 +46,12 @@ mixin _$PlantEditorState {
                 other.draft == _this.draft) &&
             (identical(other.loading, _this.loading) ||
                 other.loading == _this.loading) &&
+            (identical(other.picking, _this.picking) ||
+                other.picking == _this.picking) &&
+            const DeepCollectionEquality().equals(
+              other.existingRoutines,
+              _this.existingRoutines,
+            ) &&
             (identical(other.saving, _this.saving) ||
                 other.saving == _this.saving) &&
             (identical(other.dirty, _this.dirty) ||
@@ -61,6 +69,8 @@ mixin _$PlantEditorState {
       _this.fields,
       _this.draft,
       _this.loading,
+      _this.picking,
+      const DeepCollectionEquality().hash(_this.existingRoutines),
       _this.saving,
       _this.dirty,
       _this.errorCode,
@@ -71,7 +81,7 @@ mixin _$PlantEditorState {
   @override
   String toString() {
     final _this = this as PlantEditorState;
-    return 'PlantEditorState(fields: ${_this.fields}, draft: ${_this.draft}, loading: ${_this.loading}, saving: ${_this.saving}, dirty: ${_this.dirty}, errorCode: ${_this.errorCode}, errors: ${_this.errors})';
+    return 'PlantEditorState(fields: ${_this.fields}, draft: ${_this.draft}, loading: ${_this.loading}, picking: ${_this.picking}, existingRoutines: ${_this.existingRoutines}, saving: ${_this.saving}, dirty: ${_this.dirty}, errorCode: ${_this.errorCode}, errors: ${_this.errors})';
   }
 }
 
@@ -86,6 +96,8 @@ abstract mixin class $PlantEditorStateCopyWith<$Res> {
     CustomPlantFields? fields,
     PlantDraft? draft,
     bool loading,
+    bool picking,
+    List<RoutineRead> existingRoutines,
     bool saving,
     bool dirty,
     String? errorCode,
@@ -109,6 +121,8 @@ class _$PlantEditorStateCopyWithImpl<$Res>
     Object? fields = freezed,
     Object? draft = freezed,
     Object? loading = null,
+    Object? picking = null,
+    Object? existingRoutines = null,
     Object? saving = null,
     Object? dirty = null,
     Object? errorCode = freezed,
@@ -128,6 +142,14 @@ class _$PlantEditorStateCopyWithImpl<$Res>
             ? _self.loading
             : loading // ignore: cast_nullable_to_non_nullable
                   as bool,
+        picking: null == picking
+            ? _self.picking
+            : picking // ignore: cast_nullable_to_non_nullable
+                  as bool,
+        existingRoutines: null == existingRoutines
+            ? _self.existingRoutines
+            : existingRoutines // ignore: cast_nullable_to_non_nullable
+                  as List<RoutineRead>,
         saving: null == saving
             ? _self.saving
             : saving // ignore: cast_nullable_to_non_nullable
@@ -246,6 +268,8 @@ extension PlantEditorStatePatterns on PlantEditorState {
       CustomPlantFields? fields,
       PlantDraft? draft,
       bool loading,
+      bool picking,
+      List<RoutineRead> existingRoutines,
       bool saving,
       bool dirty,
       String? errorCode,
@@ -261,6 +285,8 @@ extension PlantEditorStatePatterns on PlantEditorState {
           _that.fields,
           _that.draft,
           _that.loading,
+          _that.picking,
+          _that.existingRoutines,
           _that.saving,
           _that.dirty,
           _that.errorCode,
@@ -290,6 +316,8 @@ extension PlantEditorStatePatterns on PlantEditorState {
       CustomPlantFields? fields,
       PlantDraft? draft,
       bool loading,
+      bool picking,
+      List<RoutineRead> existingRoutines,
       bool saving,
       bool dirty,
       String? errorCode,
@@ -304,6 +332,8 @@ extension PlantEditorStatePatterns on PlantEditorState {
           _that.fields,
           _that.draft,
           _that.loading,
+          _that.picking,
+          _that.existingRoutines,
           _that.saving,
           _that.dirty,
           _that.errorCode,
@@ -332,6 +362,8 @@ extension PlantEditorStatePatterns on PlantEditorState {
       CustomPlantFields? fields,
       PlantDraft? draft,
       bool loading,
+      bool picking,
+      List<RoutineRead> existingRoutines,
       bool saving,
       bool dirty,
       String? errorCode,
@@ -346,6 +378,8 @@ extension PlantEditorStatePatterns on PlantEditorState {
           _that.fields,
           _that.draft,
           _that.loading,
+          _that.picking,
+          _that.existingRoutines,
           _that.saving,
           _that.dirty,
           _that.errorCode,
@@ -364,11 +398,14 @@ class _PlantEditorState implements PlantEditorState {
     this.fields,
     this.draft,
     this.loading = true,
+    this.picking = false,
+    List<RoutineRead> existingRoutines = const [],
     this.saving = false,
     this.dirty = false,
     this.errorCode,
     Map<String, String> errors = const {},
-  }) : _errors = errors;
+  }) : _existingRoutines = existingRoutines,
+       _errors = errors;
 
   @override
   final CustomPlantFields? fields;
@@ -377,6 +414,19 @@ class _PlantEditorState implements PlantEditorState {
   @override
   @JsonKey()
   final bool loading;
+  @override
+  @JsonKey()
+  final bool picking;
+  final List<RoutineRead> _existingRoutines;
+  @override
+  @JsonKey()
+  List<RoutineRead> get existingRoutines {
+    if (_existingRoutines is EqualUnmodifiableListView)
+      return _existingRoutines;
+    // ignore: implicit_dynamic_type
+    return EqualUnmodifiableListView(_existingRoutines);
+  }
+
   @override
   @JsonKey()
   final bool saving;
@@ -410,6 +460,11 @@ class _PlantEditorState implements PlantEditorState {
             (identical(other.fields, fields) || other.fields == fields) &&
             (identical(other.draft, draft) || other.draft == draft) &&
             (identical(other.loading, loading) || other.loading == loading) &&
+            (identical(other.picking, picking) || other.picking == picking) &&
+            const DeepCollectionEquality().equals(
+              other.existingRoutines,
+              _existingRoutines,
+            ) &&
             (identical(other.saving, saving) || other.saving == saving) &&
             (identical(other.dirty, dirty) || other.dirty == dirty) &&
             (identical(other.errorCode, errorCode) ||
@@ -424,6 +479,8 @@ class _PlantEditorState implements PlantEditorState {
       fields,
       draft,
       loading,
+      picking,
+      const DeepCollectionEquality().hash(_existingRoutines),
       saving,
       dirty,
       errorCode,
@@ -433,7 +490,7 @@ class _PlantEditorState implements PlantEditorState {
 
   @override
   String toString() {
-    return 'PlantEditorState(fields: $fields, draft: $draft, loading: $loading, saving: $saving, dirty: $dirty, errorCode: $errorCode, errors: $errors)';
+    return 'PlantEditorState(fields: $fields, draft: $draft, loading: $loading, picking: $picking, existingRoutines: $existingRoutines, saving: $saving, dirty: $dirty, errorCode: $errorCode, errors: $errors)';
   }
 }
 
@@ -450,6 +507,8 @@ abstract mixin class _$PlantEditorStateCopyWith<$Res>
     CustomPlantFields? fields,
     PlantDraft? draft,
     bool loading,
+    bool picking,
+    List<RoutineRead> existingRoutines,
     bool saving,
     bool dirty,
     String? errorCode,
@@ -473,6 +532,8 @@ class __$PlantEditorStateCopyWithImpl<$Res>
     Object? fields = freezed,
     Object? draft = freezed,
     Object? loading = null,
+    Object? picking = null,
+    Object? existingRoutines = null,
     Object? saving = null,
     Object? dirty = null,
     Object? errorCode = freezed,
@@ -492,6 +553,14 @@ class __$PlantEditorStateCopyWithImpl<$Res>
             ? _self.loading
             : loading // ignore: cast_nullable_to_non_nullable
                   as bool,
+        picking: null == picking
+            ? _self.picking
+            : picking // ignore: cast_nullable_to_non_nullable
+                  as bool,
+        existingRoutines: null == existingRoutines
+            ? _self._existingRoutines
+            : existingRoutines // ignore: cast_nullable_to_non_nullable
+                  as List<RoutineRead>,
         saving: null == saving
             ? _self.saving
             : saving // ignore: cast_nullable_to_non_nullable

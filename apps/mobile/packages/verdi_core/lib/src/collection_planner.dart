@@ -19,7 +19,8 @@ void _validateShape(CoreCommand command) {
         if (command.plantId != null ||
             command.basePlantRevision != null ||
             command.fields.baseRoutineRevisions.isNotEmpty ||
-            command.fields.keepRoutineIds.isNotEmpty)
+            (command.fields.keepRoutineIds.isNotEmpty ||
+                command.fields.applyRoutineIntervals.isNotEmpty))
           throw CommandRejected('FIELD_INVALID');
       } else {
         if (command.plantId == null ||
@@ -33,7 +34,10 @@ void _validateShape(CoreCommand command) {
         _id(entry.key);
         _revision(entry.value);
       }
-      final choices = command.fields.keepRoutineIds;
+      final choices = [
+        ...command.fields.keepRoutineIds,
+        ...command.fields.applyRoutineIntervals.keys,
+      ];
       for (final id in choices) {
         _id(id);
       }
@@ -154,6 +158,7 @@ extension on MemoryOperationCoordinator {
     final careKinds = {...current.careKinds};
     final drafts = {...current.drafts};
     final changes = {...current.scheduleChanges};
+    final suggestions = {...current.suggestions};
     var collectionRevision = current.revision;
     var reminderGeneration = current.reminderGeneration;
     final resources = <String>{};
@@ -317,9 +322,11 @@ extension on MemoryOperationCoordinator {
         final location = _text(fields.location, 40, 'location', errors);
         final notes = _text(fields.notes, 2000, 'notes', errors, trim: false);
         final species = _text(
-          fields.speciesName,
-          120,
-          'customSpeciesName',
+          fields.catalogSelection?.speciesNameSnapshot ?? fields.speciesName,
+          fields.catalogSelection == null ? 120 : 160,
+          fields.catalogSelection == null
+              ? 'customSpeciesName'
+              : 'catalogSelection',
           errors,
           required: true,
         );
@@ -359,6 +366,18 @@ extension on MemoryOperationCoordinator {
         if (errors.isNotEmpty) throw CommandRejected('FIELD_INVALID', errors);
         final old = draft.plantId == null ? null : plants[draft.plantId];
         final isAdd = draft.mode == DraftMode.add;
+        final selection = fields.catalogSelection;
+        final sameSelection = selection == null
+            ? old?.catalogSelection == null
+            : selection.same(old?.catalogSelection);
+        if (selection != null && (isAdd || !sameSelection)) {
+          final entry = catalog.entry(selection.speciesId);
+          if (!catalog.available ||
+              entry?.active != true ||
+              !selection.same(entry!.selection))
+            throw CommandRejected('CATALOG_SELECTION_STALE');
+          bindings['catalogSelection'] = selection.toJson();
+        }
         bindings['draftRevision'] = draft.revision;
         if (!isAdd) {
           if (old == null) throw CommandRejected('NOT_FOUND');
@@ -375,12 +394,17 @@ extension on MemoryOperationCoordinator {
             throw CommandRejected('DRAFT_CONFLICT');
           }
           final changed =
+              !sameSelection ||
               old.speciesName != species ||
               old.light != fields.light ||
               old.toxicity != fields.toxicity;
           final expected = changed ? currentBases.keys.toSet() : <String>{};
-          if (fields.keepRoutineIds.toSet().length != expected.length ||
-              !fields.keepRoutineIds.toSet().containsAll(expected)) {
+          final chosen = [
+            ...fields.keepRoutineIds,
+            ...fields.applyRoutineIntervals.keys,
+          ].toSet();
+          if (chosen.length != expected.length ||
+              !chosen.containsAll(expected)) {
             throw CommandRejected('FIELD_INVALID', {
               'speciesChoices': 'FIELD_INVALID',
             });
@@ -409,6 +433,7 @@ extension on MemoryOperationCoordinator {
           old?.createdAt ?? clock.instant,
           clock.instant,
           old?.archived ?? false,
+          selection,
         );
         final rows = <PreviewRow>[];
         var eventCount = 0;
@@ -422,7 +447,7 @@ extension on MemoryOperationCoordinator {
             StandardCareKind.repot => 'Repot',
             StandardCareKind.rotate => 'Rotate',
           };
-          final routine = seed.raw.seedKind == SeedKind.unknown
+          var routine = seed.raw.seedKind == SeedKind.unknown
               ? RoutineCore.unknown(
                   id: routineId,
                   plantId: plantId,
@@ -442,6 +467,21 @@ extension on MemoryOperationCoordinator {
                   commandId: intent.commandId,
                   clock: clock,
                 );
+          final suggestion = selection?.suggestion(seed.raw.kind);
+          if (suggestion != null) {
+            final sid = intent.allocatedIds[allocation++];
+            suggestions[sid] = SuggestionSnapshot(
+              sid,
+              routineId,
+              plantId,
+              selection!.speciesId,
+              selection.catalogVersion,
+              suggestion,
+              clock.instant,
+            );
+            routine = routine.withSuggestions(sid, sid);
+            resources.add(sid);
+          }
           routines[routineId] = routine;
           careKinds[routineId] = seed.raw.kind;
           resources.addAll([routineId, headId]);
@@ -464,6 +504,51 @@ extension on MemoryOperationCoordinator {
             ),
           );
         }
+        for (final id in fields.applyRoutineIntervals.keys.toList()..sort()) {
+          final before = routines[id]!;
+          final suggestion = selection?.suggestion(careKinds[id]!);
+          if (suggestion == null)
+            throw CommandRejected('FIELD_INVALID', {
+              'speciesChoices': 'NO_SUGGESTION',
+            });
+          final sid = intent.allocatedIds[allocation++],
+              audit = intent.allocatedIds[allocation++];
+          suggestions[sid] = SuggestionSnapshot(
+            sid,
+            id,
+            plantId,
+            selection!.speciesId,
+            selection.catalogVersion,
+            suggestion,
+            clock.instant,
+          );
+          final after = before
+              .setInterval(fields.applyRoutineIntervals[id]!, clock)
+              .withSuggestions(before.originalSuggestionId, sid);
+          routines[id] = after;
+          changes[audit] = ScheduleChange._(
+            audit,
+            intent.commandId,
+            ScheduleChangeKind.speciesApply,
+            before,
+            after,
+            clock,
+          );
+          resources.addAll([id, before.headId, sid, audit]);
+          revisions[id] = after.revision;
+          revisions[before.headId] = after.headRevision;
+          rows.add(
+            PreviewRow._(
+              plantId,
+              name,
+              id,
+              before.nextCheck,
+              after.nextCheck,
+              careKind: careKinds[id],
+              careLabel: before.careLabel,
+            ),
+          );
+        }
         if (rows.isEmpty)
           rows.add(PreviewRow._(plantId, name, null, null, null));
         drafts.remove(draft.id);
@@ -476,7 +561,8 @@ extension on MemoryOperationCoordinator {
         effects = CommandEffects._(
           rows,
           plants: 1,
-          routines: seeds.length,
+          routines: seeds.length + fields.applyRoutineIntervals.length,
+          scheduleChanges: fields.applyRoutineIntervals.length,
           events: eventCount,
           gate: gate,
         );
@@ -517,6 +603,7 @@ extension on MemoryOperationCoordinator {
             for (final d in ownedDrafts) d.id: d.revision,
           };
           plants.remove(plant.id);
+          suggestions.removeWhere((_, s) => s.plantId == plant.id);
           for (final r in owned) {
             routines.remove(r.id);
             careKinds.remove(r.id);
@@ -758,6 +845,7 @@ extension on MemoryOperationCoordinator {
         drafts,
         reminderGeneration,
         changes,
+        suggestions,
       ),
       effects,
       canonicalCommandJson(bindings),

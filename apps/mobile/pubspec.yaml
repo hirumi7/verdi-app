@@ -31,4 +31,5 @@ flutter:
   uses-material-design: true
   generate: true
   assets:
+    - assets/catalog/
     - assets/illustrations/empty-plants.png

@@ -1,0 +1,1551 @@
+[
+  {
+    "id": "sp_monstera_deliciosa",
+    "entryVersion": 1,
+    "lifecycle": "active",
+    "commonName": "Monstera",
+    "scientificName": "Monstera deliciosa",
+    "altNames": [
+      "Swiss cheese plant",
+      "Split-leaf philodendron"
+    ],
+    "category": "foliage",
+    "difficulty": "unknown",
+    "light": "medium",
+    "careNotes": "Let the upper part of the potting mix dry before watering. Support the climbing stems; protect from direct sun.",
+    "suggestions": [],
+    "toxicity": {
+      "value": "unknown",
+      "animalScope": [],
+      "sourceRefs": [],
+      "qualification": "Animal-specific toxicity has not been reviewed for this entry. Unknown does not mean safe to ingest."
+    },
+    "sources": [
+      {
+        "ref": "source_monstera_deliciosa",
+        "title": "NC State Plant Toolbox: Monstera deliciosa",
+        "publisherOrCreator": "North Carolina State University Extension",
+        "locator": "Plant profile identity and cultivation/description; retained capture monstera-deliciosa",
+        "capturedAt": "2026-10-31T12:22:16.000Z",
+        "captureSha256": "2e16fcaddea3069e0933ac35379176d38286c6e5aec66157381cb2b70c29a16e",
+        "publicUrl": "https://plants.ces.ncsu.edu/plants/monstera-deliciosa/"
+      }
+    ],
+    "contentReview": {
+      "reviewer": "Codex (AI assistant)",
+      "actorType": "ai",
+      "reviewedAt": "2026-10-31T12:22:16.000Z",
+      "outcome": "pass",
+      "scope": "Identity/aliases, category, selected light and original care notes checked against the cited capture. Difficulty remains unrated; toxicity unknown except explicit cats/dogs support. Only four explicitly sourced fertilizer intervals; no fixed watering prescription.",
+      "evidenceRefs": [
+        "source_monstera_deliciosa"
+      ],
+      "findings": []
+    },
+    "textRightsReview": {
+      "reviewer": "Codex (AI assistant)",
+      "actorType": "ai",
+      "reviewedAt": "2026-10-31T12:22:16.000Z",
+      "outcome": "pass",
+      "scope": "Only factual identifiers and independently authored Verdi summaries/context; no source prose or photography redistributed.",
+      "evidenceRefs": [
+        "source_monstera_deliciosa"
+      ],
+      "findings": [],
+      "permissionBasis": "owned",
+      "licenseOrPermission": "New Verdi prose authored for the user; factual botanical names and source citations. Source article text/images are excluded.",
+      "redistributionScope": "Bundled Verdi reference metadata and original summaries",
+      "attributionText": "North Carolina State University Extension — factual reference; original summaries by Verdi.",
+      "attributionNotRequiredReason": null,
+      "restrictions": [
+        "Do not redistribute source photographs or article text under this record."
+      ]
+    }
+  },
+  {
+    "id": "sp_epipremnum_aureum",
+    "entryVersion": 1,
+    "lifecycle": "active",
+    "commonName": "Golden pothos",
+    "scientificName": "Epipremnum aureum",
+    "altNames": [
+      "Devil's ivy",
+      "Pothos"
+    ],
+    "category": "foliage",
+    "difficulty": "unknown",
+    "light": "bright-indirect",
+    "careNotes": "Let the potting mix dry between waterings. Bright indirect light is preferred; reduce feeding during winter dormancy.",
+    "suggestions": [
+      {
+        "careKind": "fertilize",
+        "interval": {
+          "count": 2,
+          "unit": "month"
+        },
+        "context": "Editable starting interval for active growth only. Pause or adjust during dormancy and follow the fertilizer label; a check is not an instruction to feed.",
+        "sourceLabel": "North Carolina State University Extension — cultivation guidance"
+      }
+    ],
+    "toxicity": {
+      "value": "unknown",
+      "animalScope": [],
+      "sourceRefs": [],
+      "qualification": "Animal-specific toxicity has not been reviewed for this entry. Unknown does not mean safe to ingest."
+    },
+    "sources": [
+      {
+        "ref": "source_epipremnum_aureum",
+        "title": "NC State Plant Toolbox: Epipremnum aureum",
+        "publisherOrCreator": "North Carolina State University Extension",
+        "locator": "Plant profile identity and cultivation/description; retained capture epipremnum-aureum",
+        "capturedAt": "2026-10-31T12:22:16.000Z",
+        "captureSha256": "b3b123fea35a4f96cc26a67b64681dd69646008bfd9b4b581c440187e8506072",
+        "publicUrl": "https://plants.ces.ncsu.edu/plants/epipremnum-aureum/"
+      }
+    ],
+    "contentReview": {
+      "reviewer": "Codex (AI assistant)",
+      "actorType": "ai",
+      "reviewedAt": "2026-10-31T12:22:16.000Z",
+      "outcome": "pass",
+      "scope": "Identity/aliases, category, selected light and original care notes checked against the cited capture. Difficulty remains unrated; toxicity unknown except explicit cats/dogs support. Only four explicitly sourced fertilizer intervals; no fixed watering prescription.",
+      "evidenceRefs": [
+        "source_epipremnum_aureum"
+      ],
+      "findings": []
+    },
+    "textRightsReview": {
+      "reviewer": "Codex (AI assistant)",
+      "actorType": "ai",
+      "reviewedAt": "2026-10-31T12:22:16.000Z",
+      "outcome": "pass",
+      "scope": "Only factual identifiers and independently authored Verdi summaries/context; no source prose or photography redistributed.",
+      "evidenceRefs": [
+        "source_epipremnum_aureum"
+      ],
+      "findings": [],
+      "permissionBasis": "owned",
+      "licenseOrPermission": "New Verdi prose authored for the user; factual botanical names and source citations. Source article text/images are excluded.",
+      "redistributionScope": "Bundled Verdi reference metadata and original summaries",
+      "attributionText": "North Carolina State University Extension — factual reference; original summaries by Verdi.",
+      "attributionNotRequiredReason": null,
+      "restrictions": [
+        "Do not redistribute source photographs or article text under this record."
+      ]
+    }
+  },
+  {
+    "id": "sp_dracaena_trifasciata",
+    "entryVersion": 1,
+    "lifecycle": "active",
+    "commonName": "Snake plant",
+    "scientificName": "Dracaena trifasciata",
+    "altNames": [
+      "Mother-in-law's tongue",
+      "Sansevieria trifasciata"
+    ],
+    "category": "foliage",
+    "difficulty": "unknown",
+    "light": "unknown",
+    "careNotes": "Use freely draining potting mix. Allow it to dry between waterings and reduce watering in winter.",
+    "suggestions": [],
+    "toxicity": {
+      "value": "unknown",
+      "animalScope": [],
+      "sourceRefs": [],
+      "qualification": "Animal-specific toxicity has not been reviewed for this entry. Unknown does not mean safe to ingest."
+    },
+    "sources": [
+      {
+        "ref": "source_dracaena_trifasciata",
+        "title": "NC State Plant Toolbox: Dracaena trifasciata",
+        "publisherOrCreator": "North Carolina State University Extension",
+        "locator": "Plant profile identity and cultivation/description; retained capture dracaena-trifasciata",
+        "capturedAt": "2026-10-31T12:22:16.000Z",
+        "captureSha256": "32c89ab53df6cef83e2fc61107074a1c1b649457f3c58841c35b0cb642a745e7",
+        "publicUrl": "https://plants.ces.ncsu.edu/plants/dracaena-trifasciata/"
+      }
+    ],
+    "contentReview": {
+      "reviewer": "Codex (AI assistant)",
+      "actorType": "ai",
+      "reviewedAt": "2026-10-31T12:22:16.000Z",
+      "outcome": "pass",
+      "scope": "Identity/aliases, category, selected light and original care notes checked against the cited capture. Difficulty remains unrated; toxicity unknown except explicit cats/dogs support. Only four explicitly sourced fertilizer intervals; no fixed watering prescription.",
+      "evidenceRefs": [
+        "source_dracaena_trifasciata"
+      ],
+      "findings": []
+    },
+    "textRightsReview": {
+      "reviewer": "Codex (AI assistant)",
+      "actorType": "ai",
+      "reviewedAt": "2026-10-31T12:22:16.000Z",
+      "outcome": "pass",
+      "scope": "Only factual identifiers and independently authored Verdi summaries/context; no source prose or photography redistributed.",
+      "evidenceRefs": [
+        "source_dracaena_trifasciata"
+      ],
+      "findings": [],
+      "permissionBasis": "owned",
+      "licenseOrPermission": "New Verdi prose authored for the user; factual botanical names and source citations. Source article text/images are excluded.",
+      "redistributionScope": "Bundled Verdi reference metadata and original summaries",
+      "attributionText": "North Carolina State University Extension — factual reference; original summaries by Verdi.",
+      "attributionNotRequiredReason": null,
+      "restrictions": [
+        "Do not redistribute source photographs or article text under this record."
+      ]
+    }
+  },
+  {
+    "id": "sp_zamioculcas_zamiifolia",
+    "entryVersion": 1,
+    "lifecycle": "active",
+    "commonName": "ZZ plant",
+    "scientificName": "Zamioculcas zamiifolia",
+    "altNames": [
+      "Zanzibar gem"
+    ],
+    "category": "foliage",
+    "difficulty": "unknown",
+    "light": "bright-indirect",
+    "careNotes": "Allow the potting mix to dry between waterings. Avoid standing water; protect leaves from direct sun.",
+    "suggestions": [],
+    "toxicity": {
+      "value": "toxic",
+      "animalScope": [
+        "cats",
+        "dogs"
+      ],
+      "sourceRefs": [
+        "source_zamioculcas_zamiifolia"
+      ],
+      "qualification": "The cited NC State profile lists toxicity to cats and dogs. This is reference information, not an assessment of an individual exposure."
+    },
+    "sources": [
+      {
+        "ref": "source_zamioculcas_zamiifolia",
+        "title": "NC State Plant Toolbox: Zamioculcas zamiifolia",
+        "publisherOrCreator": "North Carolina State University Extension",
+        "locator": "Plant profile identity and cultivation/description; retained capture zamioculcas-zamiifolia",
+        "capturedAt": "2026-10-31T12:22:16.000Z",
+        "captureSha256": "9ddb59cc07c6c7e33f1fa01cd532417685b8a90c6699c7ebc8c489832bbcaf80",
+        "publicUrl": "https://plants.ces.ncsu.edu/plants/zamioculcas-zamiifolia/"
+      }
+    ],
+    "contentReview": {
+      "reviewer": "Codex (AI assistant)",
+      "actorType": "ai",
+      "reviewedAt": "2026-10-31T12:22:16.000Z",
+      "outcome": "pass",
+      "scope": "Identity/aliases, category, selected light and original care notes checked against the cited capture. Difficulty remains unrated; toxicity unknown except explicit cats/dogs support. Only four explicitly sourced fertilizer intervals; no fixed watering prescription.",
+      "evidenceRefs": [
+        "source_zamioculcas_zamiifolia"
+      ],
+      "findings": []
+    },
+    "textRightsReview": {
+      "reviewer": "Codex (AI assistant)",
+      "actorType": "ai",
+      "reviewedAt": "2026-10-31T12:22:16.000Z",
+      "outcome": "pass",
+      "scope": "Only factual identifiers and independently authored Verdi summaries/context; no source prose or photography redistributed.",
+      "evidenceRefs": [
+        "source_zamioculcas_zamiifolia"
+      ],
+      "findings": [],
+      "permissionBasis": "owned",
+      "licenseOrPermission": "New Verdi prose authored for the user; factual botanical names and source citations. Source article text/images are excluded.",
+      "redistributionScope": "Bundled Verdi reference metadata and original summaries",
+      "attributionText": "North Carolina State University Extension — factual reference; original summaries by Verdi.",
+      "attributionNotRequiredReason": null,
+      "restrictions": [
+        "Do not redistribute source photographs or article text under this record."
+      ]
+    }
+  },
+  {
+    "id": "sp_chlorophytum_comosum",
+    "entryVersion": 1,
+    "lifecycle": "active",
+    "commonName": "Spider plant",
+    "scientificName": "Chlorophytum comosum",
+    "altNames": [
+      "Ribbon plant"
+    ],
+    "category": "foliage",
+    "difficulty": "unknown",
+    "light": "medium",
+    "careNotes": "Keep the potting mix moist with drainage. Avoid direct sun and reduce watering in winter.",
+    "suggestions": [],
+    "toxicity": {
+      "value": "unknown",
+      "animalScope": [],
+      "sourceRefs": [],
+      "qualification": "Animal-specific toxicity has not been reviewed for this entry. Unknown does not mean safe to ingest."
+    },
+    "sources": [
+      {
+        "ref": "source_chlorophytum_comosum",
+        "title": "NC State Plant Toolbox: Chlorophytum comosum",
+        "publisherOrCreator": "North Carolina State University Extension",
+        "locator": "Plant profile identity and cultivation/description; retained capture chlorophytum-comosum",
+        "capturedAt": "2026-10-31T12:22:16.000Z",
+        "captureSha256": "9bd6107a45d689ceb662ba1ac11838aa38e4d2d8e1131bccc79003f4ba175e42",
+        "publicUrl": "https://plants.ces.ncsu.edu/plants/chlorophytum-comosum/"
+      }
+    ],
+    "contentReview": {
+      "reviewer": "Codex (AI assistant)",
+      "actorType": "ai",
+      "reviewedAt": "2026-10-31T12:22:16.000Z",
+      "outcome": "pass",
+      "scope": "Identity/aliases, category, selected light and original care notes checked against the cited capture. Difficulty remains unrated; toxicity unknown except explicit cats/dogs support. Only four explicitly sourced fertilizer intervals; no fixed watering prescription.",
+      "evidenceRefs": [
+        "source_chlorophytum_comosum"
+      ],
+      "findings": []
+    },
+    "textRightsReview": {
+      "reviewer": "Codex (AI assistant)",
+      "actorType": "ai",
+      "reviewedAt": "2026-10-31T12:22:16.000Z",
+      "outcome": "pass",
+      "scope": "Only factual identifiers and independently authored Verdi summaries/context; no source prose or photography redistributed.",
+      "evidenceRefs": [
+        "source_chlorophytum_comosum"
+      ],
+      "findings": [],
+      "permissionBasis": "owned",
+      "licenseOrPermission": "New Verdi prose authored for the user; factual botanical names and source citations. Source article text/images are excluded.",
+      "redistributionScope": "Bundled Verdi reference metadata and original summaries",
+      "attributionText": "North Carolina State University Extension — factual reference; original summaries by Verdi.",
+      "attributionNotRequiredReason": null,
+      "restrictions": [
+        "Do not redistribute source photographs or article text under this record."
+      ]
+    }
+  },
+  {
+    "id": "sp_spathiphyllum_wallisii",
+    "entryVersion": 1,
+    "lifecycle": "active",
+    "commonName": "Peace lily",
+    "scientificName": "Spathiphyllum wallisii",
+    "altNames": [
+      "Wallis peace lily",
+      "White sails"
+    ],
+    "category": "flowering",
+    "difficulty": "unknown",
+    "light": "unknown",
+    "careNotes": "Keep in partial shade with moist, draining compost. Feeding guidance applies during active growth; adjust care for the conditions.",
+    "suggestions": [
+      {
+        "careKind": "fertilize",
+        "interval": {
+          "count": 1,
+          "unit": "month"
+        },
+        "context": "Editable starting interval for active growth only. Pause or adjust during dormancy and follow the fertilizer label; a check is not an instruction to feed.",
+        "sourceLabel": "Royal Horticultural Society — cultivation guidance"
+      }
+    ],
+    "toxicity": {
+      "value": "unknown",
+      "animalScope": [],
+      "sourceRefs": [],
+      "qualification": "Animal-specific toxicity has not been reviewed for this entry. Unknown does not mean safe to ingest."
+    },
+    "sources": [
+      {
+        "ref": "source_spathiphyllum_wallisii",
+        "title": "RHS plant profile: Spathiphyllum wallisii",
+        "publisherOrCreator": "Royal Horticultural Society",
+        "locator": "RHS identity and cultivation; retained AI observation from web retrieval spathiphyllum-wallisii",
+        "capturedAt": "2026-10-31T12:22:16.000Z",
+        "captureSha256": "dbb578593c1cb3aa507a2b8a059dfae6fb5110772eca9be4dd0bfd5e9bfa4599",
+        "publicUrl": "https://www.rhs.org.uk/plants/17623/spathiphyllum-wallisii/details"
+      }
+    ],
+    "contentReview": {
+      "reviewer": "Codex (AI assistant)",
+      "actorType": "ai",
+      "reviewedAt": "2026-10-31T12:22:16.000Z",
+      "outcome": "pass",
+      "scope": "Identity/aliases, category, selected light and original care notes checked against the cited capture. Difficulty remains unrated; toxicity unknown except explicit cats/dogs support. Only four explicitly sourced fertilizer intervals; no fixed watering prescription.",
+      "evidenceRefs": [
+        "source_spathiphyllum_wallisii"
+      ],
+      "findings": []
+    },
+    "textRightsReview": {
+      "reviewer": "Codex (AI assistant)",
+      "actorType": "ai",
+      "reviewedAt": "2026-10-31T12:22:16.000Z",
+      "outcome": "pass",
+      "scope": "Only factual identifiers and independently authored Verdi summaries/context; no source prose or photography redistributed.",
+      "evidenceRefs": [
+        "source_spathiphyllum_wallisii"
+      ],
+      "findings": [],
+      "permissionBasis": "owned",
+      "licenseOrPermission": "New Verdi prose authored for the user; factual botanical names and source citations. Source article text/images are excluded.",
+      "redistributionScope": "Bundled Verdi reference metadata and original summaries",
+      "attributionText": "Royal Horticultural Society — factual reference; original summaries by Verdi.",
+      "attributionNotRequiredReason": null,
+      "restrictions": [
+        "Do not redistribute source photographs or article text under this record."
+      ]
+    }
+  },
+  {
+    "id": "sp_ficus_lyrata",
+    "entryVersion": 1,
+    "lifecycle": "active",
+    "commonName": "Fiddle-leaf fig",
+    "scientificName": "Ficus lyrata",
+    "altNames": [
+      "Banjo fig"
+    ],
+    "category": "foliage",
+    "difficulty": "unknown",
+    "light": "bright-indirect",
+    "careNotes": "Provide draining potting mix and bright indirect light. Avoid excessive watering and hot afternoon sun.",
+    "suggestions": [],
+    "toxicity": {
+      "value": "unknown",
+      "animalScope": [],
+      "sourceRefs": [],
+      "qualification": "Animal-specific toxicity has not been reviewed for this entry. Unknown does not mean safe to ingest."
+    },
+    "sources": [
+      {
+        "ref": "source_ficus_lyrata",
+        "title": "NC State Plant Toolbox: Ficus lyrata",
+        "publisherOrCreator": "North Carolina State University Extension",
+        "locator": "Plant profile identity and cultivation/description; retained capture ficus-lyrata",
+        "capturedAt": "2026-10-31T12:22:16.000Z",
+        "captureSha256": "3503bdea4e49b3ff94e5725e1cf6d78a8d8c768ec96e01f9db552a655aadbbc4",
+        "publicUrl": "https://plants.ces.ncsu.edu/plants/ficus-lyrata/"
+      }
+    ],
+    "contentReview": {
+      "reviewer": "Codex (AI assistant)",
+      "actorType": "ai",
+      "reviewedAt": "2026-10-31T12:22:16.000Z",
+      "outcome": "pass",
+      "scope": "Identity/aliases, category, selected light and original care notes checked against the cited capture. Difficulty remains unrated; toxicity unknown except explicit cats/dogs support. Only four explicitly sourced fertilizer intervals; no fixed watering prescription.",
+      "evidenceRefs": [
+        "source_ficus_lyrata"
+      ],
+      "findings": []
+    },
+    "textRightsReview": {
+      "reviewer": "Codex (AI assistant)",
+      "actorType": "ai",
+      "reviewedAt": "2026-10-31T12:22:16.000Z",
+      "outcome": "pass",
+      "scope": "Only factual identifiers and independently authored Verdi summaries/context; no source prose or photography redistributed.",
+      "evidenceRefs": [
+        "source_ficus_lyrata"
+      ],
+      "findings": [],
+      "permissionBasis": "owned",
+      "licenseOrPermission": "New Verdi prose authored for the user; factual botanical names and source citations. Source article text/images are excluded.",
+      "redistributionScope": "Bundled Verdi reference metadata and original summaries",
+      "attributionText": "North Carolina State University Extension — factual reference; original summaries by Verdi.",
+      "attributionNotRequiredReason": null,
+      "restrictions": [
+        "Do not redistribute source photographs or article text under this record."
+      ]
+    }
+  },
+  {
+    "id": "sp_ficus_elastica",
+    "entryVersion": 1,
+    "lifecycle": "active",
+    "commonName": "Rubber plant",
+    "scientificName": "Ficus elastica",
+    "altNames": [
+      "Indian rubber plant"
+    ],
+    "category": "foliage",
+    "difficulty": "unknown",
+    "light": "bright-indirect",
+    "careNotes": "Provide bright indirect light or partial shade. Avoid excessive watering and reduce watering during dormancy.",
+    "suggestions": [],
+    "toxicity": {
+      "value": "unknown",
+      "animalScope": [],
+      "sourceRefs": [],
+      "qualification": "Animal-specific toxicity has not been reviewed for this entry. Unknown does not mean safe to ingest."
+    },
+    "sources": [
+      {
+        "ref": "source_ficus_elastica",
+        "title": "NC State Plant Toolbox: Ficus elastica",
+        "publisherOrCreator": "North Carolina State University Extension",
+        "locator": "Plant profile identity and cultivation/description; retained capture ficus-elastica",
+        "capturedAt": "2026-10-31T12:22:16.000Z",
+        "captureSha256": "7c6f6d49ac406f21accf128e69771cc1c33bbbccc19d25b1e028cb1849c43b6e",
+        "publicUrl": "https://plants.ces.ncsu.edu/plants/ficus-elastica/"
+      }
+    ],
+    "contentReview": {
+      "reviewer": "Codex (AI assistant)",
+      "actorType": "ai",
+      "reviewedAt": "2026-10-31T12:22:16.000Z",
+      "outcome": "pass",
+      "scope": "Identity/aliases, category, selected light and original care notes checked against the cited capture. Difficulty remains unrated; toxicity unknown except explicit cats/dogs support. Only four explicitly sourced fertilizer intervals; no fixed watering prescription.",
+      "evidenceRefs": [
+        "source_ficus_elastica"
+      ],
+      "findings": []
+    },
+    "textRightsReview": {
+      "reviewer": "Codex (AI assistant)",
+      "actorType": "ai",
+      "reviewedAt": "2026-10-31T12:22:16.000Z",
+      "outcome": "pass",
+      "scope": "Only factual identifiers and independently authored Verdi summaries/context; no source prose or photography redistributed.",
+      "evidenceRefs": [
+        "source_ficus_elastica"
+      ],
+      "findings": [],
+      "permissionBasis": "owned",
+      "licenseOrPermission": "New Verdi prose authored for the user; factual botanical names and source citations. Source article text/images are excluded.",
+      "redistributionScope": "Bundled Verdi reference metadata and original summaries",
+      "attributionText": "North Carolina State University Extension — factual reference; original summaries by Verdi.",
+      "attributionNotRequiredReason": null,
+      "restrictions": [
+        "Do not redistribute source photographs or article text under this record."
+      ]
+    }
+  },
+  {
+    "id": "sp_aloe_vera",
+    "entryVersion": 1,
+    "lifecycle": "active",
+    "commonName": "Aloe vera",
+    "scientificName": "Aloe vera",
+    "altNames": [
+      "Barbados aloe",
+      "True aloe"
+    ],
+    "category": "succulent",
+    "difficulty": "unknown",
+    "light": "unknown",
+    "careNotes": "Use freely draining succulent mix. Allow it to dry fully between waterings and reduce watering during winter.",
+    "suggestions": [],
+    "toxicity": {
+      "value": "unknown",
+      "animalScope": [],
+      "sourceRefs": [],
+      "qualification": "Animal-specific toxicity has not been reviewed for this entry. Unknown does not mean safe to ingest."
+    },
+    "sources": [
+      {
+        "ref": "source_aloe_vera",
+        "title": "NC State Plant Toolbox: Aloe vera",
+        "publisherOrCreator": "North Carolina State University Extension",
+        "locator": "Plant profile identity and cultivation/description; retained capture aloe-vera",
+        "capturedAt": "2026-10-31T12:22:16.000Z",
+        "captureSha256": "f288b1cd416a62982b11c5fbf9662a7083f81893198e11f56ac4508889b242c2",
+        "publicUrl": "https://plants.ces.ncsu.edu/plants/aloe-vera/"
+      }
+    ],
+    "contentReview": {
+      "reviewer": "Codex (AI assistant)",
+      "actorType": "ai",
+      "reviewedAt": "2026-10-31T12:22:16.000Z",
+      "outcome": "pass",
+      "scope": "Identity/aliases, category, selected light and original care notes checked against the cited capture. Difficulty remains unrated; toxicity unknown except explicit cats/dogs support. Only four explicitly sourced fertilizer intervals; no fixed watering prescription.",
+      "evidenceRefs": [
+        "source_aloe_vera"
+      ],
+      "findings": []
+    },
+    "textRightsReview": {
+      "reviewer": "Codex (AI assistant)",
+      "actorType": "ai",
+      "reviewedAt": "2026-10-31T12:22:16.000Z",
+      "outcome": "pass",
+      "scope": "Only factual identifiers and independently authored Verdi summaries/context; no source prose or photography redistributed.",
+      "evidenceRefs": [
+        "source_aloe_vera"
+      ],
+      "findings": [],
+      "permissionBasis": "owned",
+      "licenseOrPermission": "New Verdi prose authored for the user; factual botanical names and source citations. Source article text/images are excluded.",
+      "redistributionScope": "Bundled Verdi reference metadata and original summaries",
+      "attributionText": "North Carolina State University Extension — factual reference; original summaries by Verdi.",
+      "attributionNotRequiredReason": null,
+      "restrictions": [
+        "Do not redistribute source photographs or article text under this record."
+      ]
+    }
+  },
+  {
+    "id": "sp_philodendron_hederaceum",
+    "entryVersion": 1,
+    "lifecycle": "active",
+    "commonName": "Heartleaf philodendron",
+    "scientificName": "Philodendron hederaceum",
+    "altNames": [
+      "Sweetheart plant",
+      "Philodendron scandens"
+    ],
+    "category": "foliage",
+    "difficulty": "unknown",
+    "light": "medium",
+    "careNotes": "Keep the potting mix slightly moist. Reduce watering during winter; offer support if you want the stems to climb.",
+    "suggestions": [],
+    "toxicity": {
+      "value": "unknown",
+      "animalScope": [],
+      "sourceRefs": [],
+      "qualification": "Animal-specific toxicity has not been reviewed for this entry. Unknown does not mean safe to ingest."
+    },
+    "sources": [
+      {
+        "ref": "source_philodendron_hederaceum",
+        "title": "NC State Plant Toolbox: Philodendron hederaceum",
+        "publisherOrCreator": "North Carolina State University Extension",
+        "locator": "Plant profile identity and cultivation/description; retained capture philodendron-hederaceum",
+        "capturedAt": "2026-10-31T12:22:16.000Z",
+        "captureSha256": "ff8c72e090875e40b7d09075ba2fdc1d058ab6bac2fa7b8e5f4fe7bf2f2dc66d",
+        "publicUrl": "https://plants.ces.ncsu.edu/plants/philodendron-hederaceum/"
+      }
+    ],
+    "contentReview": {
+      "reviewer": "Codex (AI assistant)",
+      "actorType": "ai",
+      "reviewedAt": "2026-10-31T12:22:16.000Z",
+      "outcome": "pass",
+      "scope": "Identity/aliases, category, selected light and original care notes checked against the cited capture. Difficulty remains unrated; toxicity unknown except explicit cats/dogs support. Only four explicitly sourced fertilizer intervals; no fixed watering prescription.",
+      "evidenceRefs": [
+        "source_philodendron_hederaceum"
+      ],
+      "findings": []
+    },
+    "textRightsReview": {
+      "reviewer": "Codex (AI assistant)",
+      "actorType": "ai",
+      "reviewedAt": "2026-10-31T12:22:16.000Z",
+      "outcome": "pass",
+      "scope": "Only factual identifiers and independently authored Verdi summaries/context; no source prose or photography redistributed.",
+      "evidenceRefs": [
+        "source_philodendron_hederaceum"
+      ],
+      "findings": [],
+      "permissionBasis": "owned",
+      "licenseOrPermission": "New Verdi prose authored for the user; factual botanical names and source citations. Source article text/images are excluded.",
+      "redistributionScope": "Bundled Verdi reference metadata and original summaries",
+      "attributionText": "North Carolina State University Extension — factual reference; original summaries by Verdi.",
+      "attributionNotRequiredReason": null,
+      "restrictions": [
+        "Do not redistribute source photographs or article text under this record."
+      ]
+    }
+  },
+  {
+    "id": "sp_philodendron_hederaceum_brasil",
+    "entryVersion": 1,
+    "lifecycle": "active",
+    "commonName": "Philodendron Brasil",
+    "scientificName": "Philodendron hederaceum 'Brasil'",
+    "altNames": [
+      "Philodendron scandens 'Brasil'"
+    ],
+    "category": "foliage",
+    "difficulty": "unknown",
+    "light": "bright-indirect",
+    "careNotes": "Cultivar listing: the RHS records its name status as unresolved. Give filtered light, protect from hot sun and reduce watering outside active growth.",
+    "suggestions": [
+      {
+        "careKind": "fertilize",
+        "interval": {
+          "count": 1,
+          "unit": "month"
+        },
+        "context": "Editable starting interval for active growth only. Pause or adjust during dormancy and follow the fertilizer label; a check is not an instruction to feed.",
+        "sourceLabel": "Royal Horticultural Society — cultivation guidance"
+      }
+    ],
+    "toxicity": {
+      "value": "unknown",
+      "animalScope": [],
+      "sourceRefs": [],
+      "qualification": "Animal-specific toxicity has not been reviewed for this entry. Unknown does not mean safe to ingest."
+    },
+    "sources": [
+      {
+        "ref": "source_philodendron_hederaceum_brasil",
+        "title": "RHS plant profile: Philodendron hederaceum 'Brasil'",
+        "publisherOrCreator": "Royal Horticultural Society",
+        "locator": "RHS identity and cultivation; retained AI observation from web retrieval philodendron-hederaceum-brasil",
+        "capturedAt": "2026-10-31T12:22:16.000Z",
+        "captureSha256": "b325b2be68886a42d575cc1617126c42f0ec68264bc7633542c227e2ebec517b",
+        "publicUrl": "https://www.rhs.org.uk/plants/382446/philodendron-hederaceum-brasil-v/details"
+      }
+    ],
+    "contentReview": {
+      "reviewer": "Codex (AI assistant)",
+      "actorType": "ai",
+      "reviewedAt": "2026-10-31T12:22:16.000Z",
+      "outcome": "pass",
+      "scope": "Identity/aliases, category, selected light and original care notes checked against the cited capture. Difficulty remains unrated; toxicity unknown except explicit cats/dogs support. Only four explicitly sourced fertilizer intervals; no fixed watering prescription.",
+      "evidenceRefs": [
+        "source_philodendron_hederaceum_brasil"
+      ],
+      "findings": []
+    },
+    "textRightsReview": {
+      "reviewer": "Codex (AI assistant)",
+      "actorType": "ai",
+      "reviewedAt": "2026-10-31T12:22:16.000Z",
+      "outcome": "pass",
+      "scope": "Only factual identifiers and independently authored Verdi summaries/context; no source prose or photography redistributed.",
+      "evidenceRefs": [
+        "source_philodendron_hederaceum_brasil"
+      ],
+      "findings": [],
+      "permissionBasis": "owned",
+      "licenseOrPermission": "New Verdi prose authored for the user; factual botanical names and source citations. Source article text/images are excluded.",
+      "redistributionScope": "Bundled Verdi reference metadata and original summaries",
+      "attributionText": "Royal Horticultural Society — factual reference; original summaries by Verdi.",
+      "attributionNotRequiredReason": null,
+      "restrictions": [
+        "Do not redistribute source photographs or article text under this record."
+      ]
+    }
+  },
+  {
+    "id": "sp_pilea_peperomioides",
+    "entryVersion": 1,
+    "lifecycle": "active",
+    "commonName": "Chinese money plant",
+    "scientificName": "Pilea peperomioides",
+    "altNames": [
+      "Pancake plant",
+      "UFO plant",
+      "Coin plant"
+    ],
+    "category": "foliage",
+    "difficulty": "unknown",
+    "light": "bright-indirect",
+    "careNotes": "Provide bright indirect light and moist, draining potting mix. Keep away from cold drafts and sources of heat.",
+    "suggestions": [],
+    "toxicity": {
+      "value": "unknown",
+      "animalScope": [],
+      "sourceRefs": [],
+      "qualification": "Animal-specific toxicity has not been reviewed for this entry. Unknown does not mean safe to ingest."
+    },
+    "sources": [
+      {
+        "ref": "source_pilea_peperomioides",
+        "title": "NC State Plant Toolbox: Pilea peperomioides",
+        "publisherOrCreator": "North Carolina State University Extension",
+        "locator": "Plant profile identity and cultivation/description; retained capture pilea-peperomioides",
+        "capturedAt": "2026-10-31T12:22:16.000Z",
+        "captureSha256": "1b4f317fac9bf5fb392c6b2a752606978c038ddc2ec1c64c17628d227239bf15",
+        "publicUrl": "https://plants.ces.ncsu.edu/plants/pilea-peperomioides/"
+      }
+    ],
+    "contentReview": {
+      "reviewer": "Codex (AI assistant)",
+      "actorType": "ai",
+      "reviewedAt": "2026-10-31T12:22:16.000Z",
+      "outcome": "pass",
+      "scope": "Identity/aliases, category, selected light and original care notes checked against the cited capture. Difficulty remains unrated; toxicity unknown except explicit cats/dogs support. Only four explicitly sourced fertilizer intervals; no fixed watering prescription.",
+      "evidenceRefs": [
+        "source_pilea_peperomioides"
+      ],
+      "findings": []
+    },
+    "textRightsReview": {
+      "reviewer": "Codex (AI assistant)",
+      "actorType": "ai",
+      "reviewedAt": "2026-10-31T12:22:16.000Z",
+      "outcome": "pass",
+      "scope": "Only factual identifiers and independently authored Verdi summaries/context; no source prose or photography redistributed.",
+      "evidenceRefs": [
+        "source_pilea_peperomioides"
+      ],
+      "findings": [],
+      "permissionBasis": "owned",
+      "licenseOrPermission": "New Verdi prose authored for the user; factual botanical names and source citations. Source article text/images are excluded.",
+      "redistributionScope": "Bundled Verdi reference metadata and original summaries",
+      "attributionText": "North Carolina State University Extension — factual reference; original summaries by Verdi.",
+      "attributionNotRequiredReason": null,
+      "restrictions": [
+        "Do not redistribute source photographs or article text under this record."
+      ]
+    }
+  },
+  {
+    "id": "sp_hedera_helix",
+    "entryVersion": 1,
+    "lifecycle": "active",
+    "commonName": "English ivy",
+    "scientificName": "Hedera helix",
+    "altNames": [
+      "Common ivy"
+    ],
+    "category": "foliage",
+    "difficulty": "unknown",
+    "light": "unknown",
+    "careNotes": "Keep this entry as a container reference. English ivy can be invasive outdoors; prevent escape and check local planting guidance.",
+    "suggestions": [],
+    "toxicity": {
+      "value": "unknown",
+      "animalScope": [],
+      "sourceRefs": [],
+      "qualification": "Animal-specific toxicity has not been reviewed for this entry. Unknown does not mean safe to ingest."
+    },
+    "sources": [
+      {
+        "ref": "source_hedera_helix",
+        "title": "NC State Plant Toolbox: Hedera helix",
+        "publisherOrCreator": "North Carolina State University Extension",
+        "locator": "Plant profile identity and cultivation/description; retained capture hedera-helix",
+        "capturedAt": "2026-10-31T12:22:16.000Z",
+        "captureSha256": "1c8913a7360117c6c14f206c8cbb66d8e232ea4a4205e4695d2dc626c8082b45",
+        "publicUrl": "https://plants.ces.ncsu.edu/plants/hedera-helix/"
+      }
+    ],
+    "contentReview": {
+      "reviewer": "Codex (AI assistant)",
+      "actorType": "ai",
+      "reviewedAt": "2026-10-31T12:22:16.000Z",
+      "outcome": "pass",
+      "scope": "Identity/aliases, category, selected light and original care notes checked against the cited capture. Difficulty remains unrated; toxicity unknown except explicit cats/dogs support. Only four explicitly sourced fertilizer intervals; no fixed watering prescription.",
+      "evidenceRefs": [
+        "source_hedera_helix"
+      ],
+      "findings": []
+    },
+    "textRightsReview": {
+      "reviewer": "Codex (AI assistant)",
+      "actorType": "ai",
+      "reviewedAt": "2026-10-31T12:22:16.000Z",
+      "outcome": "pass",
+      "scope": "Only factual identifiers and independently authored Verdi summaries/context; no source prose or photography redistributed.",
+      "evidenceRefs": [
+        "source_hedera_helix"
+      ],
+      "findings": [],
+      "permissionBasis": "owned",
+      "licenseOrPermission": "New Verdi prose authored for the user; factual botanical names and source citations. Source article text/images are excluded.",
+      "redistributionScope": "Bundled Verdi reference metadata and original summaries",
+      "attributionText": "North Carolina State University Extension — factual reference; original summaries by Verdi.",
+      "attributionNotRequiredReason": null,
+      "restrictions": [
+        "Do not redistribute source photographs or article text under this record."
+      ]
+    }
+  },
+  {
+    "id": "sp_nephrolepis_exaltata",
+    "entryVersion": 1,
+    "lifecycle": "active",
+    "commonName": "Boston fern",
+    "scientificName": "Nephrolepis exaltata",
+    "altNames": [
+      "Bostonfern"
+    ],
+    "category": "fern",
+    "difficulty": "unknown",
+    "light": "bright-indirect",
+    "careNotes": "Keep the potting mix moist and provide humid air with bright indirect light. Reduce watering during winter dormancy without letting the plant dry out.",
+    "suggestions": [],
+    "toxicity": {
+      "value": "unknown",
+      "animalScope": [],
+      "sourceRefs": [],
+      "qualification": "Animal-specific toxicity has not been reviewed for this entry. Unknown does not mean safe to ingest."
+    },
+    "sources": [
+      {
+        "ref": "source_nephrolepis_exaltata",
+        "title": "NC State Plant Toolbox: Nephrolepis exaltata",
+        "publisherOrCreator": "North Carolina State University Extension",
+        "locator": "Plant profile identity and cultivation/description; retained capture nephrolepis-exaltata",
+        "capturedAt": "2026-10-31T12:22:16.000Z",
+        "captureSha256": "30f738e6c1da5e7810b25c8f3bb4d594aa48a336462d0832d49e62e2f6734001",
+        "publicUrl": "https://plants.ces.ncsu.edu/plants/nephrolepis-exaltata/"
+      }
+    ],
+    "contentReview": {
+      "reviewer": "Codex (AI assistant)",
+      "actorType": "ai",
+      "reviewedAt": "2026-10-31T12:22:16.000Z",
+      "outcome": "pass",
+      "scope": "Identity/aliases, category, selected light and original care notes checked against the cited capture. Difficulty remains unrated; toxicity unknown except explicit cats/dogs support. Only four explicitly sourced fertilizer intervals; no fixed watering prescription.",
+      "evidenceRefs": [
+        "source_nephrolepis_exaltata"
+      ],
+      "findings": []
+    },
+    "textRightsReview": {
+      "reviewer": "Codex (AI assistant)",
+      "actorType": "ai",
+      "reviewedAt": "2026-10-31T12:22:16.000Z",
+      "outcome": "pass",
+      "scope": "Only factual identifiers and independently authored Verdi summaries/context; no source prose or photography redistributed.",
+      "evidenceRefs": [
+        "source_nephrolepis_exaltata"
+      ],
+      "findings": [],
+      "permissionBasis": "owned",
+      "licenseOrPermission": "New Verdi prose authored for the user; factual botanical names and source citations. Source article text/images are excluded.",
+      "redistributionScope": "Bundled Verdi reference metadata and original summaries",
+      "attributionText": "North Carolina State University Extension — factual reference; original summaries by Verdi.",
+      "attributionNotRequiredReason": null,
+      "restrictions": [
+        "Do not redistribute source photographs or article text under this record."
+      ]
+    }
+  },
+  {
+    "id": "sp_goeppertia_orbifolia",
+    "entryVersion": 1,
+    "lifecycle": "active",
+    "commonName": "Calathea orbifolia",
+    "scientificName": "Goeppertia orbifolia",
+    "altNames": [
+      "Calathea orbifolia"
+    ],
+    "category": "foliage",
+    "difficulty": "unknown",
+    "light": "bright-indirect",
+    "careNotes": "Keep the potting mix moist with drainage. Provide humid air and stable warmth; avoid cold drafts and soggy soil.",
+    "suggestions": [
+      {
+        "careKind": "fertilize",
+        "interval": {
+          "count": 1,
+          "unit": "month"
+        },
+        "context": "Editable starting interval for active growth only. Pause or adjust during dormancy and follow the fertilizer label; a check is not an instruction to feed.",
+        "sourceLabel": "North Carolina State University Extension — cultivation guidance"
+      }
+    ],
+    "toxicity": {
+      "value": "unknown",
+      "animalScope": [],
+      "sourceRefs": [],
+      "qualification": "Animal-specific toxicity has not been reviewed for this entry. Unknown does not mean safe to ingest."
+    },
+    "sources": [
+      {
+        "ref": "source_goeppertia_orbifolia",
+        "title": "NC State Plant Toolbox: Goeppertia orbifolia",
+        "publisherOrCreator": "North Carolina State University Extension",
+        "locator": "Plant profile identity and cultivation/description; retained capture goeppertia-orbifolia",
+        "capturedAt": "2026-10-31T12:22:16.000Z",
+        "captureSha256": "4b1396e4175cf6c3f79366e67edff0977ff7cf5b0e442d181f8e870e21a13a31",
+        "publicUrl": "https://plants.ces.ncsu.edu/plants/goeppertia-orbifolia/"
+      }
+    ],
+    "contentReview": {
+      "reviewer": "Codex (AI assistant)",
+      "actorType": "ai",
+      "reviewedAt": "2026-10-31T12:22:16.000Z",
+      "outcome": "pass",
+      "scope": "Identity/aliases, category, selected light and original care notes checked against the cited capture. Difficulty remains unrated; toxicity unknown except explicit cats/dogs support. Only four explicitly sourced fertilizer intervals; no fixed watering prescription.",
+      "evidenceRefs": [
+        "source_goeppertia_orbifolia"
+      ],
+      "findings": []
+    },
+    "textRightsReview": {
+      "reviewer": "Codex (AI assistant)",
+      "actorType": "ai",
+      "reviewedAt": "2026-10-31T12:22:16.000Z",
+      "outcome": "pass",
+      "scope": "Only factual identifiers and independently authored Verdi summaries/context; no source prose or photography redistributed.",
+      "evidenceRefs": [
+        "source_goeppertia_orbifolia"
+      ],
+      "findings": [],
+      "permissionBasis": "owned",
+      "licenseOrPermission": "New Verdi prose authored for the user; factual botanical names and source citations. Source article text/images are excluded.",
+      "redistributionScope": "Bundled Verdi reference metadata and original summaries",
+      "attributionText": "North Carolina State University Extension — factual reference; original summaries by Verdi.",
+      "attributionNotRequiredReason": null,
+      "restrictions": [
+        "Do not redistribute source photographs or article text under this record."
+      ]
+    }
+  },
+  {
+    "id": "sp_goeppertia_insignis",
+    "entryVersion": 1,
+    "lifecycle": "active",
+    "commonName": "Rattlesnake plant",
+    "scientificName": "Goeppertia insignis",
+    "altNames": [
+      "Rattlesnake calathea",
+      "Calathea lancifolia"
+    ],
+    "category": "foliage",
+    "difficulty": "unknown",
+    "light": "unknown",
+    "careNotes": "Provide moist, draining potting mix and humid air. Protect from full sun, drafts and sudden changes in temperature.",
+    "suggestions": [],
+    "toxicity": {
+      "value": "unknown",
+      "animalScope": [],
+      "sourceRefs": [],
+      "qualification": "Animal-specific toxicity has not been reviewed for this entry. Unknown does not mean safe to ingest."
+    },
+    "sources": [
+      {
+        "ref": "source_goeppertia_insignis",
+        "title": "NC State Plant Toolbox: Goeppertia insignis",
+        "publisherOrCreator": "North Carolina State University Extension",
+        "locator": "Plant profile identity and cultivation/description; retained capture goeppertia-insignis",
+        "capturedAt": "2026-10-31T12:22:16.000Z",
+        "captureSha256": "1cff61c067f5e1fee15f19896760047b5e910b32f20370bdbde33816158efaef",
+        "publicUrl": "https://plants.ces.ncsu.edu/plants/goeppertia-insignis/"
+      }
+    ],
+    "contentReview": {
+      "reviewer": "Codex (AI assistant)",
+      "actorType": "ai",
+      "reviewedAt": "2026-10-31T12:22:16.000Z",
+      "outcome": "pass",
+      "scope": "Identity/aliases, category, selected light and original care notes checked against the cited capture. Difficulty remains unrated; toxicity unknown except explicit cats/dogs support. Only four explicitly sourced fertilizer intervals; no fixed watering prescription.",
+      "evidenceRefs": [
+        "source_goeppertia_insignis"
+      ],
+      "findings": []
+    },
+    "textRightsReview": {
+      "reviewer": "Codex (AI assistant)",
+      "actorType": "ai",
+      "reviewedAt": "2026-10-31T12:22:16.000Z",
+      "outcome": "pass",
+      "scope": "Only factual identifiers and independently authored Verdi summaries/context; no source prose or photography redistributed.",
+      "evidenceRefs": [
+        "source_goeppertia_insignis"
+      ],
+      "findings": [],
+      "permissionBasis": "owned",
+      "licenseOrPermission": "New Verdi prose authored for the user; factual botanical names and source citations. Source article text/images are excluded.",
+      "redistributionScope": "Bundled Verdi reference metadata and original summaries",
+      "attributionText": "North Carolina State University Extension — factual reference; original summaries by Verdi.",
+      "attributionNotRequiredReason": null,
+      "restrictions": [
+        "Do not redistribute source photographs or article text under this record."
+      ]
+    }
+  },
+  {
+    "id": "sp_maranta_leuconeura",
+    "entryVersion": 1,
+    "lifecycle": "active",
+    "commonName": "Prayer plant",
+    "scientificName": "Maranta leuconeura",
+    "altNames": [
+      "Rabbit tracks",
+      "Herringbone plant"
+    ],
+    "category": "foliage",
+    "difficulty": "unknown",
+    "light": "bright-indirect",
+    "careNotes": "Keep the potting mix evenly moist during active growth, with less water in winter. Provide humid air and protect leaves from strong sun.",
+    "suggestions": [],
+    "toxicity": {
+      "value": "unknown",
+      "animalScope": [],
+      "sourceRefs": [],
+      "qualification": "Animal-specific toxicity has not been reviewed for this entry. Unknown does not mean safe to ingest."
+    },
+    "sources": [
+      {
+        "ref": "source_maranta_leuconeura",
+        "title": "NC State Plant Toolbox: Maranta leuconeura",
+        "publisherOrCreator": "North Carolina State University Extension",
+        "locator": "Plant profile identity and cultivation/description; retained capture maranta-leuconeura",
+        "capturedAt": "2026-10-31T12:22:16.000Z",
+        "captureSha256": "1dcce950dbb05857b88ec62aead8e6a9921d844b2a034a1def5fbaf05f48e28f",
+        "publicUrl": "https://plants.ces.ncsu.edu/plants/maranta-leuconeura/"
+      }
+    ],
+    "contentReview": {
+      "reviewer": "Codex (AI assistant)",
+      "actorType": "ai",
+      "reviewedAt": "2026-10-31T12:22:16.000Z",
+      "outcome": "pass",
+      "scope": "Identity/aliases, category, selected light and original care notes checked against the cited capture. Difficulty remains unrated; toxicity unknown except explicit cats/dogs support. Only four explicitly sourced fertilizer intervals; no fixed watering prescription.",
+      "evidenceRefs": [
+        "source_maranta_leuconeura"
+      ],
+      "findings": []
+    },
+    "textRightsReview": {
+      "reviewer": "Codex (AI assistant)",
+      "actorType": "ai",
+      "reviewedAt": "2026-10-31T12:22:16.000Z",
+      "outcome": "pass",
+      "scope": "Only factual identifiers and independently authored Verdi summaries/context; no source prose or photography redistributed.",
+      "evidenceRefs": [
+        "source_maranta_leuconeura"
+      ],
+      "findings": [],
+      "permissionBasis": "owned",
+      "licenseOrPermission": "New Verdi prose authored for the user; factual botanical names and source citations. Source article text/images are excluded.",
+      "redistributionScope": "Bundled Verdi reference metadata and original summaries",
+      "attributionText": "North Carolina State University Extension — factual reference; original summaries by Verdi.",
+      "attributionNotRequiredReason": null,
+      "restrictions": [
+        "Do not redistribute source photographs or article text under this record."
+      ]
+    }
+  },
+  {
+    "id": "sp_anthurium_andraeanum",
+    "entryVersion": 1,
+    "lifecycle": "active",
+    "commonName": "Flamingo flower",
+    "scientificName": "Anthurium andraeanum",
+    "altNames": [
+      "Anthurium",
+      "Laceleaf"
+    ],
+    "category": "flowering",
+    "difficulty": "unknown",
+    "light": "bright-indirect",
+    "careNotes": "Check the top of the potting mix before watering. Provide drainage, humid air and bright indirect light; protect from cold drafts.",
+    "suggestions": [],
+    "toxicity": {
+      "value": "unknown",
+      "animalScope": [],
+      "sourceRefs": [],
+      "qualification": "Animal-specific toxicity has not been reviewed for this entry. Unknown does not mean safe to ingest."
+    },
+    "sources": [
+      {
+        "ref": "source_anthurium_andraeanum",
+        "title": "NC State Plant Toolbox: Anthurium andraeanum",
+        "publisherOrCreator": "North Carolina State University Extension",
+        "locator": "Plant profile identity and cultivation/description; retained capture anthurium-andraeanum",
+        "capturedAt": "2026-10-31T12:22:16.000Z",
+        "captureSha256": "4763324486e873d46ef5da52169f1f95ee9c963e0ae3563febaa4711b16f5614",
+        "publicUrl": "https://plants.ces.ncsu.edu/plants/anthurium-andraeanum/"
+      }
+    ],
+    "contentReview": {
+      "reviewer": "Codex (AI assistant)",
+      "actorType": "ai",
+      "reviewedAt": "2026-10-31T12:22:16.000Z",
+      "outcome": "pass",
+      "scope": "Identity/aliases, category, selected light and original care notes checked against the cited capture. Difficulty remains unrated; toxicity unknown except explicit cats/dogs support. Only four explicitly sourced fertilizer intervals; no fixed watering prescription.",
+      "evidenceRefs": [
+        "source_anthurium_andraeanum"
+      ],
+      "findings": []
+    },
+    "textRightsReview": {
+      "reviewer": "Codex (AI assistant)",
+      "actorType": "ai",
+      "reviewedAt": "2026-10-31T12:22:16.000Z",
+      "outcome": "pass",
+      "scope": "Only factual identifiers and independently authored Verdi summaries/context; no source prose or photography redistributed.",
+      "evidenceRefs": [
+        "source_anthurium_andraeanum"
+      ],
+      "findings": [],
+      "permissionBasis": "owned",
+      "licenseOrPermission": "New Verdi prose authored for the user; factual botanical names and source citations. Source article text/images are excluded.",
+      "redistributionScope": "Bundled Verdi reference metadata and original summaries",
+      "attributionText": "North Carolina State University Extension — factual reference; original summaries by Verdi.",
+      "attributionNotRequiredReason": null,
+      "restrictions": [
+        "Do not redistribute source photographs or article text under this record."
+      ]
+    }
+  },
+  {
+    "id": "sp_dracaena_marginata",
+    "entryVersion": 1,
+    "lifecycle": "active",
+    "commonName": "Madagascar dragon tree",
+    "scientificName": "Dracaena reflexa var. angustifolia",
+    "altNames": [
+      "Dracaena marginata",
+      "Dragon tree"
+    ],
+    "category": "foliage",
+    "difficulty": "unknown",
+    "light": "bright-indirect",
+    "careNotes": "The reference uses Dracaena reflexa var. angustifolia for this identity. Let draining potting mix dry between waterings without prolonged severe dryness.",
+    "suggestions": [],
+    "toxicity": {
+      "value": "unknown",
+      "animalScope": [],
+      "sourceRefs": [],
+      "qualification": "Animal-specific toxicity has not been reviewed for this entry. Unknown does not mean safe to ingest."
+    },
+    "sources": [
+      {
+        "ref": "source_dracaena_marginata",
+        "title": "NC State Plant Toolbox: Dracaena reflexa var. angustifolia",
+        "publisherOrCreator": "North Carolina State University Extension",
+        "locator": "Plant profile identity and cultivation/description; retained capture dracaena-marginata",
+        "capturedAt": "2026-10-31T12:22:16.000Z",
+        "captureSha256": "c0e35a2d068fa7721175ae5547cc2147872cba20a8ee0c8ab80a0f23821b9fd4",
+        "publicUrl": "https://plants.ces.ncsu.edu/plants/dracaena-marginata/"
+      }
+    ],
+    "contentReview": {
+      "reviewer": "Codex (AI assistant)",
+      "actorType": "ai",
+      "reviewedAt": "2026-10-31T12:22:16.000Z",
+      "outcome": "pass",
+      "scope": "Identity/aliases, category, selected light and original care notes checked against the cited capture. Difficulty remains unrated; toxicity unknown except explicit cats/dogs support. Only four explicitly sourced fertilizer intervals; no fixed watering prescription.",
+      "evidenceRefs": [
+        "source_dracaena_marginata"
+      ],
+      "findings": []
+    },
+    "textRightsReview": {
+      "reviewer": "Codex (AI assistant)",
+      "actorType": "ai",
+      "reviewedAt": "2026-10-31T12:22:16.000Z",
+      "outcome": "pass",
+      "scope": "Only factual identifiers and independently authored Verdi summaries/context; no source prose or photography redistributed.",
+      "evidenceRefs": [
+        "source_dracaena_marginata"
+      ],
+      "findings": [],
+      "permissionBasis": "owned",
+      "licenseOrPermission": "New Verdi prose authored for the user; factual botanical names and source citations. Source article text/images are excluded.",
+      "redistributionScope": "Bundled Verdi reference metadata and original summaries",
+      "attributionText": "North Carolina State University Extension — factual reference; original summaries by Verdi.",
+      "attributionNotRequiredReason": null,
+      "restrictions": [
+        "Do not redistribute source photographs or article text under this record."
+      ]
+    }
+  },
+  {
+    "id": "sp_dracaena_fragrans",
+    "entryVersion": 1,
+    "lifecycle": "active",
+    "commonName": "Corn plant",
+    "scientificName": "Dracaena fragrans",
+    "altNames": [
+      "Cornstalk plant"
+    ],
+    "category": "foliage",
+    "difficulty": "unknown",
+    "light": "bright-indirect",
+    "careNotes": "Provide filtered light and drainage. Keep the potting mix moist during active growth, with less water in winter.",
+    "suggestions": [],
+    "toxicity": {
+      "value": "unknown",
+      "animalScope": [],
+      "sourceRefs": [],
+      "qualification": "Animal-specific toxicity has not been reviewed for this entry. Unknown does not mean safe to ingest."
+    },
+    "sources": [
+      {
+        "ref": "source_dracaena_fragrans",
+        "title": "NC State Plant Toolbox: Dracaena fragrans",
+        "publisherOrCreator": "North Carolina State University Extension",
+        "locator": "Plant profile identity and cultivation/description; retained capture dracaena-fragrans",
+        "capturedAt": "2026-10-31T12:22:16.000Z",
+        "captureSha256": "d1f8afb50180a78ac637e2bfd39d6e02437d8462bb2a58d0cc2bb3e27fbdca16",
+        "publicUrl": "https://plants.ces.ncsu.edu/plants/dracaena-fragrans/"
+      }
+    ],
+    "contentReview": {
+      "reviewer": "Codex (AI assistant)",
+      "actorType": "ai",
+      "reviewedAt": "2026-10-31T12:22:16.000Z",
+      "outcome": "pass",
+      "scope": "Identity/aliases, category, selected light and original care notes checked against the cited capture. Difficulty remains unrated; toxicity unknown except explicit cats/dogs support. Only four explicitly sourced fertilizer intervals; no fixed watering prescription.",
+      "evidenceRefs": [
+        "source_dracaena_fragrans"
+      ],
+      "findings": []
+    },
+    "textRightsReview": {
+      "reviewer": "Codex (AI assistant)",
+      "actorType": "ai",
+      "reviewedAt": "2026-10-31T12:22:16.000Z",
+      "outcome": "pass",
+      "scope": "Only factual identifiers and independently authored Verdi summaries/context; no source prose or photography redistributed.",
+      "evidenceRefs": [
+        "source_dracaena_fragrans"
+      ],
+      "findings": [],
+      "permissionBasis": "owned",
+      "licenseOrPermission": "New Verdi prose authored for the user; factual botanical names and source citations. Source article text/images are excluded.",
+      "redistributionScope": "Bundled Verdi reference metadata and original summaries",
+      "attributionText": "North Carolina State University Extension — factual reference; original summaries by Verdi.",
+      "attributionNotRequiredReason": null,
+      "restrictions": [
+        "Do not redistribute source photographs or article text under this record."
+      ]
+    }
+  },
+  {
+    "id": "sp_crassula_ovata",
+    "entryVersion": 1,
+    "lifecycle": "active",
+    "commonName": "Jade plant",
+    "scientificName": "Crassula ovata",
+    "altNames": [
+      "Jade tree",
+      "Money plant"
+    ],
+    "category": "succulent",
+    "difficulty": "unknown",
+    "light": "unknown",
+    "careNotes": "Water when the potting mix is dry, with less water in the cooler season. Provide bright light and drainage.",
+    "suggestions": [],
+    "toxicity": {
+      "value": "unknown",
+      "animalScope": [],
+      "sourceRefs": [],
+      "qualification": "Animal-specific toxicity has not been reviewed for this entry. Unknown does not mean safe to ingest."
+    },
+    "sources": [
+      {
+        "ref": "source_crassula_ovata",
+        "title": "NC State Plant Toolbox: Crassula ovata",
+        "publisherOrCreator": "North Carolina State University Extension",
+        "locator": "Plant profile identity and cultivation/description; retained capture crassula-ovata",
+        "capturedAt": "2026-10-31T12:22:16.000Z",
+        "captureSha256": "90a507263003b7c6fd8fa779a899fe9b738c39b2a5924419a2d50813e45204fa",
+        "publicUrl": "https://plants.ces.ncsu.edu/plants/crassula-ovata/"
+      }
+    ],
+    "contentReview": {
+      "reviewer": "Codex (AI assistant)",
+      "actorType": "ai",
+      "reviewedAt": "2026-10-31T12:22:16.000Z",
+      "outcome": "pass",
+      "scope": "Identity/aliases, category, selected light and original care notes checked against the cited capture. Difficulty remains unrated; toxicity unknown except explicit cats/dogs support. Only four explicitly sourced fertilizer intervals; no fixed watering prescription.",
+      "evidenceRefs": [
+        "source_crassula_ovata"
+      ],
+      "findings": []
+    },
+    "textRightsReview": {
+      "reviewer": "Codex (AI assistant)",
+      "actorType": "ai",
+      "reviewedAt": "2026-10-31T12:22:16.000Z",
+      "outcome": "pass",
+      "scope": "Only factual identifiers and independently authored Verdi summaries/context; no source prose or photography redistributed.",
+      "evidenceRefs": [
+        "source_crassula_ovata"
+      ],
+      "findings": [],
+      "permissionBasis": "owned",
+      "licenseOrPermission": "New Verdi prose authored for the user; factual botanical names and source citations. Source article text/images are excluded.",
+      "redistributionScope": "Bundled Verdi reference metadata and original summaries",
+      "attributionText": "North Carolina State University Extension — factual reference; original summaries by Verdi.",
+      "attributionNotRequiredReason": null,
+      "restrictions": [
+        "Do not redistribute source photographs or article text under this record."
+      ]
+    }
+  },
+  {
+    "id": "sp_echeveria_elegans",
+    "entryVersion": 1,
+    "lifecycle": "active",
+    "commonName": "Mexican snowball",
+    "scientificName": "Echeveria elegans",
+    "altNames": [
+      "Mexican snow ball",
+      "White Mexican rose"
+    ],
+    "category": "succulent",
+    "difficulty": "unknown",
+    "light": "unknown",
+    "careNotes": "Use draining potting mix and avoid excessive watering. This succulent prefers a sunny position or partial shade.",
+    "suggestions": [],
+    "toxicity": {
+      "value": "unknown",
+      "animalScope": [],
+      "sourceRefs": [],
+      "qualification": "Animal-specific toxicity has not been reviewed for this entry. Unknown does not mean safe to ingest."
+    },
+    "sources": [
+      {
+        "ref": "source_echeveria_elegans",
+        "title": "NC State Plant Toolbox: Echeveria elegans",
+        "publisherOrCreator": "North Carolina State University Extension",
+        "locator": "Plant profile identity and cultivation/description; retained capture echeveria-elegans",
+        "capturedAt": "2026-10-31T12:22:16.000Z",
+        "captureSha256": "91d4b4f6cb9997d4d8fcf90df3bfb66d218e15b3bcf21cb557a5705e4d46af42",
+        "publicUrl": "https://plants.ces.ncsu.edu/plants/echeveria-elegans/"
+      }
+    ],
+    "contentReview": {
+      "reviewer": "Codex (AI assistant)",
+      "actorType": "ai",
+      "reviewedAt": "2026-10-31T12:22:16.000Z",
+      "outcome": "pass",
+      "scope": "Identity/aliases, category, selected light and original care notes checked against the cited capture. Difficulty remains unrated; toxicity unknown except explicit cats/dogs support. Only four explicitly sourced fertilizer intervals; no fixed watering prescription.",
+      "evidenceRefs": [
+        "source_echeveria_elegans"
+      ],
+      "findings": []
+    },
+    "textRightsReview": {
+      "reviewer": "Codex (AI assistant)",
+      "actorType": "ai",
+      "reviewedAt": "2026-10-31T12:22:16.000Z",
+      "outcome": "pass",
+      "scope": "Only factual identifiers and independently authored Verdi summaries/context; no source prose or photography redistributed.",
+      "evidenceRefs": [
+        "source_echeveria_elegans"
+      ],
+      "findings": [],
+      "permissionBasis": "owned",
+      "licenseOrPermission": "New Verdi prose authored for the user; factual botanical names and source citations. Source article text/images are excluded.",
+      "redistributionScope": "Bundled Verdi reference metadata and original summaries",
+      "attributionText": "North Carolina State University Extension — factual reference; original summaries by Verdi.",
+      "attributionNotRequiredReason": null,
+      "restrictions": [
+        "Do not redistribute source photographs or article text under this record."
+      ]
+    }
+  },
+  {
+    "id": "sp_haworthiopsis_fasciata",
+    "entryVersion": 1,
+    "lifecycle": "active",
+    "commonName": "Zebra haworthia",
+    "scientificName": "Haworthiopsis fasciata",
+    "altNames": [
+      "Haworthia fasciata",
+      "Little zebra plant"
+    ],
+    "category": "succulent",
+    "difficulty": "unknown",
+    "light": "bright-indirect",
+    "careNotes": "Allow succulent mix to dry fully between waterings. Protect from sudden temperature changes. This identity is often confused with Haworthiopsis attenuata.",
+    "suggestions": [],
+    "toxicity": {
+      "value": "unknown",
+      "animalScope": [],
+      "sourceRefs": [],
+      "qualification": "Animal-specific toxicity has not been reviewed for this entry. Unknown does not mean safe to ingest."
+    },
+    "sources": [
+      {
+        "ref": "source_haworthiopsis_fasciata",
+        "title": "NC State Plant Toolbox: Haworthiopsis fasciata",
+        "publisherOrCreator": "North Carolina State University Extension",
+        "locator": "Plant profile identity and cultivation/description; retained capture haworthiopsis-fasciata",
+        "capturedAt": "2026-10-31T12:22:16.000Z",
+        "captureSha256": "88d50a3c33ef6d14fe4484df90cc74d0df8704473c0cd0f1a0b1144c08d36738",
+        "publicUrl": "https://plants.ces.ncsu.edu/plants/haworthiopsis-fasciata/"
+      }
+    ],
+    "contentReview": {
+      "reviewer": "Codex (AI assistant)",
+      "actorType": "ai",
+      "reviewedAt": "2026-10-31T12:22:16.000Z",
+      "outcome": "pass",
+      "scope": "Identity/aliases, category, selected light and original care notes checked against the cited capture. Difficulty remains unrated; toxicity unknown except explicit cats/dogs support. Only four explicitly sourced fertilizer intervals; no fixed watering prescription.",
+      "evidenceRefs": [
+        "source_haworthiopsis_fasciata"
+      ],
+      "findings": []
+    },
+    "textRightsReview": {
+      "reviewer": "Codex (AI assistant)",
+      "actorType": "ai",
+      "reviewedAt": "2026-10-31T12:22:16.000Z",
+      "outcome": "pass",
+      "scope": "Only factual identifiers and independently authored Verdi summaries/context; no source prose or photography redistributed.",
+      "evidenceRefs": [
+        "source_haworthiopsis_fasciata"
+      ],
+      "findings": [],
+      "permissionBasis": "owned",
+      "licenseOrPermission": "New Verdi prose authored for the user; factual botanical names and source citations. Source article text/images are excluded.",
+      "redistributionScope": "Bundled Verdi reference metadata and original summaries",
+      "attributionText": "North Carolina State University Extension — factual reference; original summaries by Verdi.",
+      "attributionNotRequiredReason": null,
+      "restrictions": [
+        "Do not redistribute source photographs or article text under this record."
+      ]
+    }
+  },
+  {
+    "id": "sp_curio_rowleyanus",
+    "entryVersion": 1,
+    "lifecycle": "active",
+    "commonName": "String of pearls",
+    "scientificName": "Curio rowleyanus",
+    "altNames": [
+      "Senecio rowleyanus",
+      "String of beads"
+    ],
+    "category": "succulent",
+    "difficulty": "unknown",
+    "light": "bright-indirect",
+    "careNotes": "Provide bright indirect light indoors and a freely draining succulent mix. Protect from frost.",
+    "suggestions": [],
+    "toxicity": {
+      "value": "unknown",
+      "animalScope": [],
+      "sourceRefs": [],
+      "qualification": "Animal-specific toxicity has not been reviewed for this entry. Unknown does not mean safe to ingest."
+    },
+    "sources": [
+      {
+        "ref": "source_curio_rowleyanus",
+        "title": "NC State Plant Toolbox: Curio rowleyanus",
+        "publisherOrCreator": "North Carolina State University Extension",
+        "locator": "Plant profile identity and cultivation/description; retained capture curio-rowleyanus",
+        "capturedAt": "2026-10-31T12:22:16.000Z",
+        "captureSha256": "03ecbc41f9c1c7d2012e3c1a991e84607787fc0bab88cc7094a90ecdad12d0bd",
+        "publicUrl": "https://plants.ces.ncsu.edu/plants/curio-rowleyanus/"
+      }
+    ],
+    "contentReview": {
+      "reviewer": "Codex (AI assistant)",
+      "actorType": "ai",
+      "reviewedAt": "2026-10-31T12:22:16.000Z",
+      "outcome": "pass",
+      "scope": "Identity/aliases, category, selected light and original care notes checked against the cited capture. Difficulty remains unrated; toxicity unknown except explicit cats/dogs support. Only four explicitly sourced fertilizer intervals; no fixed watering prescription.",
+      "evidenceRefs": [
+        "source_curio_rowleyanus"
+      ],
+      "findings": []
+    },
+    "textRightsReview": {
+      "reviewer": "Codex (AI assistant)",
+      "actorType": "ai",
+      "reviewedAt": "2026-10-31T12:22:16.000Z",
+      "outcome": "pass",
+      "scope": "Only factual identifiers and independently authored Verdi summaries/context; no source prose or photography redistributed.",
+      "evidenceRefs": [
+        "source_curio_rowleyanus"
+      ],
+      "findings": [],
+      "permissionBasis": "owned",
+      "licenseOrPermission": "New Verdi prose authored for the user; factual botanical names and source citations. Source article text/images are excluded.",
+      "redistributionScope": "Bundled Verdi reference metadata and original summaries",
+      "attributionText": "North Carolina State University Extension — factual reference; original summaries by Verdi.",
+      "attributionNotRequiredReason": null,
+      "restrictions": [
+        "Do not redistribute source photographs or article text under this record."
+      ]
+    }
+  }
+]

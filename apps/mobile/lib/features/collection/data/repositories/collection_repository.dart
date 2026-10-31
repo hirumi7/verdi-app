@@ -7,6 +7,7 @@ final class WorkspaceRead {
 }
 
 abstract interface class CollectionRepository {
+  Future<CatalogState> catalog({bool retry = false});
   String get datasetId;
   String newId();
   Future<WorkspaceRead> read({required bool archived, required String query});

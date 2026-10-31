@@ -70,11 +70,11 @@ enum CoreRegistry {
             if action == "insert" { try require(before == nil && statement["beforeHash"]?.isNull == true, "STALE_TARGET") }
             else { try require(before != nil, "STALE_TARGET"); try require(try CoreSchema.rowHash(before!) == CoreSchema.string(statement["beforeHash"]), "STALE_TARGET") }
             if action == "deleteTree" {
-                try require(table == "plants" && p.type == "DeletePlant" && raw.count == 7)
+                try require(table == "plants" && p.type == "DeletePlant" && raw.count == 10)
                 changes.append(CoreDelta(table:table,action:action,id:id,before:before,values:[],raw:raw)); continue
             }
             if action == "delete" {
-                try require(table == "plant_drafts" && ["SavePlant","DiscardDraft"].contains(p.type) && raw.count == 1)
+                try require(((table == "plant_drafts" && ["SavePlant","DiscardDraft"].contains(p.type)) || (table == "plant_catalog" && p.type == "SavePlant")) && raw.count == 1)
                 changes.append(CoreDelta(table:table,action:action,id:id,before:before,values:[],raw:raw)); continue
             }
             try require(raw.count == CoreSchema.columns[table]!.count)
@@ -102,11 +102,11 @@ enum CoreRegistry {
                 for i in values.indices where !mutable.contains(i) { try require(values[i] == before[i]) }
                 if let revision = CoreSchema.revisions[table] { try require(try CoreSchema.integer(values[revision]) == CoreSchema.integer(before[revision]) + 1) }
             } else {
-                try require(inserted.insert(id).inserted)
+                if !CoreSchema.linkedTables.contains(table) {try require(inserted.insert(id).inserted)}
                 if table == "plant_drafts" {
                     let reservation = try sql.query("SELECT kind,used FROM reservations WHERE id=?", [.text(id)])
                     try require(reservation.count == 1 && reservation[0][0] == .text("draft") && reservation[0][1] == .integer(0), "NOT_ELIGIBLE")
-                } else { try require(allocated.contains(id)); if let revision = CoreSchema.revisions[table] { try require(values[revision] == .integer(1)) } }
+                } else if !CoreSchema.linkedTables.contains(table) { try require(allocated.contains(id)); if let revision = CoreSchema.revisions[table] { try require(values[revision] == .integer(1)) } }
             }
             changes.append(CoreDelta(table:table,action:action,id:id,before:before,values:values,raw:raw))
         }
@@ -147,22 +147,24 @@ enum CoreRegistry {
             let draftID = try CoreSchema.string(p.payload["draftId"]); try guardDraft(draftID,p.payload["draftRevision"])
             let draft = try requiredRow(sql,"plant_drafts",draftID), adding = draft[2] == .text("add")
             requiresAccess = adding
-            try only(["plants","routines","heads","care_events","plant_drafts"])
+            try only(["plants","routines","heads","care_events","plant_drafts","plant_catalog","suggestion_snapshots","routine_suggestions","routine_changes"])
             try require(of("plant_drafts").count == 1 && of("plant_drafts")[0].action == "delete" && of("plant_drafts")[0].id == draftID)
             try require(of("plants").count == 1)
             let plant = of("plants")[0], fields = try CoreSchema.object(CoreSchema.object(CanonicalParser.parse(CoreSchema.text(draft[5])))["fields"])
-            let trims: [(Int,String,Bool,Int)] = [(2,"name",true,60),(3,"location",true,40),(4,"notes",false,2000),(5,"customSpeciesName",true,120)]
-            for (i,key,trim,limit) in trims {
-                let raw = try CoreSchema.rawText(fields[key]!), expected = trim ? trimLikeDart(raw) : raw
-                try require(plant.values[i] == .text(expected) && !expected.unicodeScalars.contains(where: {$0.value == 0}) && expected.count <= limit && (![2,5].contains(i) || !expected.isEmpty))
+            let selection=try validateCatalogSelection(sql,plant:plant,fields:fields,changes:of("plant_catalog"))
+            try require(plant.values[2] == .text(try validatedText(fields["name"],max:60,required:true)) && plant.values[3] == .text(try validatedText(fields["location"],max:40)) && plant.values[4] == .text(try validatedText(fields["notes"],max:2000,trim:false)))
+            if let selection {
+                try require(plant.values[5] == .text(try CoreSchema.string(selection.object?["speciesNameSnapshot"])) && plant.values[6] == .text("unknown") && plant.values[7] == .text("unknown"))
+            } else {
+                try require(plant.values[5] == .text(try validatedText(fields["customSpeciesName"],max:120,required:true)))
+                let light=try CoreSchema.string(fields["customLight"]),toxicity=try CoreSchema.string(fields["customToxicity"])
+                try require(plant.values[6] == .text(light == "bright-indirect" ? "brightIndirect":light) && plant.values[7] == .text(toxicity == "non-toxic" ? "nonToxic":toxicity))
             }
-            let light = try CoreSchema.string(fields["customLight"]), toxicity = try CoreSchema.string(fields["customToxicity"])
-            try require(plant.values[6] == .text(light == "bright-indirect" ? "brightIndirect" : light) && plant.values[7] == .text(toxicity == "non-toxic" ? "nonToxic" : toxicity))
             if adding {
                 let inputs = try CoreSchema.array(fields["routineInputs"])
                 try require(inputs.count <= 5 && plant.action == "insert" && plant.id == allocated.first && plant.values[8] == .integer(0))
                 try require(of("routines").count == inputs.count && of("heads").count == inputs.count)
-                var slot = 1, kinds: Set<String> = [], seedEvents = 0
+                var slot = 1, kinds: Set<String> = [], seedEvents = 0, snapshotCount = 0
                 for input in inputs {
                     let raw = try CoreSchema.object(input), seed = try CoreSchema.object(raw["seed"]), kind = try CoreSchema.string(raw["kind"])
                     try require(kinds.insert(kind).inserted && slot + 1 < allocated.count)
@@ -178,16 +180,43 @@ enum CoreRegistry {
                     } else {
                         try require(seed["kind"]?.text == "unknown" && r.values[9] == .integer(1) && r.values[10] == .text(try CoreSchema.string(seed["firstCheckDate"])) && h.values[3] == r.values[10])
                     }
+                    if let suggestion=selection?.object?["suggestions"]?.array?.first(where:{$0.object?["careKind"]?.text==kind}) {
+                        try require(slot<allocated.count)
+                        try validateSuggestion(d, snapshotID:allocated[slot], routine:r.values, plant:plant.id, fields:fields, suggestion:suggestion, original:nil, adding:true)
+                        slot += 1;snapshotCount += 1
+                    }
                 }
-                try require(slot == allocated.count && of("care_events").count == seedEvents)
+                try require(slot == allocated.count && of("care_events").count == seedEvents && of("suggestion_snapshots").count==snapshotCount && of("routine_suggestions").count==snapshotCount && of("routine_changes").isEmpty)
             } else {
-                try require(d.count == 2 && allocated.isEmpty && plant.action == "update" && plant.values[0] == draft[3] && plant.before?[1] == draft[4] && plant.values[8] == plant.before?[8])
+                try require(plant.action == "update" && plant.values[0] == draft[3] && plant.before?[1] == draft[4] && plant.values[8] == plant.before?[8])
                 let routines = try sql.query("SELECT id,revision FROM routines WHERE plant_id=? AND state!='retired' ORDER BY id", [plant.values[0]])
                 let bases: CanonicalValue = .array(routines.map { .object(["routineId":CoreSchema.canonical($0[0]),"revision":CoreSchema.canonical($0[1])]) })
                 try require(try CoreSchema.same(fields["baseRoutineRevisions"],bases), "DRAFT_CONFLICT")
-                let changed = [5,6,7].contains { plant.values[$0] != plant.before![$0] }
-                let choices: CanonicalValue = .array(changed ? routines.map { .object(["routineId":CoreSchema.canonical($0[0]),"decision":.string("keep"),"interval":.null]) } : [])
-                try require(try CoreSchema.same(fields["speciesChoices"],choices))
+                let oldCatalog=try CoreSchema.row(sql,"plant_catalog",plant.id)
+                let sameSelection = try CoreSchema.same(selection,oldCatalog.map {try CanonicalParser.parse(CoreSchema.text($0[3]))})
+                let changed = [5,6,7].contains { plant.values[$0] != plant.before![$0] } || !sameSelection || oldCatalog?[1].stringValue != fields["speciesId"]?.text
+                let choices=try CoreSchema.array(fields["speciesChoices"])
+                try require(choices.compactMap{$0.object?["routineId"]?.text} == (changed ? routines.compactMap{$0[0].stringValue}:[]))
+                var slot=0, applied=0
+                for c in choices {
+                    let choice=try CoreSchema.object(c), id=try CoreSchema.string(choice["routineId"])
+                    if choice["decision"]?.text == "keep" {try require(!of("routines").contains{$0.id==id} && !of("heads").contains{$0.values[1] == .text(id)});continue}
+                    let old=try requiredRow(sql,"routines",id)
+                    guard let r=of("routines").first(where:{$0.id==id}),let suggestion=selection?.object?["suggestions"]?.array?.first(where:{$0.object?["careKind"]?.text == old[3].stringValue}) else {throw CoreRepositoryError("PLAN_INVALID")}
+                    let oldHead=try sql.query("SELECT id, routine_id, revision, next_check, override_date FROM heads WHERE routine_id=?",[.text(id)])[0]
+                    let head=of("heads").first{$0.values[1] == .text(id)}, interval=try CoreSchema.object(choice["interval"])
+                    try require(r.action == "update" && r.values[6] == .integer(try CoreSchema.number(interval["count"])) && r.values[7] == .text(try CoreSchema.string(interval["unit"])))
+                    for i in [0,1,3,4,5,11] {try require(r.values[i]==old[i])}
+                    try intervalTransition(r,head:head,storedHead:oldHead,interval:interval)
+                    try require(slot+1<allocated.count)
+                    let oldLink=try CoreSchema.row(sql,"routine_suggestions",id)
+                    try validateSuggestion(d,snapshotID:allocated[slot],routine:r.values,plant:plant.id,fields:fields,suggestion:suggestion,original:oldLink?[1],adding:false)
+                    guard let audit=of("routine_changes").first(where:{$0.id==allocated[slot+1]}),let link=of("routine_suggestions").first(where:{$0.id==id}) else {throw CoreRepositoryError("PLAN_INVALID")}
+                    try validateAudit(sql,audit,routine:r,head:head,command:p,kind:"speciesApply",beforeArchived:plant.values[8] == .integer(1),afterArchived:plant.values[8] == .integer(1),storedHead:oldHead,afterSuggestions:link.values)
+                    slot += 2;applied += 1
+                }
+                try require(slot==allocated.count && of("routines").count==applied && of("routine_changes").count==applied && of("suggestion_snapshots").count==applied && of("routine_suggestions").count==applied && of("care_events").isEmpty)
+                try require(of("heads").allSatisfy{h in of("routines").contains{$0.id==h.values[1].stringValue}})
             }
         } else if ["ArchivePlant","RestorePlant","DeletePlant"].contains(p.type) {
             let plantID = try CoreSchema.string(p.payload["plantId"]), plant = try requiredRow(sql,"plants",plantID)
@@ -206,7 +235,7 @@ enum CoreRegistry {
                 for (index,id) in routines.enumerated() {
                     guard let r = of("routines").first(where:{$0.id == id}), let h = of("heads").first(where:{$0.values[1] == .text(id)}), let audit = of("routine_changes").first(where:{$0.id == allocated[index]}) else { throw CoreRepositoryError("PLAN_INVALID") }
                     for i in 5...10 { try require(r.values[i] == r.before![i]) }
-                    try validateAudit(audit,routine:r,head:h,command:p,kind:restoring ? "restore" : "archive",beforeArchived:restoring,afterArchived:restoring ? false : true)
+                    try validateAudit(sql,audit,routine:r,head:h,command:p,kind:restoring ? "restore" : "archive",beforeArchived:restoring,afterArchived:restoring ? false : true)
                 }
             }
         } else if p.type == "Undo" {
@@ -239,7 +268,7 @@ enum CoreRegistry {
                 }
                 try require(slot < allocated.count)
                 guard let audit = of("routine_changes").first(where:{$0.id == allocated[slot]}) else { throw CoreRepositoryError("PLAN_INVALID") }; slot += 1
-                try validateAudit(audit,routine:r,head:h,command:p,kind:"undo",beforeArchived:false,afterArchived:false,storedHead:currentHead)
+                try validateAudit(sql,audit,routine:r,head:h,command:p,kind:"undo",beforeArchived:false,afterArchived:false,storedHead:currentHead)
             }
             try require(slot == allocated.count && Set(of("care_events").map(\.id)) == expectedEvents && of("event_corrections").count == expectedEvents.count && Set(of("heads").map(\.id)) == expectedHeads)
         } else {
@@ -267,7 +296,7 @@ enum CoreRegistry {
                     expectedAudits += 1
                     guard let audit = of("routine_changes").first(where:{$0.id == allocatedID}) else { throw CoreRepositoryError("PLAN_INVALID") }
                     let kind = ["SetInterval":"interval","PauseRoutine":"pause","ResumeRoutine":"resume","RetireRoutine":"retire"][p.type] ?? "override"
-                    try validateAudit(audit,routine:r,head:h,command:p,kind:kind,beforeArchived:plant[8] == .integer(1),afterArchived:plant[8] == .integer(1),storedHead:head)
+                    try validateAudit(sql,audit,routine:r,head:h,command:p,kind:kind,beforeArchived:plant[8] == .integer(1),afterArchived:plant[8] == .integer(1),storedHead:head)
                 } else if ["CorrectEvent","RestoreEvent","VoidEvent"].contains(p.type) {
                     expectedCorrections += 1
                     let eventID = try CoreSchema.string(p.payload["eventId"])
@@ -318,13 +347,19 @@ enum CoreRegistry {
             let date = max(try CoreSchema.text(storedHead[3]),clock.today)
             try require(r.values[5] == .text("active") && nextHead[3] == .text(date) && nextHead[4] == (storedHead[4] == .null ? .null : .text(date)) && head != nil)
         case "SetInterval":
-            let interval = try CoreSchema.object(p.payload["interval"])
-            try require(r.values[6] == .integer(try CoreSchema.number(interval["count"])) && r.values[7] == .text(try CoreSchema.string(interval["unit"])))
-            if storedHead[4] != .null { for i in 8...10 { try require(r.values[i] == old[i]) }; try require(head == nil) }
-            else { try require(nextHead[4] == .null) }
+            try intervalTransition(r,head:head,storedHead:storedHead,interval:CoreSchema.object(p.payload["interval"]))
         case "ClearOverride": try require(nextHead[4] == .null)
         default: break
         }
+    }
+    static func intervalTransition(_ r: CoreDelta, head: CoreDelta?, storedHead: [SQLValue], interval: [String:CanonicalValue]) throws {
+        let old=r.before!, next=head?.values ?? storedHead
+        try require(r.values[6] == .integer(try CoreSchema.number(interval["count"])) && r.values[7] == .text(try CoreSchema.string(interval["unit"])))
+        for i in [3,4] {if next[i] != .null {try validDate(CoreSchema.text(next[i]))}}
+        if storedHead[4] != .null {
+            for i in 8...10 {try require(r.values[i]==old[i])}
+            try require(head==nil)
+        } else {try require(next[4] == .null)}
     }
     /// Pinned Dart String.trim White_Space plus BOM, verified over all BMP units.
     static func trimLikeDart(_ value: String) -> String {
@@ -357,14 +392,17 @@ enum CoreRegistry {
             try require(c.values[6] == .text(date) && c.values[7] == .text(try CoreSchema.string(p.payload["outcome"])) && c.values[8] == .integer(0))
         }
     }
-    static func headSnapshot(_ routine: [SQLValue], _ head: [SQLValue], archived: Bool) -> CanonicalValue {
-        .object(["version":.integer(1),"headId":CoreSchema.canonical(head[0]),"intervalCount":CoreSchema.canonical(routine[6]),"intervalUnit":CoreSchema.canonical(routine[7]),"anchor":CoreSchema.canonical(routine[8]),"firstCheckAnchor":.boolean(routine[9] == .integer(1)),"firstCheckDate":CoreSchema.canonical(routine[10]),"nextCheck":CoreSchema.canonical(head[3]),"overrideDate":CoreSchema.canonical(head[4]),"status":CoreSchema.canonical(routine[5]),"archived":.boolean(archived)])
+    static func headSnapshot(_ routine: [SQLValue], _ head: [SQLValue], archived: Bool, link: [SQLValue]? = nil) -> CanonicalValue {
+        var value: [String:CanonicalValue] = ["version":.integer(1),"headId":CoreSchema.canonical(head[0]),"intervalCount":CoreSchema.canonical(routine[6]),"intervalUnit":CoreSchema.canonical(routine[7]),"anchor":CoreSchema.canonical(routine[8]),"firstCheckAnchor":.boolean(routine[9] == .integer(1)),"firstCheckDate":CoreSchema.canonical(routine[10]),"nextCheck":CoreSchema.canonical(head[3]),"overrideDate":CoreSchema.canonical(head[4]),"status":CoreSchema.canonical(routine[5]),"archived":.boolean(archived)]
+        if let link {value["version"] = .integer(2);value["originalSuggestionId"] = CoreSchema.canonical(link[1]);value["appliedSuggestionId"] = CoreSchema.canonical(link[2])}
+        return .object(value)
     }
-    static func validateAudit(_ audit: CoreDelta, routine r: CoreDelta, head: CoreDelta?, command p: CorePlan, kind: String, beforeArchived: Bool, afterArchived: Bool, storedHead: [SQLValue]? = nil) throws {
+    static func validateAudit(_ sql: SQLiteSession, _ audit: CoreDelta, routine r: CoreDelta, head: CoreDelta?, command p: CorePlan, kind: String, beforeArchived: Bool, afterArchived: Bool, storedHead: [SQLValue]? = nil, afterSuggestions: [SQLValue]? = nil) throws {
         guard let old = r.before, let oldHead = head?.before ?? storedHead else { throw CoreRepositoryError("PLAN_INVALID") }
         let nextHead = head?.values ?? oldHead
         try require(audit.action == "insert" && audit.values[1] == old[1] && audit.values[2] == old[0] && audit.values[3] == .text(p.id) && audit.values[4] == .text(kind))
-        try require(audit.values[8] == .text(try headSnapshot(old,oldHead,archived:beforeArchived).json()) && audit.values[9] == .text(try headSnapshot(r.values,nextHead,archived:afterArchived).json()))
+        let link=try CoreSchema.row(sql,"routine_suggestions",r.id)
+        try require(audit.values[8] == .text(try headSnapshot(old,oldHead,archived:beforeArchived,link:link).json()) && audit.values[9] == .text(try headSnapshot(r.values,nextHead,archived:afterArchived,link:afterSuggestions ?? link).json()))
     }
     static func checkUndoMembers(_ sql: SQLiteSession, _ context: CanonicalValue) throws {
         for member in try CoreSchema.array(CoreSchema.object(context)["members"]) {
@@ -396,6 +434,7 @@ enum CoreRegistry {
         for (index,query) in queries.enumerated() {
             let count = try CoreSchema.integer(sql.query(query,[.text(d.id)])[0][0]); try require(d.raw[index+2].integer == count,"PREVIEW_STALE")
         }
+        for (i,query) in ["SELECT count(*) FROM suggestion_snapshots WHERE plant_id=?","SELECT count(*) FROM plant_catalog WHERE id=?","SELECT count(*) FROM routine_suggestions WHERE id IN (SELECT id FROM routines WHERE plant_id=?)"].enumerated() {try require(d.raw[7+i].integer == CoreSchema.integer(sql.query(query,[.text(d.id)])[0][0]),"PREVIEW_STALE")}
         let drafts = try ownedDrafts(sql,d.id)
         try require(try CoreSchema.same(d.raw[6],drafts) && CoreSchema.same(.array(guards),drafts),"PREVIEW_STALE")
     }
@@ -403,7 +442,7 @@ enum CoreRegistry {
         for d in changes {
             if d.action == "deleteTree" { try deleteTree(sql,d.id,p.id); continue }
             if d.action == "delete" {
-                try require(try sql.execute("DELETE FROM plant_drafts WHERE id=?", [.text(d.id)]) == 1,"STALE_TARGET"); continue
+                try require(try sql.execute("DELETE FROM \(d.table) WHERE id=?", [.text(d.id)]) == 1,"STALE_TARGET"); continue
             }
             let columns = CoreSchema.columns[d.table]!
             let count: Int
@@ -446,6 +485,8 @@ enum CoreRegistry {
             }
         }
         for query in [
+            "DELETE FROM routine_suggestions WHERE id IN (SELECT id FROM routines WHERE plant_id=?)",
+            "DELETE FROM suggestion_snapshots WHERE plant_id=?", "DELETE FROM plant_catalog WHERE id=?",
             "DELETE FROM event_corrections WHERE event_id IN (SELECT id FROM care_events WHERE plant_id=?)",
             "DELETE FROM care_events WHERE plant_id=?", "DELETE FROM routine_changes WHERE plant_id=?",
             "DELETE FROM heads WHERE routine_id IN (SELECT id FROM routines WHERE plant_id=?)",
@@ -462,7 +503,7 @@ enum CoreRegistry {
         for delta in d where delta.action != "delete" && delta.action != "deleteTree" {
             if let index = CoreSchema.revisions[delta.table] { revisions[delta.id] = CoreSchema.canonical(delta.values[index]) }
         }
-        if p.type == "Undo" || p.type == "BulkComplete" {
+        if p.type == "Undo" || p.type == "BulkComplete" || p.type == "SavePlant" {
             for r in d where r.table == "routines" {
                 let head = try sql.query("SELECT id,revision FROM heads WHERE routine_id=?", [.text(r.id)])[0]
                 let id = try CoreSchema.text(head[0]); revisions[id] = CoreSchema.canonical(head[1]); resources.insert(id)

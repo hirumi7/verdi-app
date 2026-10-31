@@ -35,10 +35,11 @@ Flutter presentation scope. No production persistence or release claim.
 
 ## Next action
 
-Continue the docs-first native-storage design/review, then implement durable
-persistence and bridge integration. Preserve the verified synthetic UI and all
-accepted requirements. Real-device/store configuration and full release remain
-separate gates; no new permission to keep building is needed.
+The latest catalog delivery and remaining product boundaries are recorded in the
+final section below. Continue the next selected feature through design/review,
+implementation and actual client verification. Preserve durable data and all
+accepted requirements. Device/store work and public release remain separate gates;
+no new permission to keep building is needed.
 
 ## Core loop evidence — 2026-10-31
 
@@ -570,3 +571,111 @@ rechecked final evidence, partial coverage and remaining boundaries, and closed
 with no blocking mismatch. App code/tests are unchanged from the verified
 implementation commit. Staged and committed consumer/gitlink checks accompany
 this pin update; public release and remaining feature/device/store work stay open.
+
+## Bundled catalog and species integration — 2026-10-31
+
+**Author:** Codex (AI assistant).
+**Date:** 2026-10-31 (Asia/Jakarta).
+
+Implementation contract: docs `63b6062da0d1d868617f0b90aa26054ca2e0adcd`,
+published before adoption in app `574a275`. Affected REQ-001–006/016, preserving
+related REQ-007/008/009/014/015/018 behavior. Accepted requirement and decision
+records are unchanged; REQ-019 stays proposed. This extends the existing durable
+main Flutter UI, not the product's release status.
+
+The actual bundle has the fixed 24 Popular species, reviewed against primary
+NC State/RHS sources, with authored summaries and explicit source/content/rights
+records. The reviewer inspected all 22 NC State captures and independently opened
+the two RHS profiles after correcting insufficient excerpts. Four qualified
+active-growth fertilizer intervals are supplied; no fixed watering advice was
+invented. Difficulty and unsupported animal-specific toxicity remain Unknown.
+The generic Figma illustration uses the user's confirmed rights; original source
+captures remain ignored, and no third-party article photos are bundled.
+
+The main picker now supports immediate whole-inventory search, pinned Unicode15.1
+case folding/whitespace, exact phrase/rank/tie rules, Popular, distinct information
+and selection actions, source-attributed guides, generic-art fallback and custom
+entry. Selection must be durably acknowledged before advancing. Restart restores
+its species/name and raw draft. Existing routines require explicit keep/apply when
+species changes; original suggestion snapshots remain immutable and applied ones
+are added atomically with the plant/routines/draft/receipt. Unknown last care does
+not invent history or change its chosen first check merely to apply an interval.
+
+Native schema v2 adds catalog/selection/snapshot tables to the same permanent
+`custom_core_v1` database. It retains every original table and stable identity.
+Strict bounded package validation, lossless duplicate-key rejection, fixed asset
+paths and decoded PNG validation precede atomic install. Failed updates retain
+the last good package. Malformed catalog metadata cannot block custom saves/care;
+new selections revalidate entry review, lifecycle, version, exact projection and
+embedded ID. Unchanged stored selections retain their offline edit exception.
+
+Independent reviewer `core_readiness_review` inspected design, content and actual
+code. Fixes include native schedule-transition guards for apply, catalog failure
+isolation, retained manifest validation, qualified toxicity downgrade, entry-ID
+binding, required result labels/attributions and small-screen picker layout.
+Actual UI testing found that an unknown-seed apply with unchanged next-check row
+was rejected by native result validation. The fix accepts only the exact existing
+head ID/revision for authorized changed routines. A shared regression covers it,
+and the originally interrupted save succeeded with its retained command ID.
+No failing command or user data was erased to get a passing result.
+
+Executed on Flutter3.47.8/Dart3.13.7, macOS14.6, Xcode16.2/SDK18.2 and iPhone16 /
+iPhone SE3 simulators on iOS18.3:
+
+- Core analyzer and all **122 tests** passed. Flutter analyzer and **29 unit/widget
+  tests** passed, including acknowledged-selection failure/retry, stale selection,
+  search/info/query preservation/custom prefill and 320px/320% text with a 300px
+  keyboard. Format checks passed. DI/Freezed/localization generation and Pigeon
+  Dart/Swift reproduction passed; catalog/Unicode generation reproduced exact
+  bytes and the native fixture bundle matches the actual app bundle.
+- Native `swift test` and iOS `xcodebuild ... test`: **63 tests passed on each**.
+  Covers real v1 migration and rollback/lost-reply recovery, retained v1 frozen
+  SavePlant/DeletePlant commands, hostile apply plans, known/unknown-seed shared
+  replay/reopen, immutable suggestions, package/retained corruption rejection,
+  catalog update preservation and all preserved core tests.
+- Actual retained iPhone16 installation upgraded v1→v2 without uninstall/reset.
+  All 12 original tables retained identical row counts/hashes and the same dataset
+  identity; the new catalog contains 24 entries. This includes 56 intents, 56
+  receipts and 101 reservations. The `upgrade` UI phase passed 1/1.
+- Main `catalog_flow_test.dart` seed/recover each passed **1/1** in separate retained
+  processes. UI search/info, add, explicit species apply, care, archive/restore and
+  acknowledged draft all survive restart. `resumeApply` additionally recovered
+  the original interrupted save 1/1. Test-only fixes use the actual Cancel/Discard
+  changes labels, navigate the Archived collection and clear the live test
+  binding's cached editable after native focus changes; product assertions stay.
+
+The preserved main custom core seed/recover passed **1/1 each** on iPhone SE3,
+including custom entry through the bundled picker, full care/history/lifecycle,
+pending-action recovery and draft recovery. The native retry integration passed
+**1/1** and the memory collection plus isolated native draft regressions passed
+**2/2**. The custom test now scrolls the picker list rather than the TextField and
+waits for the editor after native acknowledgement, including when the progress
+indicator is offscreen. Assertions remain intact. Native warnings-as-errors and
+both core walkthroughs passed. The independent reviewer closed the last embedded-ID
+finding after reading the final native and catalog recovery logs.
+
+Local logs: `/tmp/verdi-catalog-core-final.log`,
+`/tmp/verdi-catalog-widget-final.log`, `/tmp/verdi-catalog-analyze-final.log`,
+`/tmp/verdi-catalog-swift-final.log`, `/tmp/verdi-catalog-native-ios-final.log`,
+`/tmp/verdi-catalog-upgrade-ui.log`, `/tmp/verdi-catalog-seed-ui.log`,
+`/tmp/verdi-catalog-recover-ui.log`, `/tmp/verdi-catalog-apply-recovery.log` and
+`/tmp/verdi-catalog-simulator-migration-result.json`. These are local execution
+records, not a portable archived report. Preserved-flow logs are
+`/tmp/verdi-catalog-old-core-seed.log`, `/tmp/verdi-catalog-old-core-recover.log`,
+`/tmp/verdi-catalog-old-retry.log` and `/tmp/verdi-catalog-preserved.log`.
+
+Remaining: broader launch inventory/species artwork, physical offline/screen-reader
+and full accessibility/performance checks; media/journal, backup/generation
+replacement, notifications, StoreKit and admin. Physical protection/first-unlock,
+interruption and actual store/release checks remain open. The development entry
+still refuses release mode; candidate store IDs remain unregistered.
+
+Final normal development build (`flutter build ios --simulator --debug -t
+lib/main_development.dart`) passed, then `flutter run --no-pub -t
+lib/main_development.dart -d DEVICE_ID` opened the main workspace on the retained
+iPhone16 installation. The rendered Today screen was inspected with both the
+prior custom fixture and new catalog fixture present; no data reset was used.
+Logs: `/tmp/verdi-catalog-ios-build-final.log`, `/tmp/verdi-catalog-main-run.log`;
+local screenshot `/tmp/verdi-catalog-main-preview.png`. Final full Dart analyzer
+and format recheck passed after the test-navigation changes. Independent evidence
+review also matched the preserved integration results to partial coverage.

@@ -93,6 +93,9 @@ void main() {
       await tester.pumpAndSettle();
       expect(find.text('Add a plant'), findsNothing);
       await press(tester, 'Add a plant');
+      if (field('Search species').evaluate().isNotEmpty) {
+        await press(tester, 'Add a custom plant');
+      }
       expect(field('Plant name'), findsOneWidget);
       expect(tester.takeException(), isNull);
     },
@@ -158,6 +161,9 @@ void main() {
       await tester.pumpWidget(const VerdiApp());
       await tester.pumpAndSettle();
       await press(tester, 'Add a plant');
+      if (field('Search species').evaluate().isNotEmpty) {
+        await press(tester, 'Add a custom plant');
+      }
       await tester.enterText(field('Plant name'), 'Seed sample');
       await tester.pump();
       await tester.enterText(field('Custom species name'), 'Synthetic');
@@ -219,6 +225,9 @@ void main() {
       await tester.pumpWidget(const VerdiApp());
       await tester.pumpAndSettle();
       await press(tester, 'Add a plant');
+      if (field('Search species').evaluate().isNotEmpty) {
+        await press(tester, 'Add a custom plant');
+      }
       await tester.enterText(field('Plant name'), 'Sample fern');
       await tester.pump();
       await tester.enterText(field('Custom species name'), 'Synthetic fern');
@@ -355,6 +364,9 @@ void main() {
           scrollable: find.byType(Scrollable).first,
         );
         await press(tester, 'Add a plant');
+        if (field('Search species').evaluate().isNotEmpty) {
+          await press(tester, 'Add a custom plant');
+        }
         await tester.enterText(field('Plant name'), 'Large text fern');
         tester.view.viewInsets = const FakeViewPadding(bottom: 300);
         await tester.pump();

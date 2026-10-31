@@ -44,9 +44,8 @@ final class RoutineInput {
   }
 }
 
-/// The supported editor subset: custom identity, no media, standard new routines.
-/// Catalog selection, apply-suggestion choices and existing-routine edits cannot
-/// be expressed here; those need their own reviewed adapters and command types.
+/// Lossless editor fields. The historical class name remains source compatible;
+/// catalogSelection selects the catalog branch of the identity union.
 final class CustomPlantFields {
   final String name;
   final String location;
@@ -57,6 +56,8 @@ final class CustomPlantFields {
   final List<RoutineInput> routines;
   final Map<String, int> baseRoutineRevisions;
   final List<String> keepRoutineIds;
+  final CatalogSelection? catalogSelection;
+  final Map<String, CareInterval> applyRoutineIntervals;
 
   CustomPlantFields({
     this.name = '',
@@ -68,26 +69,33 @@ final class CustomPlantFields {
     Iterable<RoutineInput> routines = const [],
     Map<String, int> baseRoutineRevisions = const {},
     Iterable<String> keepRoutineIds = const [],
+    this.catalogSelection,
+    Map<String, CareInterval> applyRoutineIntervals = const {},
   }) : routines = List.unmodifiable(routines),
        baseRoutineRevisions = Map.unmodifiable(baseRoutineRevisions),
-       keepRoutineIds = List.unmodifiable(keepRoutineIds);
+       keepRoutineIds = List.unmodifiable(keepRoutineIds),
+       applyRoutineIntervals = Map.unmodifiable(applyRoutineIntervals);
 
   Map<String, Object?> _json() {
     final bases = baseRoutineRevisions.keys.toList()..sort();
-    final choices = keepRoutineIds.toList()..sort();
+    final choices = [...keepRoutineIds, ...applyRoutineIntervals.keys]..sort();
     return {
       'name': name,
       'location': location,
       'notes': notes,
-      'identityKind': 'custom',
+      'identityKind': catalogSelection == null ? 'custom' : 'catalog',
       'coverPhotoId': null,
-      'speciesId': null,
-      'catalogSelection': null,
-      'customSpeciesName': speciesName,
-      'customLight': light == CustomLight.brightIndirect
+      'speciesId': catalogSelection?.speciesId,
+      'catalogSelection': catalogSelection?.toJson(),
+      'customSpeciesName': catalogSelection == null ? speciesName : null,
+      'customLight': catalogSelection != null
+          ? null
+          : light == CustomLight.brightIndirect
           ? 'bright-indirect'
           : light.name,
-      'customToxicity': toxicity == CustomToxicity.nonToxic
+      'customToxicity': catalogSelection != null
+          ? null
+          : toxicity == CustomToxicity.nonToxic
           ? 'non-toxic'
           : toxicity.name,
       'routineInputs': routines.map((r) => r._json()).toList(),
@@ -97,7 +105,18 @@ final class CustomPlantFields {
       ],
       'speciesChoices': [
         for (final id in choices)
-          {'routineId': id, 'decision': 'keep', 'interval': null},
+          {
+            'routineId': id,
+            'decision': applyRoutineIntervals.containsKey(id)
+                ? 'apply'
+                : 'keep',
+            'interval': applyRoutineIntervals.containsKey(id)
+                ? {
+                    'count': applyRoutineIntervals[id]!.count,
+                    'unit': applyRoutineIntervals[id]!.unit.name,
+                  }
+                : null,
+          },
       ],
     };
   }
@@ -136,6 +155,7 @@ final class PlantCore {
   final DateTime createdAt;
   final DateTime updatedAt;
   final bool archived;
+  final CatalogSelection? catalogSelection;
   const PlantCore._(
     this.id,
     this.revision,
@@ -148,6 +168,7 @@ final class PlantCore {
     this.createdAt,
     this.updatedAt, [
     this.archived = false,
+    this.catalogSelection,
   ]);
 
   PlantCore _setArchived(bool value, DateTime instant) => PlantCore._(
@@ -162,11 +183,13 @@ final class PlantCore {
     createdAt,
     instant,
     value,
+    catalogSelection,
   );
 }
 
 enum ScheduleChangeKind {
   interval,
+  speciesApply,
   override,
   pause,
   resume,
@@ -179,9 +202,8 @@ enum ScheduleChangeKind {
 /// Value snapshot excludes history so an audit never holds duplicate event data.
 final class RoutineHeadValues {
   final String headId;
-  // The supported custom-plant core has no catalog suggestion snapshots yet.
-  final String? originalSuggestionId = null;
-  final String? appliedSuggestionId = null;
+  final String? originalSuggestionId;
+  final String? appliedSuggestionId;
   final CareInterval interval;
   final LocalDate anchor;
   final bool firstCheckAnchor;
@@ -199,10 +221,14 @@ final class RoutineHeadValues {
     this.nextCheck,
     this.overrideDate,
     this.status,
-    this.archived,
-  );
+    this.archived, [
+    this.originalSuggestionId,
+    this.appliedSuggestionId,
+  ]);
   RoutineHeadValues._(RoutineCore routine)
-    : headId = routine.headId,
+    : originalSuggestionId = routine.originalSuggestionId,
+      appliedSuggestionId = routine.appliedSuggestionId,
+      headId = routine.headId,
       interval = routine.interval,
       anchor = routine.anchor,
       firstCheckAnchor = routine.firstCheckAnchor,
@@ -264,6 +290,7 @@ final class CollectionSnapshot {
   final Map<String, StandardCareKind> careKinds;
   final Map<String, PlantDraft> drafts;
   final Map<String, ScheduleChange> scheduleChanges;
+  final Map<String, SuggestionSnapshot> suggestions;
 
   /// Fake reminder invalidation only; no OS notification is scheduled.
   final int reminderGeneration;
@@ -276,11 +303,13 @@ final class CollectionSnapshot {
     Map<String, PlantDraft> drafts,
     this.reminderGeneration, [
     Map<String, ScheduleChange> scheduleChanges = const {},
+    Map<String, SuggestionSnapshot> suggestions = const {},
   ]) : plants = Map.unmodifiable(plants),
        routines = Map.unmodifiable(routines),
        careKinds = Map.unmodifiable(careKinds),
        drafts = Map.unmodifiable(drafts),
-       scheduleChanges = Map.unmodifiable(scheduleChanges);
+       scheduleChanges = Map.unmodifiable(scheduleChanges),
+       suggestions = Map.unmodifiable(suggestions);
 
   List<PlantCore> get activePlants =>
       List.unmodifiable(plants.values.where((p) => !p.archived));

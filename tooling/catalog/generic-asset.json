@@ -1,0 +1,36 @@
+{
+  "id": "generic_plant",
+  "resourceName": "generic_plant",
+  "sha256": "6a0aeba8827d6e36208db75140ee23d6d9c1d650afce3595870a69a8bbbe4d8f",
+  "mimeType": "image/png",
+  "pixelWidth": 340,
+  "pixelHeight": 255,
+  "provenance": [
+    {
+      "ref": "verdi_import_rights",
+      "title": "Verdi imported generic plant illustration",
+      "publisherOrCreator": "Verdi design import",
+      "locator": "Figma 11:407; TEMPLATE_PROVENANCE.md; accepted source SRC-011",
+      "capturedAt": "2026-10-31T12:22:16.000Z",
+      "captureSha256": "693ae2e2ba70a362a9cb6fa35e0329ee7739fac6dce0362e6faa5f212194ceb3",
+      "retainedEvidenceRef": "tooling/catalog/artwork-evidence.txt"
+    }
+  ],
+  "rightsReview": {
+    "reviewer": "Codex (AI assistant)",
+    "actorType": "ai",
+    "reviewedAt": "2026-10-31T12:22:16.000Z",
+    "outcome": "pass",
+    "scope": "Existing generic illustration, unmodified; no species identity mapping. User-confirmed commercial rights.",
+    "evidenceRefs": [
+      "verdi_import_rights"
+    ],
+    "findings": [],
+    "permissionBasis": "other_documented",
+    "licenseOrPermission": "User confirms rights to both PLabs templates and imported artwork in SRC-011.",
+    "redistributionScope": "Bundled Verdi application illustration",
+    "attributionText": "Verdi design import",
+    "attributionNotRequiredReason": null,
+    "restrictions": []
+  }
+}

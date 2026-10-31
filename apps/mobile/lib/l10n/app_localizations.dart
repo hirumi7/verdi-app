@@ -1059,6 +1059,162 @@ abstract class AppStrings {
   /// In en, this message translates to:
   /// **'Save unfinished draft'**
   String get saveDraftAction;
+
+  /// No description provided for @searchSpecies.
+  ///
+  /// In en, this message translates to:
+  /// **'Search species'**
+  String get searchSpecies;
+
+  /// No description provided for @popularSpecies.
+  ///
+  /// In en, this message translates to:
+  /// **'Popular'**
+  String get popularSpecies;
+
+  /// No description provided for @catalogLimited.
+  ///
+  /// In en, this message translates to:
+  /// **'Some plant guides are unavailable'**
+  String get catalogLimited;
+
+  /// No description provided for @catalogCustomAvailable.
+  ///
+  /// In en, this message translates to:
+  /// **'You can still add a custom plant. Your saved plants and care history are kept.'**
+  String get catalogCustomAvailable;
+
+  /// No description provided for @noSpeciesMatches.
+  ///
+  /// In en, this message translates to:
+  /// **'No matches for “{query}”'**
+  String noSpeciesMatches(String query);
+
+  /// No description provided for @customPlant.
+  ///
+  /// In en, this message translates to:
+  /// **'Add a custom plant'**
+  String get customPlant;
+
+  /// No description provided for @speciesInformation.
+  ///
+  /// In en, this message translates to:
+  /// **'Species information'**
+  String get speciesInformation;
+
+  /// No description provided for @genericIllustration.
+  ///
+  /// In en, this message translates to:
+  /// **'Generic illustration'**
+  String get genericIllustration;
+
+  /// No description provided for @difficulty.
+  ///
+  /// In en, this message translates to:
+  /// **'Difficulty'**
+  String get difficulty;
+
+  /// No description provided for @suggestionOnly.
+  ///
+  /// In en, this message translates to:
+  /// **'A starting suggestion for checks. Adjust it to your plant and conditions.'**
+  String get suggestionOnly;
+
+  /// No description provided for @sourcesCredits.
+  ///
+  /// In en, this message translates to:
+  /// **'Sources and credits'**
+  String get sourcesCredits;
+
+  /// No description provided for @catalogCredits.
+  ///
+  /// In en, this message translates to:
+  /// **'Care summaries: Verdi. Generic illustration: Verdi design import. Names and source references are included for attribution. Source websites require an internet connection.'**
+  String get catalogCredits;
+
+  /// No description provided for @changeSpecies.
+  ///
+  /// In en, this message translates to:
+  /// **'Change species'**
+  String get changeSpecies;
+
+  /// No description provided for @keepRoutine.
+  ///
+  /// In en, this message translates to:
+  /// **'Keep current routine'**
+  String get keepRoutine;
+
+  /// No description provided for @applySuggestion.
+  ///
+  /// In en, this message translates to:
+  /// **'Apply suggestion'**
+  String get applySuggestion;
+
+  /// No description provided for @chooseSpeciesRoutine.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose what happens to each existing routine.'**
+  String get chooseSpeciesRoutine;
+
+  /// No description provided for @originalSuggestion.
+  ///
+  /// In en, this message translates to:
+  /// **'Original suggestion'**
+  String get originalSuggestion;
+
+  /// No description provided for @appliedSuggestion.
+  ///
+  /// In en, this message translates to:
+  /// **'Last applied suggestion'**
+  String get appliedSuggestion;
+
+  /// No description provided for @catalogIdentity.
+  ///
+  /// In en, this message translates to:
+  /// **'Catalog species'**
+  String get catalogIdentity;
+
+  /// No description provided for @customIdentity.
+  ///
+  /// In en, this message translates to:
+  /// **'User-supplied species and observations'**
+  String get customIdentity;
+
+  /// No description provided for @chooseSpecies.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose species'**
+  String get chooseSpecies;
+
+  /// No description provided for @catalogStale.
+  ///
+  /// In en, this message translates to:
+  /// **'This guide changed. Choose the species again or use a custom plant; your other fields are kept.'**
+  String get catalogStale;
+
+  /// No description provided for @selectedSpecies.
+  ///
+  /// In en, this message translates to:
+  /// **'Selected species'**
+  String get selectedSpecies;
+
+  /// No description provided for @contentReviewed.
+  ///
+  /// In en, this message translates to:
+  /// **'Content reviewed'**
+  String get contentReviewed;
+
+  /// No description provided for @category.
+  ///
+  /// In en, this message translates to:
+  /// **'Category'**
+  String get category;
+
+  /// No description provided for @createCustomQuery.
+  ///
+  /// In en, this message translates to:
+  /// **'Create “{query}” as a custom plant'**
+  String createCustomQuery(String query);
 }
 
 class _AppStringsDelegate extends LocalizationsDelegate<AppStrings> {

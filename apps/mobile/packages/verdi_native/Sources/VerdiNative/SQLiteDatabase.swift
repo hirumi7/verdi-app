@@ -52,9 +52,9 @@ final class SQLiteDatabase {
         return database
     }
 
-    static func open(at url: URL, schema: CompiledSchema) throws -> SQLiteDatabase {
+    static func open(at url: URL, schema: CompiledSchema, upgradeFrom: CompiledSchema? = nil, migrationStatements: [String] = [], fault: ((SQLiteBoundary) throws -> Void)? = nil) throws -> SQLiteDatabase {
         let target = try canonicalTarget(url)
-        let database = SQLiteDatabase(fault: nil)
+        let database = SQLiteDatabase(fault: fault)
         try database.queue.sync {
             try database.checkInput(url, schema)
             var info = stat()
@@ -62,11 +62,24 @@ final class SQLiteDatabase {
             guard (info.st_mode & S_IFMT) == S_IFREG else { throw StorageFailure.invalidPath }
             do {
                 try database.openHandle(target, readOnly: true)
-                try database.validate(schema)
+                var migrating = false
+                do { try database.validate(schema) }
+                catch StorageFailure.schemaMismatch {
+                    guard let previous = upgradeFrom, !migrationStatements.isEmpty else { throw StorageFailure.schemaMismatch }
+                    try database.validate(previous); migrating = true
+                }
                 try database.closeHandle()
                 try database.openHandle(target, readOnly: false)
-                try database.validate(schema)
-                try database.configure()
+                if migrating {
+                    try database.validate(upgradeFrom!)
+                    try database.configure()
+                    try database.atomic { sql in
+                        try database.validate(upgradeFrom!)
+                        for statement in migrationStatements { try sql.execute(statement) }
+                        try database.control("PRAGMA user_version = \(schema.version)")
+                        try database.validate(schema)
+                    }
+                } else { try database.validate(schema); try database.configure() }
                 database.usable = true
             } catch {
                 database.dispose()

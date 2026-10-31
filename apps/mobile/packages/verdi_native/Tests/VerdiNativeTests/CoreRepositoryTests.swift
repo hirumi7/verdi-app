@@ -1,5 +1,6 @@
 import Foundation
 import XCTest
+import SQLite3
 @testable import VerdiNative
 
 final class CoreRepositoryTests: XCTestCase {
@@ -93,6 +94,166 @@ final class CoreRepositoryTests: XCTestCase {
         XCTAssertThrowsError(try work(),file:file,line:line) { error in
             XCTAssertEqual((error as? CoreRepositoryError)?.code,code,file:file,line:line)
         }
+    }
+    func testV1PendingSaveAndDeleteSurviveMigrationWithEveryOldRow() throws {
+        let legacyFile=try XCTUnwrap(Bundle.module.url(forResource:"core-storage-legacy-v1",withExtension:"json",subdirectory:"Fixtures"))
+        let oldSteps=try CoreSchema.array(CoreSchema.object(CanonicalParser.parse(String(contentsOf:legacyFile).trimmingCharacters(in:.whitespacesAndNewlines)))["steps"]).map(CoreSchema.object)
+        let tables=Array(CoreSchema.tables.prefix(7))+["metadata","intents","reservations","receipts","outbox"]
+        for pending in [1,25] {
+            for index in (pending==1 ? 0:2)..<pending {try execute(index)}
+            var oldIntent=try CoreSchema.object(oldSteps[pending]["intent"]);oldIntent["datasetId"] = .string(dataset)
+            try call("freeze",["intent":.object(oldIntent)])
+            _=try call("close")
+            let url=directory.appendingPathComponent("core.sqlite")
+            var db=try SQLiteDatabase.open(at:url,schema:CoreSchema.schema())
+            let before=try db.read {sql in try tables.map{try sql.query("SELECT * FROM \($0) ORDER BY 1")}}
+            // Exact original v1 DDL, actual persisted rows/frozen v1 payloads.
+            try db.close()
+            var raw: OpaquePointer?
+            XCTAssertEqual(sqlite3_open(url.path,&raw),SQLITE_OK)
+            defer {sqlite3_close(raw)}
+            XCTAssertEqual(sqlite3_exec(raw,"BEGIN; DROP TABLE routine_suggestions; DROP TABLE suggestion_snapshots; DROP TABLE plant_catalog; DROP TABLE catalog_head; DROP TABLE catalog_entries; DROP TABLE catalog_identity; PRAGMA user_version=1; COMMIT;",nil,nil,nil),SQLITE_OK)
+            sqlite3_close(raw);raw=nil
+            db=try SQLiteDatabase.open(at:url,schema:CoreSchema.schema(version:1));try db.close()
+            XCTAssertThrowsError(try SQLiteDatabase.open(at:url,schema:CoreSchema.schema(),upgradeFrom:CoreSchema.schema(version:1),migrationStatements:CoreSchema.catalogDefinitions,fault:{if $0 == .beforeCommit {throw StorageFailure.unavailable}}))
+            db=try SQLiteDatabase.open(at:url,schema:CoreSchema.schema(version:1))
+            XCTAssertEqual(try db.read {sql in try tables.map{try sql.query("SELECT * FROM \($0) ORDER BY 1")}},before);try db.close()
+            XCTAssertThrowsError(try SQLiteDatabase.open(at:url,schema:CoreSchema.schema(),upgradeFrom:CoreSchema.schema(version:1),migrationStatements:CoreSchema.catalogDefinitions,fault:{if $0 == .afterCommit {throw StorageFailure.unavailable}}))
+            try open()
+            db=try SQLiteDatabase.open(at:url,schema:CoreSchema.schema())
+            XCTAssertEqual(try db.read {sql in try tables.map{try sql.query("SELECT * FROM \($0) ORDER BY 1")}},before);try db.close()
+            XCTAssertThrowsError(try SQLiteDatabase.open(at:url,schema:CoreSchema.schema(version:1)))
+            let pendingBody=try call("pendingBody",["commandId":oldIntent["commandId"]!])
+            XCTAssertEqual(try pendingBody.json(),try CanonicalValue.object(oldIntent).json())
+            // Replan using v2 vectors, preserving exact v1 command identity/hash.
+            XCTAssertEqual(steps[pending]["intent"]?.object?["payloadHash"]?.text,oldIntent["payloadHash"]?.text)
+            try execute(pending)
+            let receipt=try call("resolve",["commandId":oldIntent["commandId"]!,"payloadHash":oldIntent["payloadHash"]!])
+            XCTAssertNotNil(receipt.object)
+        }
+    }
+    func useCatalogFixture(_ fixtureName: String = "catalog-storage-v2") throws {
+        _ = try call("close")
+        try FileManager.default.removeItem(at:directory)
+        let file=try XCTUnwrap(Bundle.module.url(forResource:fixtureName,withExtension:"json",subdirectory:"Fixtures"))
+        let fixture=try CoreSchema.object(CanonicalParser.parse(String(contentsOf:file).trimmingCharacters(in:.whitespacesAndNewlines)))
+        steps=try CoreSchema.array(fixture["steps"]).map(CoreSchema.object)
+        now=try date(CoreSchema.string(steps[0]["instant"]))
+        repo=CoreRepository(directory:directory,fault:{[weak self] b in if self?.failure==b {self?.failure=nil;throw StorageFailure.unavailable}},now:{self.now},elapsed:{self.ticks},zone:{TimeZone(identifier:"Etc/UTC")!},catalog:catalogBytes)
+        try open()
+        XCTAssertEqual(try call("catalogMeta").object?["version"]?.text,"verdi-2026-10-31.1")
+    }
+    func corruptCatalog(_ work: (SQLiteSession) throws -> Void) throws {
+        _=try call("close")
+        let db=try SQLiteDatabase.open(at:directory.appendingPathComponent("core.sqlite"),schema:CoreSchema.schema())
+        try db.transaction(work);try db.close();try open()
+    }
+    func testRetainedInvalidGuideCannotGrantNewSelectionButCustomStillSaves() throws {
+        try useCatalogFixture()
+        try corruptCatalog {sql in
+            let raw=try sql.query("SELECT entry_json FROM catalog_entries WHERE catalog_id='sp_epipremnum_aureum'")[0][0]
+            var e=try CoreSchema.object(CanonicalParser.parse(CoreSchema.text(raw))),review=e["contentReview"]!.object!
+            review["outcome"] = .string("pending");e["contentReview"] = .object(review)
+            try sql.execute("UPDATE catalog_entries SET entry_json=? WHERE catalog_id='sp_epipremnum_aureum'",[.text(try CanonicalValue.object(e).json())])
+        }
+        try execute(0)
+        assertCode("CATALOG_SELECTION_STALE") {_=try preview(plan(1))}
+        try verifyRows(0)
+
+    }
+    func testMalformedCatalogMetadataDoesNotBlockCustomCommands() throws {
+        let custom=steps
+        try useCatalogFixture();steps=custom
+        let originalManifest=try call("catalogMeta").object!["manifest"]!.object!
+        var badAssets=originalManifest;badAssets["assets"] = .integer(1)
+        var badArt=originalManifest;badArt["speciesArt"] = .array([.string("invalid")])
+        for malformed in ["{", "{\"popularIds\":1}",try CanonicalValue.object(badAssets).json(),try CanonicalValue.object(badArt).json()] {
+            try corruptCatalog {try $0.execute("UPDATE catalog_head SET manifest_json=?",[.text(malformed)])}
+            assertCode("CATALOG_UNAVAILABLE") {_=try call("catalogMeta")}
+        }
+        try execute(0);try execute(1);try execute(2);try execute(3);try execute(4)
+    }
+    func testWrongEmbeddedCatalogIDCannotGrantNewSelection() throws {
+        try useCatalogFixture()
+        try corruptCatalog {sql in
+            let row=try sql.query("SELECT entry_json FROM catalog_entries WHERE catalog_id='sp_epipremnum_aureum'")[0][0]
+            var entry=try CoreSchema.object(CanonicalParser.parse(CoreSchema.text(row)))
+            entry["id"] = .string("wrong_id")
+            try sql.execute("UPDATE catalog_entries SET entry_json=? WHERE catalog_id='sp_epipremnum_aureum'",[.text(try CanonicalValue.object(entry).json())])
+        }
+        try execute(0)
+        assertCode("CATALOG_SELECTION_STALE") {_=try preview(plan(1))}
+        try verifyRows(0)
+    }
+    func testUnsupportedRetainedToxicityIsUnknownAndWrongEmbeddedIDRejects() throws {
+        try useCatalogFixture()
+        try corruptCatalog {sql in
+            let row=try sql.query("SELECT entry_json FROM catalog_entries WHERE catalog_id='sp_zamioculcas_zamiifolia'")[0][0]
+            var e=try CoreSchema.object(CanonicalParser.parse(CoreSchema.text(row))),t=e["toxicity"]!.object!
+            t["value"] = .string("non-toxic");t["sourceRefs"] = .array([]);e["toxicity"] = .object(t)
+            try sql.execute("UPDATE catalog_entries SET entry_json=? WHERE catalog_id='sp_zamioculcas_zamiifolia'",[.text(try CanonicalValue.object(e).json())])
+        }
+        let page=try call("catalogRows",["version":.string("verdi-2026-10-31.1"),"after":.null])
+        let zz=page.object!["entries"]!.array!.first{$0.object?["id"]?.text=="sp_zamioculcas_zamiifolia"}!
+        XCTAssertEqual(zz.object?["toxicity"]?.object?["value"]?.text,"unknown")
+        XCTAssertEqual(try call("catalogMeta").object?["limitation"]?.text,"CATALOG_UNAVAILABLE")
+        try corruptCatalog {sql in
+            let row=try sql.query("SELECT entry_json FROM catalog_entries LIMIT 1")[0][0]
+            var e=try CoreSchema.object(CanonicalParser.parse(CoreSchema.text(row)));e["id"] = .string("wrong_id")
+            try sql.execute("UPDATE catalog_entries SET entry_json=? WHERE entry_json=?",[.text(try CanonicalValue.object(e).json()),row])
+        }
+        assertCode("CATALOG_UNAVAILABLE") {_=try call("catalogRows",["version":.string("verdi-2026-10-31.1"),"after":.null])}
+    }
+    func testCatalogUpdateKeepsSavedRowsAndRejectsOldNewSelection() throws {
+        try useCatalogFixture();try execute(0);try execute(1)
+        let bytes=try catalogBytes()
+        var manifest=try CoreSchema.object(CanonicalParser.package(String(decoding:bytes.manifest,as:UTF8.self))),entries=try CoreSchema.array(CanonicalParser.package(String(decoding:bytes.entries,as:UTF8.self)))
+        let index=try XCTUnwrap(entries.firstIndex{$0.object?["id"]?.text=="sp_epipremnum_aureum"})
+        var e=entries[index].object!;e["commonName"] = .string("Reviewed rename fixture");e["entryVersion"] = .integer(2);entries[index] = .object(e)
+        let raw=try CanonicalCommand.bytes(.array(entries));manifest["catalogVersion"] = .string("verdi-test-update.2");manifest["entriesSha256"] = .string(CatalogPackage.digest(raw))
+        let next=try BundledCatalogBytes(manifest:CanonicalCommand.bytes(.object(manifest)),entries:raw,assets:bytes.assets)
+        _=try call("close")
+        repo=CoreRepository(directory:directory,fault:nil,now:{self.now},zone:{TimeZone(identifier:"Etc/UTC")!},catalog:{next})
+        try open();try verifyRows(1)
+        XCTAssertEqual(try call("catalogMeta").object?["version"]?.text,"verdi-test-update.2")
+        try execute(2)
+        assertCode("CATALOG_SELECTION_STALE") {_=try preview(plan(3))}
+        try verifyRows(2)
+    }
+    func testCatalogSharedReplayAndReopen() throws {
+        try useCatalogFixture()
+        for index in steps.indices {
+            try execute(index)
+            if index+1 == steps.count || steps[index+1]["intent"]?.object?["commandType"]?.text != "Undo" {try open()}
+            try verifyRows(index)
+        }
+    }
+    func testUnknownSeedApplyKeepsHeadAndStillCommitsItsGuardedResult() throws {
+        try useCatalogFixture("catalog-unknown-v2")
+        for index in 0...2 {try execute(index)}
+        let heads=try allRows("heads")
+        try execute(3)
+        XCTAssertEqual(try allRows("heads"),heads)
+        XCTAssertEqual(try allRows("suggestion_snapshots").count,2)
+        try open();try verifyRows(3)
+    }
+    func testCatalogApplyRejectsForgedOverrideAndRollsBackAtomically() throws {
+        try useCatalogFixture();try execute(0);try execute(1);try execute(2)
+        let good=try plan(3)
+        var bad=good, statements=try CoreSchema.array(good["statements"])
+        for i in statements.indices {
+            var s=try CoreSchema.object(statements[i]);if s["key"]?.text=="heads.update" {
+                var values=try CoreSchema.array(s["values"]);values[4] = .string("2030-01-01");s["values"] = .array(values);statements[i] = .object(s)
+            }
+        }
+        bad["statements"] = .array(statements)
+        assertCode("PLAN_INVALID") {_ = try preview(rehash(bad))}
+        failure = .beforeCommit
+        let p=try preview(good)
+        XCTAssertThrowsError(try call("commit",["plan":.object(p)]))
+        try open();try verifyRows(2)
+        _=try call("commit",["plan":.object(try preview(plan(3)))])
+        try verifyRows(3)
     }
     func testAllCommandsMatchDartRowsAndSurviveReopen() throws {
         for index in steps.indices {
@@ -256,7 +417,7 @@ final class CoreRepositoryTests: XCTestCase {
         var p=try CoreSchema.object(steps[25]["plan"])
         p["sessionId"] = .string(session); p["datasetId"] = .string(dataset); p["commandId"] = .string(command); p["normalisedPayload"] = .object(payload); p["payloadHash"] = .string(hash); p["expectedCollectionRevision"] = .integer(revision)
         let row=try XCTUnwrap(allRows("plants").first { $0[0] == .text(plant) })
-        p["statements"] = .array([.object(["key":.string("plants.deleteTree"),"beforeHash":.string(try CoreSchema.rowHash(row)),"values":.array([.string(plant),.integer(1),.integer(0),.integer(0),.integer(0),.integer(0),.array([])])])])
+        p["statements"] = .array([.object(["key":.string("plants.deleteTree"),"beforeHash":.string(try CoreSchema.rowHash(row)),"values":.array([.string(plant),.integer(1),.integer(0),.integer(0),.integer(0),.integer(0),.array([]),.integer(0),.integer(0),.integer(0)])])])
         p["result"] = .object(["commandId":.string(command),"datasetId":.string(dataset),"collectionRevision":.integer(revision+1),"primaryId":.string(plant),"primaryType":.string("plant"),"replayed":.boolean(false),"resourceIds":.array([.string(plant)]),"newRevisions":.object([:]),"notices":.array([])])
         p=try preview(rehash(p)); try call("commit",["plan":.object(p)])
     }

@@ -7,6 +7,7 @@ import 'presentation_helpers.dart';
 
 class RoutineFieldsEditor extends StatelessWidget {
   final List<RoutineInput> routines;
+  final List<CatalogSuggestion> suggestions;
   final Map<String, String> errors;
   final ValueChanged<List<RoutineInput>> onChanged;
   final Map<String, GlobalKey> fieldKeys;
@@ -14,6 +15,7 @@ class RoutineFieldsEditor extends StatelessWidget {
   const RoutineFieldsEditor({
     super.key,
     required this.routines,
+    this.suggestions = const [],
     required this.errors,
     required this.onChanged,
     required this.fieldKeys,
@@ -38,6 +40,9 @@ class RoutineFieldsEditor extends StatelessWidget {
         for (final kind in StandardCareKind.values)
           Builder(
             builder: (context) {
+              final proposal = suggestions
+                  .where((s) => s.careKind == kind)
+                  .firstOrNull;
               final index = routines.indexWhere((r) => r.kind == kind);
               final raw = index < 0 ? null : routines[index];
               void update({
@@ -76,14 +81,19 @@ class RoutineFieldsEditor extends StatelessWidget {
                       enabled
                           ? RoutineInput(
                               kind: kind,
-                              count: '',
-                              unit: IntervalUnit.day,
+                              count: proposal?.interval.count.toString() ?? '',
+                              unit: proposal?.interval.unit ?? IntervalUnit.day,
                               seedKind: null,
                               date: '',
                             )
                           : null,
                     ),
                   ),
+                  if (proposal != null) ...[
+                    Text(s.suggestionOnly),
+                    Text(proposal.context),
+                    Text(proposal.sourceLabel),
+                  ],
                   if (raw != null) ...[
                     TextFormField(
                       key: fieldKeys['${kind.name}-count'],

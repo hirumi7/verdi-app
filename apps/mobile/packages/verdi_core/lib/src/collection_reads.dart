@@ -72,9 +72,14 @@ final class RoutineRead {
 final class PlantDetail {
   final PlantCore plant;
   final List<RoutineRead> routines;
+  final Map<String, SuggestionSnapshot> suggestions;
   final bool canRestore;
-  PlantDetail._(this.plant, Iterable<RoutineRead> routines, this.canRestore)
-    : routines = List.unmodifiable(routines);
+  PlantDetail._(
+    this.plant,
+    Iterable<RoutineRead> routines,
+    this.canRestore,
+    this.suggestions,
+  ) : routines = List.unmodifiable(routines);
   bool get canArchive => !plant.archived;
   bool get canDelete => plant.archived;
   bool get canEdit => true;
@@ -366,6 +371,10 @@ extension CollectionReads on MemoryOperationCoordinator {
       plant,
       rows.map((r) => RoutineRead._(plant, r, snapshot.careKinds[r.id]!)),
       plant.archived && (_store._pro || snapshot.activePlants.length < 5),
+      Map.unmodifiable({
+        for (final entry in snapshot.suggestions.entries)
+          if (entry.value.plantId == plant.id) entry.key: entry.value,
+      }),
     );
   }
 

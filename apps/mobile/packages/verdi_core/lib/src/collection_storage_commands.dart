@@ -6,26 +6,32 @@ List<Object?> _list(Object? value) => (value as List).cast<Object?>();
 
 CustomPlantFields _storedFields(Object? value) {
   final m = _map(value);
-  if (m['identityKind'] != 'custom' ||
-      m['coverPhotoId'] != null ||
-      m['speciesId'] != null ||
-      m['catalogSelection'] != null) {
+  final selection = m['catalogSelection'] == null
+      ? null
+      : CatalogSelection.fromJson(
+          m['speciesId'] as String,
+          m['catalogSelection'],
+        );
+  if (m['coverPhotoId'] != null ||
+      !['custom', 'catalog'].contains(m['identityKind']) ||
+      (m['identityKind'] == 'catalog') != (selection != null))
     throw CommandRejected('STORAGE_INVALID');
-  }
   final fields = CustomPlantFields(
     name: m['name'] as String,
     location: m['location'] as String,
     notes: m['notes'] as String,
-    speciesName: m['customSpeciesName'] as String,
+    speciesName:
+        selection?.speciesNameSnapshot ?? m['customSpeciesName'] as String,
+    catalogSelection: selection,
     light: CustomLight.values.byName(
       m['customLight'] == 'bright-indirect'
           ? 'brightIndirect'
-          : m['customLight'] as String,
+          : (m['customLight'] as String? ?? 'unknown'),
     ),
     toxicity: CustomToxicity.values.byName(
       m['customToxicity'] == 'non-toxic'
           ? 'nonToxic'
-          : m['customToxicity'] as String,
+          : (m['customToxicity'] as String? ?? 'unknown'),
     ),
     routines: _list(m['routineInputs']).map((v) {
       final r = _map(v);
@@ -46,12 +52,20 @@ CustomPlantFields _storedFields(Object? value) {
       for (final v in _list(m['baseRoutineRevisions']))
         _map(v)['routineId'] as String: _map(v)['revision'] as int,
     },
-    keepRoutineIds: _list(m['speciesChoices']).map((v) {
-      final c = _map(v);
-      if (c['decision'] != 'keep' || c['interval'] != null)
-        throw CommandRejected('STORAGE_INVALID');
-      return c['routineId'] as String;
-    }),
+    keepRoutineIds: _list(m['speciesChoices'])
+        .where((v) => _map(v)['decision'] == 'keep')
+        .map((v) => _map(v)['routineId'] as String),
+    applyRoutineIntervals: {
+      for (final v in _list(
+        m['speciesChoices'],
+      ).where((v) => _map(v)['decision'] == 'apply'))
+        _map(v)['routineId'] as String: CareInterval(
+          _map(_map(v)['interval'])['count'] as int,
+          IntervalUnit.values.byName(
+            _map(_map(v)['interval'])['unit'] as String,
+          ),
+        ),
+    },
   );
   if (canonicalCommandJson(fields._json()) != canonicalCommandJson(m))
     throw CommandRejected('STORAGE_INVALID');
@@ -170,7 +184,11 @@ Map<String, Object?> _successJson(CommandSuccess r) => {
   'notices': r.notices,
 };
 Map<String, Object?> _headJson(RoutineHeadValues r) => {
-  'version': 1,
+  'version': r.appliedSuggestionId == null ? 1 : 2,
+  if (r.appliedSuggestionId != null)
+    'originalSuggestionId': r.originalSuggestionId,
+  if (r.appliedSuggestionId != null)
+    'appliedSuggestionId': r.appliedSuggestionId,
   'headId': r.headId,
   'intervalCount': r.interval.count,
   'intervalUnit': r.interval.unit.name,
@@ -184,7 +202,7 @@ Map<String, Object?> _headJson(RoutineHeadValues r) => {
 };
 RoutineHeadValues _storedHead(Object? value) {
   final m = _map(value);
-  if (m['version'] != 1) throw CommandRejected('STORAGE_INVALID');
+  if (![1, 2].contains(m['version'])) throw CommandRejected('STORAGE_INVALID');
   final r = RoutineHeadValues._stored(
     m['headId'] as String,
     CareInterval(
@@ -198,6 +216,8 @@ RoutineHeadValues _storedHead(Object? value) {
     CareStorage.date(m['overrideDate']),
     RoutineStatus.values.byName(m['status'] as String),
     m['archived'] as bool,
+    m['originalSuggestionId'] as String?,
+    m['appliedSuggestionId'] as String?,
   );
   if (canonicalCommandJson(_headJson(r)) != canonicalCommandJson(m))
     throw CommandRejected('STORAGE_INVALID');

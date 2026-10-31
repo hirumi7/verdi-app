@@ -133,6 +133,7 @@ String kindLabel(AppStrings s, StandardCareKind kind, {bool actual = false}) =>
     };
 
 String errorLabel(AppStrings s, String code) => switch (code) {
+  'CATALOG_SELECTION_STALE' || 'CATALOG_CHANGED' => s.catalogStale,
   'UNDO_EXPIRED' || 'UNDO_CHANGED' || 'UNDO_UNAVAILABLE' => s.undoUnavailable,
   'STALE_TARGET' ||
   'PREVIEW_STALE' ||

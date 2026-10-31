@@ -5,6 +5,13 @@ import Foundation
 enum CanonicalParseFailure: Error { case malformed, duplicateKey, nonCanonical }
 
 enum CanonicalParser {
+    static func package(_ text: String) throws -> CanonicalValue {
+        guard text.utf8.count <= 32*1024*1024 else { throw CanonicalFailure.sizeLimit }
+        var parser = JSONTokenReader(bytes:Array(text.utf8)); parser.whitespace()
+        let value = try parser.value(depth:0); parser.whitespace()
+        guard parser.position == parser.bytes.count else { throw CanonicalParseFailure.malformed }
+        return value
+    }
     static func parse(_ text: String, limit: Int = CanonicalCommand.byteLimit) throws -> CanonicalValue {
         guard text.utf8.count <= limit else { throw CanonicalFailure.sizeLimit }
         var parser = JSONTokenReader(bytes: Array(text.utf8))
@@ -19,7 +26,9 @@ private struct JSONTokenReader {
     let bytes: [UInt8]
     var position = 0
     var peek: UInt8? { position < bytes.count ? bytes[position] : nil }
+    mutating func whitespace() { while let b=peek, [9,10,13,32].contains(b) {position += 1} }
     mutating func take(_ byte: UInt8) throws {
+        whitespace()
         guard peek == byte else { throw CanonicalParseFailure.malformed }
         position += 1
     }
@@ -80,6 +89,7 @@ private struct JSONTokenReader {
         throw CanonicalParseFailure.malformed
     }
     mutating func value(depth: Int) throws -> CanonicalValue {
+        whitespace()
         guard let firstByte = peek else { throw CanonicalParseFailure.malformed }
         switch firstByte {
         case 110: try literal("null"); return .null
@@ -89,25 +99,30 @@ private struct JSONTokenReader {
         case 91:
             guard depth < CanonicalCommand.depthLimit else { throw CanonicalFailure.depthLimit }
             position += 1
+            whitespace()
             var values: [CanonicalValue] = []
             if peek == 93 { position += 1; return .array(values) }
             while true {
                 values.append(try value(depth: depth + 1))
+                whitespace()
                 if peek == 93 { position += 1; return .array(values) }
                 try take(44)
             }
         case 123:
             guard depth < CanonicalCommand.depthLimit else { throw CanonicalFailure.depthLimit }
             position += 1
+            whitespace()
             var values: [String: CanonicalValue] = [:]
             if peek == 125 { position += 1; return .object(values) }
             while true {
+                whitespace()
                 let units = try string()
                 guard units.allSatisfy({ $0 < 128 }) else { throw CanonicalFailure.nonASCIIKey }
                 let key = String(utf16CodeUnits: units, count: units.count)
                 guard values[key] == nil else { throw CanonicalParseFailure.duplicateKey }
                 try take(58)
                 values[key] = try value(depth: depth + 1)
+                whitespace()
                 if peek == 125 { position += 1; return .object(values) }
                 try take(44)
             }

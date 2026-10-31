@@ -1,6 +1,6 @@
 # Verdi application
 
-This repository is the selected home for Verdi application code. Development includes a [pure Dart core](apps/mobile/packages/verdi_core/README.md), a tested Flutter/iOS preview and a [native SQLite foundation](apps/mobile/packages/verdi_native/README.md). The main development UI saves custom plants, care, history and drafts in native SQLite. The full product feature set and internal admin remain unfinished. Product requirements and human review records live in the independent docs repository, pinned here at [docs/](docs/README.md).
+This repository is the selected home for Verdi application code. Development includes a [pure Dart core](apps/mobile/packages/verdi_core/README.md), a tested Flutter/iOS preview and a [native SQLite foundation](apps/mobile/packages/verdi_native/README.md). The main development UI saves custom and catalog plants, care, history and drafts in native SQLite. A reviewed 24-species bundle supplies offline search, species information and explicit care-suggestion choices. The full product feature set and internal admin remain unfinished. Product requirements and human review records live in the independent docs repository, pinned here at [docs/](docs/README.md).
 
 ## Start with the AI
 
@@ -122,3 +122,28 @@ controls. The memory environment is requested explicitly by unit/widget tests.
 Regenerate the 28-transition Dart/native storage fixture from `packages/verdi_core`
 with `dart run tool/generate_storage_vectors.dart`; the core test detects drift.
 Keep `tooling/pigeon/check_generation.py` passing for both generated API outputs.
+
+## Bundled catalog verification
+
+The reviewed content, source/rights evidence and deterministic build instructions
+are in [tooling/catalog](tooling/catalog/README.md). The installed catalog is
+separate from user data; schema v2 adds linked selection and immutable suggestion
+snapshots without replacing the permanent `custom_core_v1` dataset. A failed
+catalog update retains the last good catalog and custom entry stays available.
+
+Run the catalog UI seed and recovery in separate processes on the same retained
+installation, immediately one after the other:
+
+```sh
+cd apps/mobile
+flutter test integration_test/catalog_flow_test.dart -d DEVICE_ID --no-uninstall --dart-define=VERDI_CATALOG_PHASE=seed
+flutter test integration_test/catalog_flow_test.dart -d DEVICE_ID --no-uninstall --dart-define=VERDI_CATALOG_PHASE=recover
+```
+
+These exercise search/info, durable selection, explicit suggestion application,
+care/lifecycle and draft recovery. The `upgrade` phase is a separate migration
+probe for the documented retained v1 fixture; do not claim migration evidence
+from running it on an already upgraded installation. Native tests separately
+exercise real v1 migration, interrupted migration, retained frozen commands,
+malformed bundles and catalog updates. Regenerate the known/unknown-seed catalog
+vectors with `dart run tool/generate_catalog_vectors.dart` from `packages/verdi_core`.

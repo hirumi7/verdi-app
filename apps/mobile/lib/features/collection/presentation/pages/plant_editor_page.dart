@@ -6,6 +6,7 @@ import 'package:verdi_core/verdi_core.dart';
 import '../../../../core/di/injection.dart';
 import '../../../../core/router/app_router.dart';
 import '../cubits/plant_editor_cubit.dart';
+import '../../../catalog/presentation/widgets/species_picker.dart';
 import '../widgets/presentation_helpers.dart';
 import '../widgets/routine_fields_editor.dart';
 
@@ -71,8 +72,21 @@ class _PlantEditorPageState extends State<PlantEditorPage>
   Future<void> back() async {
     if (reviewing) return;
     final s = strings(context);
+    if (editor.state.picking &&
+        (widget.plantId != null || editor.state.draft != null)) {
+      try {
+        await editor.flush();
+      } catch (_) {
+        return;
+      }
+      editor.closePicker();
+      return;
+    }
     if (!editor.state.dirty) {
-      await context.router.maybePop();
+      setState(() => leaving = true);
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted) context.router.maybePop();
+      });
       return;
     }
     final discard = await showDialog<bool>(
@@ -214,7 +228,7 @@ class _PlantEditorPageState extends State<PlantEditorPage>
         final s = strings(context);
         final f = state.fields;
         return PopScope(
-          canPop: leaving || (!state.dirty && !reviewing),
+          canPop: leaving || (!state.dirty && !reviewing && !state.picking),
           onPopInvokedWithResult: (didPop, _) {
             if (!didPop) back();
           },
@@ -225,7 +239,13 @@ class _PlantEditorPageState extends State<PlantEditorPage>
                 tooltip: s.cancel,
                 icon: const Icon(Icons.arrow_back),
               ),
-              title: Text(widget.plantId == null ? s.addPlant : s.editPlant),
+              title: Text(
+                state.picking
+                    ? s.chooseSpecies
+                    : widget.plantId == null
+                    ? s.addPlant
+                    : s.editPlant,
+              ),
             ),
             body: state.loading
                 ? const Center(child: CircularProgressIndicator())
@@ -235,6 +255,8 @@ class _PlantEditorPageState extends State<PlantEditorPage>
                       state.errorCode ?? 'STORAGE_UNAVAILABLE',
                     ),
                   )
+                : state.picking
+                ? SpeciesPicker(editor: editor)
                 : SingleChildScrollView(
                     key: const ValueKey('plant-editor-scroll'),
                     keyboardDismissBehavior:
@@ -278,12 +300,20 @@ class _PlantEditorPageState extends State<PlantEditorPage>
                           onChanged: (v) => editor.update(name: v),
                         ),
                         const SizedBox(height: 16),
+                        TextButton.icon(
+                          onPressed: editor.openPicker,
+                          icon: const Icon(Icons.search),
+                          label: Text(s.changeSpecies),
+                        ),
                         TextFormField(
+                          readOnly: f.catalogSelection != null,
                           key: fieldKeys['speciesName'],
                           focusNode: fieldFocus['speciesName'],
                           initialValue: f.speciesName,
                           decoration: InputDecoration(
-                            labelText: s.species,
+                            labelText: f.catalogSelection == null
+                                ? s.species
+                                : s.selectedSpecies,
                             errorText:
                                 state.errors.containsKey('customSpeciesName')
                                 ? s.fieldInvalid
@@ -322,56 +352,149 @@ class _PlantEditorPageState extends State<PlantEditorPage>
                           onChanged: (v) => editor.update(notes: v),
                         ),
                         const SizedBox(height: 16),
-                        DropdownButtonFormField<CustomLight>(
-                          initialValue: f.light,
-                          isExpanded: true,
-                          decoration: InputDecoration(labelText: s.light),
-                          items: [
-                            for (final light in CustomLight.values)
-                              DropdownMenuItem(
-                                value: light,
-                                child: Text(switch (light) {
-                                  CustomLight.unknown => s.unknown,
-                                  CustomLight.low => s.lowLight,
-                                  CustomLight.medium => s.mediumLight,
-                                  CustomLight.brightIndirect =>
-                                    s.brightIndirect,
-                                  CustomLight.direct => s.directLight,
-                                }),
-                              ),
-                          ],
-                          onChanged: (v) => editor.update(light: v),
-                        ),
+                        if (f.catalogSelection == null)
+                          DropdownButtonFormField<CustomLight>(
+                            initialValue: f.light,
+                            isExpanded: true,
+                            decoration: InputDecoration(labelText: s.light),
+                            items: [
+                              for (final light in CustomLight.values)
+                                DropdownMenuItem(
+                                  value: light,
+                                  child: Text(switch (light) {
+                                    CustomLight.unknown => s.unknown,
+                                    CustomLight.low => s.lowLight,
+                                    CustomLight.medium => s.mediumLight,
+                                    CustomLight.brightIndirect =>
+                                      s.brightIndirect,
+                                    CustomLight.direct => s.directLight,
+                                  }),
+                                ),
+                            ],
+                            onChanged: (v) => editor.update(light: v),
+                          ),
                         const SizedBox(height: 16),
-                        DropdownButtonFormField<CustomToxicity>(
-                          initialValue: f.toxicity,
-                          isExpanded: true,
-                          decoration: InputDecoration(labelText: s.toxicity),
-                          items: [
-                            for (final value in CustomToxicity.values)
-                              DropdownMenuItem(
-                                value: value,
-                                child: Text(switch (value) {
-                                  CustomToxicity.unknown => s.unknown,
-                                  CustomToxicity.toxic => s.toxic,
-                                  CustomToxicity.nonToxic => s.nonToxic,
-                                }),
-                              ),
-                          ],
-                          onChanged: (v) => editor.update(toxicity: v),
-                        ),
+                        if (f.catalogSelection == null)
+                          DropdownButtonFormField<CustomToxicity>(
+                            initialValue: f.toxicity,
+                            isExpanded: true,
+                            decoration: InputDecoration(labelText: s.toxicity),
+                            items: [
+                              for (final value in CustomToxicity.values)
+                                DropdownMenuItem(
+                                  value: value,
+                                  child: Text(switch (value) {
+                                    CustomToxicity.unknown => s.unknown,
+                                    CustomToxicity.toxic => s.toxic,
+                                    CustomToxicity.nonToxic => s.nonToxic,
+                                  }),
+                                ),
+                            ],
+                            onChanged: (v) => editor.update(toxicity: v),
+                          ),
                         if (widget.plantId == null)
                           RoutineFieldsEditor(
                             fieldKeys: routineKeys,
                             fieldFocus: routineFocus,
                             routines: f.routines,
+                            suggestions: f.catalogSelection?.suggestions ?? [],
                             errors: state.errors,
                             onChanged: (routines) =>
                                 editor.update(routines: routines),
                           ),
-                        if (widget.plantId != null &&
-                            f.keepRoutineIds.isNotEmpty)
-                          Text(s.keepCurrentSchedules),
+                        if (editor.identityChanged) ...[
+                          Text(s.chooseSpeciesRoutine),
+                          for (final row in state.existingRoutines)
+                            Builder(
+                              builder: (context) {
+                                final id = row.routine.id,
+                                    proposal = f.catalogSelection?.suggestion(
+                                      row.careKind,
+                                    );
+                                return Card(
+                                  child: Padding(
+                                    padding: const EdgeInsets.all(12),
+                                    child: Column(
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
+                                      children: [
+                                        Text(kindLabel(s, row.careKind)),
+                                        RadioGroup<String>(
+                                          groupValue:
+                                              f.keepRoutineIds.contains(id)
+                                              ? 'keep'
+                                              : f.applyRoutineIntervals
+                                                    .containsKey(id)
+                                              ? 'apply'
+                                              : null,
+                                          onChanged: (value) {
+                                            if (value == 'keep') {
+                                              editor.chooseRoutine(id, null);
+                                            } else if (proposal != null) {
+                                              editor.chooseRoutine(
+                                                id,
+                                                proposal.interval,
+                                              );
+                                            }
+                                          },
+                                          child: Column(
+                                            children: [
+                                              RadioListTile(
+                                                value: 'keep',
+                                                title: Text(s.keepRoutine),
+                                                subtitle: Text(
+                                                  s.routineEvery(
+                                                    row.routine.interval.count,
+                                                    unitLabel(
+                                                      s,
+                                                      row.routine.interval.unit,
+                                                    ),
+                                                  ),
+                                                ),
+                                              ),
+                                              if (proposal != null)
+                                                RadioListTile(
+                                                  value: 'apply',
+                                                  title: Text(
+                                                    s.applySuggestion,
+                                                  ),
+                                                  subtitle: Text(
+                                                    proposal.context,
+                                                  ),
+                                                ),
+                                            ],
+                                          ),
+                                        ),
+                                        if (f.applyRoutineIntervals[id]
+                                            case final interval?)
+                                          TextButton(
+                                            onPressed: () async {
+                                              final chosen =
+                                                  await chooseInterval(
+                                                    context,
+                                                    interval,
+                                                  );
+                                              if (chosen != null) {
+                                                editor.chooseRoutine(
+                                                  id,
+                                                  chosen,
+                                                );
+                                              }
+                                            },
+                                            child: Text(
+                                              s.routineEvery(
+                                                interval.count,
+                                                unitLabel(s, interval.unit),
+                                              ),
+                                            ),
+                                          ),
+                                      ],
+                                    ),
+                                  ),
+                                );
+                              },
+                            ),
+                        ],
                         const SizedBox(height: 24),
                         FilledButton(
                           onPressed: reviewing ? null : save,

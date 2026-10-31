@@ -12,6 +12,9 @@ final class CoreStorageProjection {
     'event_corrections',
     'routine_changes',
     'plant_drafts',
+    'plant_catalog',
+    'suggestion_snapshots',
+    'routine_suggestions',
   ];
   final MemoryCoreStore _store;
   late final MemoryOperationCoordinator reader;
@@ -45,13 +48,17 @@ final class CoreStorageProjection {
       _revision(revision);
       _revision(storageRevision);
       final ids = <String>{};
-      final lengths = [11, 13, 5, 11, 12, 10, 8];
+      final lengths = [11, 13, 5, 11, 12, 10, 8, 4, 11, 3];
       for (var t = 0; t < tables.length; t++) {
+        final tableIds = <String>{};
         for (final row in rows[tables[t]]!) {
           if (row.length != lengths[t])
             throw CommandRejected('STORAGE_INVALID');
           _id(row[0] as String);
-          if (!ids.add(row[0] as String))
+          if (!tableIds.add(row[0] as String))
+            throw CommandRejected('STORAGE_INVALID');
+          if (!['plant_catalog', 'routine_suggestions'].contains(tables[t]) &&
+              !ids.add(row[0] as String))
             throw CommandRejected('STORAGE_INVALID');
         }
       }
@@ -70,7 +77,28 @@ final class CoreStorageProjection {
           CareStorage.instant(r[9]),
           CareStorage.instant(r[10]),
           CareStorage.flag(r[8]),
+          rows['plant_catalog']!
+              .where((c) => c[0] == r[0])
+              .map(
+                (c) => CatalogSelection.fromJson(
+                  c[1] as String,
+                  jsonDecode(c[3] as String),
+                ),
+              )
+              .firstOrNull,
         );
+      }
+      for (final row in rows['plant_catalog']!) {
+        final plant = plants[row[0]],
+            selection = plants[row[0]]?.catalogSelection;
+        if (plant == null ||
+            selection == null ||
+            row[2] != selection.catalogVersion ||
+            plant.speciesName != selection.speciesNameSnapshot ||
+            plant.light != CustomLight.unknown ||
+            plant.toxicity != CustomToxicity.unknown) {
+          throw CommandRejected('STORAGE_INVALID');
+        }
       }
       final routines = <String, RoutineCore>{};
       final kinds = <String, StandardCareKind>{};
@@ -85,7 +113,7 @@ final class CoreStorageProjection {
         CareStorage.instant(r[11]);
         CareStorage.instant(r[12]);
         final kind = StandardCareKind.values.byName(r[3] as String);
-        final routine = CareStorage.hydrate(
+        var routine = CareStorage.hydrate(
           routine: r,
           head: heads.single,
           archived: parent.archived,
@@ -100,6 +128,14 @@ final class CoreStorageProjection {
               kinds[x.id] == kind,
         ))
           throw CommandRejected('STORAGE_INVALID');
+        final link = rows['routine_suggestions']!
+            .where((c) => c[0] == r[0])
+            .firstOrNull;
+        if (link != null)
+          routine = routine.withSuggestions(
+            link[1] as String?,
+            link[2] as String,
+          );
         routines[routine.id] = routine;
         kinds[routine.id] = kind;
       }
@@ -157,6 +193,43 @@ final class CoreStorageProjection {
           _storedHead(jsonDecode(r[9] as String)),
         );
       }
+      final suggestions = <String, SuggestionSnapshot>{};
+      for (final row in rows['suggestion_snapshots']!) {
+        final routine = routines[row[1]];
+        if (routine == null ||
+            routine.plantId != row[2] ||
+            kinds[routine.id]!.name != row[5])
+          throw CommandRejected('STORAGE_INVALID');
+        suggestions[row[0] as String] = SuggestionSnapshot(
+          row[0] as String,
+          row[1] as String,
+          row[2] as String,
+          row[3] as String,
+          row[4] as String,
+          CatalogSuggestion(
+            kinds[routine.id]!,
+            CareInterval(
+              row[6] as int,
+              IntervalUnit.values.byName(row[7] as String),
+            ),
+            row[9] as String,
+            row[8] as String,
+          ),
+          CareStorage.instant(row[10]),
+        );
+      }
+      for (final routine in routines.values) {
+        for (final sid in [
+          routine.originalSuggestionId,
+          routine.appliedSuggestionId,
+        ].whereType<String>()) {
+          if (suggestions[sid]?.routineId != routine.id)
+            throw CommandRejected('STORAGE_INVALID');
+        }
+      }
+      if (rows['plant_catalog']!.any((c) => !plants.containsKey(c[0])) ||
+          rows['routine_suggestions']!.any((c) => !routines.containsKey(c[0])))
+        throw CommandRejected('STORAGE_INVALID');
       final prior = _store._state;
       _store._state = _State(
         CollectionSnapshot._(
@@ -168,6 +241,7 @@ final class CoreStorageProjection {
           drafts,
           revision - 1,
           changes,
+          suggestions,
         ),
         prior.receipts,
         prior.usedDraftIds,
@@ -281,6 +355,17 @@ final class CoreStorageProjection {
           [
             for (final r in owned) {'draftId': r[0], 'revision': r[1]},
           ],
+          snapshot.suggestions.values
+              .where((s) => s.plantId == command.plantId)
+              .length,
+          snapshot.plants[command.plantId]!.catalogSelection == null ? 0 : 1,
+          snapshot.routines.values
+              .where(
+                (r) =>
+                    r.plantId == command.plantId &&
+                    r.appliedSuggestionId != null,
+              )
+              .length,
         ],
       });
     } else {
@@ -520,6 +605,40 @@ final class CoreStorageProjection {
         d.updatedAt.toIso8601String(),
       ]);
     }
+    for (final p in s.plants.values) {
+      final c = p.catalogSelection;
+      if (c != null)
+        result['plant_catalog']!.add([
+          p.id,
+          c.speciesId,
+          c.catalogVersion,
+          canonicalCommandJson(c.toJson()),
+        ]);
+    }
+    for (final r in s.routines.values) {
+      if (r.appliedSuggestionId != null)
+        result['routine_suggestions']!.add([
+          r.id,
+          r.originalSuggestionId,
+          r.appliedSuggestionId,
+        ]);
+    }
+    for (final v in s.suggestions.values) {
+      final c = v.suggestion;
+      result['suggestion_snapshots']!.add([
+        v.id,
+        v.routineId,
+        v.plantId,
+        v.speciesId,
+        v.catalogVersion,
+        c.careKind.name,
+        c.interval.count,
+        c.interval.unit.name,
+        c.sourceLabel,
+        c.context,
+        v.capturedAt.toIso8601String(),
+      ]);
+    }
     // Preserve exact native timestamp spellings on unchanged rows.
     for (final t in tables) {
       final old = {for (final r in _rows[t]!) r[0]: r};
@@ -536,6 +655,7 @@ final class CoreStorageProjection {
   }
 
   static const _instantColumns = <String, List<int>>{
+    'suggestion_snapshots': [10],
     'plants': [9, 10],
     'routines': [11, 12],
     'care_events': [8],

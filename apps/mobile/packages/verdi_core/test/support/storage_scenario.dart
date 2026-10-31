@@ -73,6 +73,11 @@ final class StorageScenario {
                 .where((r) => r[1] == plant)
                 .map((r) => r[0])
                 .toSet();
+        rows['plant_catalog']!.removeWhere((r) => r[0] == plant);
+        rows['routine_suggestions']!.removeWhere(
+          (r) => routines.contains(r[0]),
+        );
+        rows['suggestion_snapshots']!.removeWhere((r) => r[2] == plant);
         rows['plants']!.removeWhere((r) => r[0] == plant);
         rows['routines']!.removeWhere((r) => r[1] == plant);
         rows['heads']!.removeWhere((r) => routines.contains(r[1]));

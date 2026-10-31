@@ -35,9 +35,12 @@ public final class CoreRepository {
     let now: () -> Date
     let elapsed: () -> TimeInterval
     let fault: ((SQLiteBoundary) throws -> Void)?
-    public convenience init(directory: URL) { self.init(directory: directory, fault: nil) }
+    let catalogProvider: (() throws -> BundledCatalogBytes)?
+    var catalogLimitation: String?
+    public convenience init(directory: URL, catalog: (() throws -> BundledCatalogBytes)? = nil) { self.init(directory: directory, fault: nil, catalog:catalog) }
     init(directory: URL, fault: ((SQLiteBoundary) throws -> Void)?, now: @escaping () -> Date = Date.init,
-         elapsed: @escaping () -> TimeInterval = { ProcessInfo.processInfo.systemUptime }, zone: @escaping () -> TimeZone = { .current }) {
+         elapsed: @escaping () -> TimeInterval = { ProcessInfo.processInfo.systemUptime }, zone: @escaping () -> TimeZone = { .current }, catalog: (() throws -> BundledCatalogBytes)? = nil) {
+        self.catalogProvider=catalog
         self.directory = directory; self.fault = fault; self.now = now; self.elapsed = elapsed; self.zone = zone
     }
     public func invalidateUndo() { queue.sync { grants.removeAll() } }
@@ -50,6 +53,9 @@ public final class CoreRepository {
                 let value: CanonicalValue
                 switch operation {
                 case "close": try db.close(); database = nil; sessionID = ""; grants.removeAll(); previews.removeAll(); value = .null
+                case "catalogMeta": value = try db.read {try catalogMeta($0)}
+                case "catalogRows": value = try db.read {try catalogRows($0,args)}
+                case "retryCatalog": tryCatalog(db); value = try db.read {try catalogMeta($0)}
                 case "clock": value = CoreClockFrame.capture(now(), zone: zone()).value
                 case "metadata": value = try db.read { try metadata($0) }
                 case "readRows": value = try db.read { try readRows($0, args) }
@@ -112,7 +118,7 @@ public final class CoreRepository {
             guard parentSync == 0, parentClose == 0 else { throw StorageFailure.filesystem(errno) }
         }
         try protect(marker)
-        let db = try initialized ? SQLiteDatabase.open(at: file, schema: CoreSchema.schema())
+        let db = try initialized ? SQLiteDatabase.open(at: file, schema: CoreSchema.schema(), upgradeFrom: CoreSchema.schema(version:1), migrationStatements: CoreSchema.catalogDefinitions, fault:fault)
             : SQLiteDatabase.create(at: file, schema: CoreSchema.schema(dataset: UUID().uuidString.lowercased(), instant: CoreClockFrame.capture(now(), zone: zone()).instant), fault: fault)
         do {
             for suffix in ["", "-wal", "-shm"] {
@@ -121,8 +127,9 @@ public final class CoreRepository {
             }
             datasetID = try db.read { try CoreSchema.text($0.query("SELECT dataset_id FROM metadata")[0][0]) }
             sessionID = UUID().uuidString.lowercased(); database = db
+            tryCatalog(db)
             var result = try CoreSchema.object(db.read { try metadata($0) })
-            result["sessionId"] = .string(sessionID); result["profile"] = .string("custom_core_v1"); result["schemaVersion"] = .integer(1)
+            result["sessionId"] = .string(sessionID); result["profile"] = .string("custom_core_v1"); result["schemaVersion"] = .integer(2)
             result["fileProtectionVerified"] = .boolean(Self.deviceProtectionRequired)
             result["clock"] = CoreClockFrame.capture(now(), zone: zone()).value; result["capabilityRevision"] = .integer(1); result["access"] = .string("free")
             return .object(result)

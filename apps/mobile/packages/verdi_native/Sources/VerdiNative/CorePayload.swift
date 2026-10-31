@@ -62,9 +62,19 @@ extension CoreRegistry {
     static func validateRawFields(_ value: CanonicalValue?, mode: String) throws {
         let fields = try CoreSchema.object(value)
         try require(["add","edit"].contains(mode) && Set(fields.keys) == Set(["name","location","notes","identityKind","coverPhotoId","speciesId","catalogSelection","customSpeciesName","customLight","customToxicity","routineInputs","baseRoutineRevisions","speciesChoices"]),"FIELD_INVALID")
-        try require(["name","location","notes","customSpeciesName"].allSatisfy {fields[$0]?.units != nil},"FIELD_INVALID")
-        try require(fields["identityKind"]?.text == "custom" && ["coverPhotoId","speciesId","catalogSelection"].allSatisfy {fields[$0]?.isNull == true},"FIELD_INVALID")
-        try require(["unknown","low","medium","bright-indirect","direct"].contains(fields["customLight"]?.text ?? "") && ["unknown","toxic","non-toxic"].contains(fields["customToxicity"]?.text ?? ""),"FIELD_INVALID")
+        try require(["name","location","notes"].allSatisfy {fields[$0]?.units != nil},"FIELD_INVALID")
+        try require(fields["coverPhotoId"]?.isNull == true,"FIELD_INVALID")
+        if fields["identityKind"]?.text == "catalog" {
+            _=try CatalogPackage.matches(fields["speciesId"],"^[A-Za-z0-9_-]{1,128}$")
+            let selection=try CoreSchema.object(fields["catalogSelection"])
+            try CatalogPackage.keys(selection,["catalogVersion","speciesNameSnapshot","suggestions"])
+            _=try CatalogPackage.matches(selection["catalogVersion"],"^[a-z0-9][a-z0-9._-]{0,79}$")
+            _=try CatalogPackage.text(selection["speciesNameSnapshot"],160);try CatalogPackage.suggestions(selection["suggestions"])
+            try require(["customSpeciesName","customLight","customToxicity"].allSatisfy {fields[$0]?.isNull == true},"FIELD_INVALID")
+        } else {
+            try require(fields["identityKind"]?.text == "custom" && fields["customSpeciesName"]?.units != nil && ["speciesId","catalogSelection"].allSatisfy {fields[$0]?.isNull == true},"FIELD_INVALID")
+            try require(["unknown","low","medium","bright-indirect","direct"].contains(fields["customLight"]?.text ?? "") && ["unknown","toxic","non-toxic"].contains(fields["customToxicity"]?.text ?? ""),"FIELD_INVALID")
+        }
         let routines = try CoreSchema.array(fields["routineInputs"]), bases = try CoreSchema.array(fields["baseRoutineRevisions"]), choices = try CoreSchema.array(fields["speciesChoices"])
         try require(mode == "add" ? bases.isEmpty && choices.isEmpty : routines.isEmpty,"FIELD_INVALID")
         for value in routines {
@@ -83,7 +93,13 @@ extension CoreRegistry {
         }
         for value in choices {
             let c = try CoreSchema.object(value), id = try CoreSchema.string(c["routineId"]); try CoreSchema.uuid(id)
-            try require(Set(c.keys) == Set(["routineId","decision","interval"]) && c["decision"]?.text == "keep" && c["interval"]?.isNull == true,"FIELD_INVALID"); choiceIDs.append(id)
+            try require(Set(c.keys) == Set(["routineId","decision","interval"]),"FIELD_INVALID")
+            if c["decision"]?.text == "keep" {try require(c["interval"]?.isNull == true,"FIELD_INVALID")}
+            else {
+                try require(c["decision"]?.text == "apply","FIELD_INVALID");let interval=try CoreSchema.object(c["interval"])
+                try CatalogPackage.keys(interval,["count","unit"]);let count=try CoreSchema.number(interval["count"])
+                try require((1...9999).contains(count) && ["day","week","month","year"].contains(interval["unit"]?.text ?? ""),"FIELD_INVALID")
+            };choiceIDs.append(id)
         }
         try require(baseIDs == baseIDs.sorted() && Set(baseIDs).count == baseIDs.count && choiceIDs == choiceIDs.sorted() && Set(choiceIDs).count == choiceIDs.count,"FIELD_INVALID")
     }

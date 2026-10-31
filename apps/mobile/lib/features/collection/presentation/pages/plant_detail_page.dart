@@ -1,3 +1,7 @@
+import '../../../../core/di/injection.dart';
+import '../../data/repositories/collection_repository.dart';
+import '../../../catalog/presentation/widgets/species_picker.dart';
+
 import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -190,6 +194,41 @@ class _PlantDetailPageState extends State<PlantDetailPage> {
                 d.plant.speciesName,
                 style: Theme.of(context).textTheme.titleLarge,
               ),
+              Text(
+                d.plant.catalogSelection == null
+                    ? s.customIdentity
+                    : s.catalogIdentity,
+              ),
+              if (d.plant.catalogSelection case final selection?)
+                TextButton.icon(
+                  icon: const Icon(Icons.info_outline),
+                  label: Text(s.speciesInformation),
+                  onPressed: () async {
+                    try {
+                      final catalog = await getIt<CollectionRepository>()
+                          .catalog();
+                      if (!context.mounted) return;
+                      final entry = catalog.entry(selection.speciesId);
+                      if (entry != null) {
+                        await showSpeciesInformation(
+                          context,
+                          entry,
+                          manifest: catalog.manifest,
+                        );
+                      } else {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(content: Text(s.catalogLimited)),
+                        );
+                      }
+                    } catch (_) {
+                      if (context.mounted) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(content: Text(s.catalogLimited)),
+                        );
+                      }
+                    }
+                  },
+                ),
               if (d.plant.location.isNotEmpty)
                 Padding(
                   padding: const EdgeInsets.only(top: 8),
@@ -230,6 +269,33 @@ class _PlantDetailPageState extends State<PlantDetailPage> {
                               unitLabel(s, r.routine.interval.unit),
                             ),
                           ),
+                          for (final pair in [
+                            (
+                              s.originalSuggestion,
+                              r.routine.originalSuggestionId,
+                            ),
+                            (
+                              s.appliedSuggestion,
+                              r.routine.appliedSuggestionId,
+                            ),
+                          ])
+                            if (d.suggestions[pair.$2] case final snapshot?)
+                              ExpansionTile(
+                                title: Text(pair.$1),
+                                children: [
+                                  Text(
+                                    s.routineEvery(
+                                      snapshot.suggestion.interval.count,
+                                      unitLabel(
+                                        s,
+                                        snapshot.suggestion.interval.unit,
+                                      ),
+                                    ),
+                                  ),
+                                  Text(snapshot.suggestion.context),
+                                  Text(snapshot.suggestion.sourceLabel),
+                                ],
+                              ),
                           if (r.latestActualCare != null)
                             Text(
                               '${s.lastCare}: ${dateLabel(context, r.latestActualCare!)}',

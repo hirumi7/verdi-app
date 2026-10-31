@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'package:characters/characters.dart';
 
 import 'calendar.dart';
+import 'catalog.dart';
 import 'care.dart';
 import 'command_encoding.dart';
 import 'errors.dart';
@@ -116,6 +117,7 @@ final class _Preview {
 }
 
 final class MemoryOperationCoordinator {
+  CatalogState catalog = CatalogState();
   final MemoryCoreStore _store;
   final ClockReading Function() _clock;
   final Map<String, _Preview> _previews = {};
@@ -169,6 +171,7 @@ final class MemoryOperationCoordinator {
                 location: plant.location,
                 notes: plant.notes,
                 speciesName: plant.speciesName,
+                catalogSelection: plant.catalogSelection,
                 light: plant.light,
                 toxicity: plant.toxicity,
                 baseRoutineRevisions: {
@@ -225,9 +228,16 @@ final class MemoryOperationCoordinator {
             1 +
             draft.fields.routines.fold<int>(
               0,
-              (n, r) => n + 2 + (r.seedKind == SeedKind.known ? 1 : 0),
+              (n, r) =>
+                  n +
+                  2 +
+                  (r.seedKind == SeedKind.known ? 1 : 0) +
+                  (draft.fields.catalogSelection?.suggestion(r.kind) == null
+                      ? 0
+                      : 1),
             );
       }
+      count += draft.fields.applyRoutineIntervals.length * 2;
     } else if (command is RoutineCommand) {
       count = 1;
     } else if (command is BulkComplete) {

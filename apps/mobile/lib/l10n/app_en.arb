@@ -264,5 +264,45 @@
   "retainDraftExplanation": "Saved plants and the retained draft stay available.",
   "keepPending": "Keep pending",
   "recoveredActionReview": "Review the recovered action before saving.",
-  "saveDraftAction": "Save unfinished draft"
+  "saveDraftAction": "Save unfinished draft",
+  "searchSpecies": "Search species",
+  "popularSpecies": "Popular",
+  "catalogLimited": "Some plant guides are unavailable",
+  "catalogCustomAvailable": "You can still add a custom plant. Your saved plants and care history are kept.",
+  "noSpeciesMatches": "No matches for “{query}”",
+  "customPlant": "Add a custom plant",
+  "speciesInformation": "Species information",
+  "genericIllustration": "Generic illustration",
+  "difficulty": "Difficulty",
+  "suggestionOnly": "A starting suggestion for checks. Adjust it to your plant and conditions.",
+  "sourcesCredits": "Sources and credits",
+  "catalogCredits": "Care summaries: Verdi. Generic illustration: Verdi design import. Names and source references are included for attribution. Source websites require an internet connection.",
+  "changeSpecies": "Change species",
+  "keepRoutine": "Keep current routine",
+  "applySuggestion": "Apply suggestion",
+  "chooseSpeciesRoutine": "Choose what happens to each existing routine.",
+  "originalSuggestion": "Original suggestion",
+  "appliedSuggestion": "Last applied suggestion",
+  "catalogIdentity": "Catalog species",
+  "customIdentity": "User-supplied species and observations",
+  "chooseSpecies": "Choose species",
+  "catalogStale": "This guide changed. Choose the species again or use a custom plant; your other fields are kept.",
+  "selectedSpecies": "Selected species",
+  "contentReviewed": "Content reviewed",
+  "category": "Category",
+  "@noSpeciesMatches": {
+    "placeholders": {
+      "query": {
+        "type": "String"
+      }
+    }
+  },
+  "createCustomQuery": "Create “{query}” as a custom plant",
+  "@createCustomQuery": {
+    "placeholders": {
+      "query": {
+        "type": "String"
+      }
+    }
+  }
 }
