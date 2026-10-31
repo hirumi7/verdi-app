@@ -17,10 +17,11 @@ Inherited uncommitted guarded-save and lifecycle work is preserved, with its
 [77-test evidence](../lifecycle-core-2026-10-31.md). This is the current handoff for
 the broader task; earlier handoffs remain historical evidence.
 
-The selected docs review permits the synthetic pure-Dart core. The current loop
-implements the remaining REQ-007/008/009 bulk and Undo/read contracts in
-`technical/local-data-and-care.md` sections 6–7. Native Flutter scope still requires
-its own review and published docs pin. No production persistence or release claim.
+The core loop implemented the remaining REQ-007/008/009 standard bulk and Undo/read
+contracts in `technical/local-data-and-care.md` sections 6–7. The next selected
+docs pin is `47ff07b4b81e57950dfb86863f4afa5b0f63e7b5`, published on
+`codex/verdi-app-readiness-2026-10-31`; it adds a separately reviewed synthetic
+Flutter presentation scope. No production persistence or release claim.
 
 ## Verification plan
 
@@ -34,9 +35,9 @@ its own review and published docs pin. No production persistence or release clai
 
 ## Next action
 
-Complete the reviewed core and its tests while preparing the separate native/UI
-scope review. Preserve the new user answers in the docs working branch
-`codex/verdi-app-readiness-2026-10-31` before publication/adoption.
+Adopt the published UI review pin, then implement the Flutter presentation with
+the selected template structure, typed core adapter and Figma styling. Preserve
+the explicit development-only boundary; native durability remains unimplemented.
 
 ## Core loop evidence — 2026-10-31
 
@@ -58,3 +59,18 @@ and diff checks passed. Format check covered 20 Dart files. The independent
 reviewer rechecked the fixes and **25 targeted tests**, closing both findings;
 the final receipt-absence assertion also passed in the targeted recheck. Native
 and rendered UI checks have not run for this core loop.
+
+## Flutter preparation and docs adoption
+
+Core checkpoint commit `39de0d6f1dc076d268db909593ce0a31ff11a821` preserves all
+inherited guarded-save/lifecycle work plus the reviewed bulk/Undo/read additions.
+Docs commit `47ff07b4b81e57950dfb86863f4afa5b0f63e7b5` was pushed before changing
+the app gitlink. Its 18 accepted requirement files are byte-identical to the old
+pin. User rights/access confirmations and exact remaining limits are recorded.
+
+Flutter 3.47.8 / Dart 3.13.7 is installed in the isolated user runtime cache,
+verified against official archive SHA-256. The selected template checkout at
+`ea035cccdd6aa5c0a6cf243b7ff2ca16e94a4d26` passed dependency solve and analyzer
+after exactly four SDK-required lock updates (recorded in the docs review).
+Figma foundations, Today, Plants, Add details and empty Today were inspected.
+The iPhone 16 / iOS 18.3 simulator booted; no app build or device test is claimed.
