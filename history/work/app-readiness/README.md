@@ -1074,3 +1074,18 @@ blocker. No Dart/UI/Pigeon source changed; earlier analyzer/unit checks are
 inherited evidence, not rerun claims. REQ-012 remains partial. Remaining work
 includes directory-creation/third-party-internal/VFS fault coverage, maximum-size,
 physical protection/power loss, accessibility, notifications, StoreKit and release.
+
+### I/O recovery evidence publication and docs pin
+
+**Author:** Codex (AI assistant). **Date:** 2026-11-01 (Asia/Jakarta).
+
+Implementation `ac41f6d9b2f20e0fff414c2e566d58f03b4b5c26` is published.
+Docs `efe316478038b36e8e70cd523f51af853bc1cbd4` was published before consumer
+adoption. The docs aggregate passed8/8 with268 tooling tests
+(`/tmp/verdi-io-docs.log`); independent evidence review found no scoped mismatch.
+Accepted requirements, decisions and questions are byte-preserved. The normal
+Flutter development app also builds and launches on the disposable QA simulator
+(`/tmp/verdi-io-normal-run.log`), preserving its synthetic restored collection.
+Consumer/gitlink checks validate this exact published pin. Remaining failure,
+physical-device and release gates stay open; the current delivery does not mark
+REQ-012 or the whole app complete.
