@@ -679,3 +679,24 @@ Logs: `/tmp/verdi-catalog-ios-build-final.log`, `/tmp/verdi-catalog-main-run.log
 local screenshot `/tmp/verdi-catalog-main-preview.png`. Final full Dart analyzer
 and format recheck passed after the test-navigation changes. Independent evidence
 review also matched the preserved integration results to partial coverage.
+
+## Catalog delivery publication and docs pin — 2026-10-31
+
+**Author:** Codex (AI assistant). **Date:** 2026-10-31 (Asia/Jakarta).
+
+Implementation `176183887d79a300204c145c1e721135395b0662` is published on
+`codex/flutter-core-2026-10-30`. Verified delivery, partial coverage and current
+repository observations are published in docs
+`1737da78dfeb76d995ae399cb701f0aa50ad94e2` on
+`codex/verdi-app-readiness-2026-10-31`; this pin advances to that exact published
+revision. The implementation contract remains
+`63b6062da0d1d868617f0b90aa26054ca2e0adcd`. No accepted requirement or decision
+bytes changed. The docs aggregate passed **8/8**, including **268 tooling tests**
+(`/tmp/verdi-catalog-docs-final.log`). Independent source/evidence review found no
+remaining blocking defect for the bounded catalog slice. Staged/committed
+consumer checks accompany this pin; full feature/device/store release gates remain.
+
+Mounted docs verification also passed **8/8** with **268 tooling tests**
+(`/tmp/verdi-catalog-mounted-docs-final.log`); staged consumer and clean-gitlink
+checks passed at `1737da78dfeb76d995ae399cb701f0aa50ad94e2`. Code and tests are
+unchanged from the published, verified implementation commit.
