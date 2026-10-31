@@ -4,5 +4,8 @@ version: 0.1.0
 publish_to: none
 environment:
   sdk: '>=3.11.1 <4.0.0'
+dependencies:
+  characters: ^1.4.1
+  crypto: ^3.0.8
 dev_dependencies:
   test: ^1.25.0

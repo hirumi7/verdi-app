@@ -93,6 +93,31 @@ final class CareEvent {
   );
 }
 
+/// Value-only rollback capture: never duplicates plant text or historical rows.
+final class RoutineUndoValues {
+  final String routineId;
+  final String headId;
+  final CareInterval interval;
+  final LocalDate anchor;
+  final bool firstCheckAnchor;
+  final LocalDate? firstCheckDate;
+  final LocalDate nextCheck;
+  final LocalDate? overrideDate;
+  final RoutineStatus status;
+  final bool archived;
+  RoutineUndoValues(RoutineCore r)
+    : routineId = r.id,
+      headId = r.headId,
+      interval = r.interval,
+      anchor = r.anchor,
+      firstCheckAnchor = r.firstCheckAnchor,
+      firstCheckDate = r.firstCheckDate,
+      nextCheck = r.nextCheck,
+      overrideDate = r.overrideDate,
+      status = r.status,
+      archived = r.archived;
+}
+
 /// Immutable per-routine state for the first domain slice, not a persisted DTO.
 /// Only the named seed factories can construct it. Commands produce new values;
 /// callers must eventually use the guarded native transaction protocol to save.
@@ -275,13 +300,17 @@ final class RoutineCore {
   }
 
   RoutineCore _next({
+    CareInterval? interval,
     LocalDate? anchor,
     bool? firstCheckAnchor,
+    LocalDate? firstCheckDate,
     LocalDate? nextCheck,
     LocalDate? overrideDate,
     bool replaceOverride = false,
     Iterable<CareEvent>? events,
     bool headChanged = false,
+    RoutineStatus? status,
+    bool? archived,
   }) => RoutineCore._(
     id: id,
     plantId: plantId,
@@ -289,16 +318,129 @@ final class RoutineCore {
     careLabel: careLabel,
     revision: _increment(revision),
     headRevision: headChanged ? _increment(headRevision) : headRevision,
-    interval: interval,
+    interval: interval ?? this.interval,
     anchor: anchor ?? this.anchor,
     firstCheckAnchor: firstCheckAnchor ?? this.firstCheckAnchor,
-    firstCheckDate: firstCheckDate,
+    firstCheckDate: firstCheckDate ?? this.firstCheckDate,
     nextCheck: nextCheck ?? this.nextCheck,
     overrideDate: replaceOverride ? overrideDate : this.overrideDate,
-    status: status,
-    archived: archived,
+    status: status ?? this.status,
+    archived: archived ?? this.archived,
     events: events ?? this.events,
   );
+
+  void _editable() {
+    if (status == RoutineStatus.retired) {
+      throw const DomainException('NOT_ELIGIBLE');
+    }
+  }
+
+  /// Changing an interval is explicit; historical additions never call this.
+  RoutineCore setInterval(
+    CareInterval value,
+    CareClock clock, {
+    LocalDate? chosenFirstCheck,
+  }) {
+    _editable();
+    if (overrideDate != null) return _next(interval: value);
+    return _recalculate(
+      value,
+      clock,
+      chosenFirstCheck: chosenFirstCheck,
+      requireChosenFirstCheck: false,
+    );
+  }
+
+  RoutineCore clearOverride(CareClock clock, {LocalDate? chosenFirstCheck}) {
+    _editable();
+    return _recalculate(
+      interval,
+      clock,
+      chosenFirstCheck: chosenFirstCheck,
+      requireChosenFirstCheck: true,
+    );
+  }
+
+  RoutineCore _recalculate(
+    CareInterval value,
+    CareClock clock, {
+    LocalDate? chosenFirstCheck,
+    required bool requireChosenFirstCheck,
+  }) {
+    final latest = latestActualCare;
+    if (latest != null) {
+      final candidate = addInterval(latest, value);
+      final head = candidate.compareTo(clock.today) < 0
+          ? clock.today
+          : candidate;
+      return _next(
+        interval: value,
+        anchor: latest,
+        firstCheckAnchor: false,
+        nextCheck: head,
+        replaceOverride: true,
+        headChanged: head != nextCheck || overrideDate != null,
+      );
+    }
+    final first = requireChosenFirstCheck
+        ? chosenFirstCheck
+        : firstCheckDate ?? chosenFirstCheck;
+    if (first == null) throw const DomainException('FIRST_CHECK_REQUIRED');
+    return _next(
+      interval: value,
+      anchor: first,
+      firstCheckAnchor: true,
+      firstCheckDate: first,
+      nextCheck: first,
+      replaceOverride: true,
+      headChanged: first != nextCheck || overrideDate != null,
+    );
+  }
+
+  RoutineCore pause() {
+    _active();
+    return _next(status: RoutineStatus.paused, headChanged: true);
+  }
+
+  RoutineCore resume(CareClock clock) {
+    if (archived || status != RoutineStatus.paused) {
+      throw const DomainException('NOT_ELIGIBLE');
+    }
+    final head = nextCheck.compareTo(clock.today) < 0 ? clock.today : nextCheck;
+    return _next(
+      status: RoutineStatus.active,
+      nextCheck: head,
+      overrideDate: overrideDate == null ? null : head,
+      replaceOverride: true,
+      headChanged: true,
+    );
+  }
+
+  RoutineCore retire() {
+    _editable();
+    return _next(status: RoutineStatus.retired, headChanged: true);
+  }
+
+  /// Collection-owned lifecycle propagation. Retired heads never resume/clamp.
+  RoutineCore archive() {
+    if (archived) throw const DomainException('NOT_ELIGIBLE');
+    return _next(archived: true, headChanged: true);
+  }
+
+  RoutineCore restore(CareClock clock) {
+    if (!archived) throw const DomainException('NOT_ELIGIBLE');
+    if (status == RoutineStatus.retired) {
+      return _next(archived: false, headChanged: true);
+    }
+    final head = nextCheck.compareTo(clock.today) < 0 ? clock.today : nextCheck;
+    return _next(
+      archived: false,
+      nextCheck: head,
+      overrideDate: overrideDate == null ? null : head,
+      replaceOverride: true,
+      headChanged: true,
+    );
+  }
 
   RoutineCore complete({
     required LocalDate careDate,
@@ -328,6 +470,77 @@ final class RoutineCore {
       replaceOverride: true,
       events: [...events, event],
       headChanged: head != nextCheck || overrideDate != null,
+    );
+  }
+
+  /// The coordinator supplies the session/deadline/all-member guard. The domain
+  /// additionally checks identity, revision and event-command ownership.
+  RoutineCore undoTo(
+    RoutineUndoValues before, {
+    required int expectedRevision,
+    required String originalCommandId,
+    required String commandId,
+    required Map<String, String> correctionIds,
+    required CareClock clock,
+  }) {
+    _id(commandId);
+    _id(originalCommandId);
+    if (before.routineId != id ||
+        before.headId != headId ||
+        expectedRevision != revision)
+      throw const DomainException('UNDO_CHANGED');
+    if (correctionIds.values.toSet().length != correctionIds.length) {
+      throw const DomainException('FIELD_INVALID');
+    }
+    for (final entry in correctionIds.entries) {
+      _newId(entry.value);
+      final event = events.where((e) => e.id == entry.key).firstOrNull;
+      if (event == null ||
+          event.commandId != originalCommandId ||
+          event.effective.voided) {
+        throw const DomainException('UNDO_CHANGED');
+      }
+    }
+    final revised = events.map((event) {
+      final correctionId = correctionIds[event.id];
+      if (correctionId == null) return event;
+      return event._correct(
+        EventCorrection._(
+          correctionId,
+          commandId,
+          event.effective,
+          EventValues(
+            event.effective.careDate,
+            event.effective.outcome,
+            voided: true,
+          ),
+          clock.instant,
+          'undo',
+        ),
+      );
+    });
+    return RoutineCore._(
+      id: id,
+      plantId: plantId,
+      headId: headId,
+      careLabel: careLabel,
+      revision: _increment(revision),
+      headRevision:
+          nextCheck != before.nextCheck ||
+              overrideDate != before.overrideDate ||
+              status != before.status ||
+              archived != before.archived
+          ? _increment(headRevision)
+          : headRevision,
+      interval: before.interval,
+      anchor: before.anchor,
+      firstCheckAnchor: before.firstCheckAnchor,
+      firstCheckDate: before.firstCheckDate,
+      nextCheck: before.nextCheck,
+      overrideDate: before.overrideDate,
+      status: before.status,
+      archived: before.archived,
+      events: revised,
     );
   }
 

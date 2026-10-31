@@ -49,10 +49,13 @@ dart format --output=none --set-exit-if-changed lib test example
 dart analyze
 dart test
 dart run example/care_walkthrough.dart
+dart run example/guarded_save_walkthrough.dart
 ```
 
-The package has no runtime dependencies and uses synthetic, memory-only state.
+The package uses synthetic, memory-only state, with locked grapheme and hashing
+dependencies. The guarded-save example exercises draft integration and recovery
+from a simulated lost reply without duplicating a plant.
 These commands do not test native persistence, Flutter screens or store/OS behavior.
-The [delivery handoff](history/work/flutter-core-2026-10-30.md) records exact docs
+The [current delivery handoff](history/work/app-readiness/README.md) records exact docs
 identity, scope, executed evidence and remaining criteria. Do not run upstream
 fresh-repository setup over this existing repository or copy unreviewed assets.

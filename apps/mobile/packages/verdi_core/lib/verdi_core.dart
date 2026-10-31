@@ -1,6 +1,8 @@
-/// Pure domain primitives. This is not the native CollectionStore protocol.
+/// Domain primitives and a synthetic, memory-only command harness.
+/// This is not the native CollectionStore protocol or durable storage.
 library;
 
 export 'src/calendar.dart';
 export 'src/care.dart';
+export 'src/collection.dart';
 export 'src/errors.dart';

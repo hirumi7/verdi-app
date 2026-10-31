@@ -86,6 +86,10 @@ Executed with official Dart 3.13.7 macos_arm64:
 
 ## Next action and release boundary
 
+**Historical next step; continued in the
+[guarded-save delivery](guarded-saves-2026-10-30.md).** The evidence above records
+the first published slice and remains unchanged by later implementation.
+
 Next implement and test the guarded command coordinator with explicit preview,
 frozen identity/receipt recovery and injected failure cases, then collection/draft
 integration. Keep native SQL/OS/store implementations and Flutter UI behind their
