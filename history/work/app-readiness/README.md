@@ -544,3 +544,29 @@ admin and full product accessibility/performance verification. Simulator protect
 is explicitly unverified. Physical protection/first-unlock, real interruption,
 current submission toolchain and store/release evidence remain open. The DEBUG
 entry still refuses release mode; prepared store IDs remain unregistered.
+
+
+## Verified delivery docs publication and pin — 2026-10-31
+
+**Author:** Codex (AI assistant).
+**Date:** 2026-10-31 (Asia/Jakarta).
+
+Implementation `8a6d6f833def10721d11f7ebb46f036a4ea1506f` is published on
+`codex/flutter-core-2026-10-30`. The independently reviewed delivery coverage,
+current handoff and repository map are published in docs
+`fb55ed4f044d140be368b21564bc62dca1b85cb7` on
+`codex/verdi-app-readiness-2026-10-31`; this change advances the app gitlink to
+that exact published revision. The implementation contract remains
+`91d61be2201811e19d538e7c720a0be694e55c52`; the new docs commit changes evidence
+and current observations, not technical behavior or accepted requirements.
+
+Final docs aggregate passed 8/8, including 268 tooling tests, on the refreshed
+input manifest (`/tmp/verdi-core-docs-verified.log`). One intermediate run caught
+a stale generated scope after a regeneration command used a Python environment
+without PyYAML; regeneration with the established docs virtualenv and a complete
+aggregate rerun passed. No gate was relaxed. Requirement/decision paths have no
+diff from the prior accepted baseline. Separate reviewer `core_readiness_review`
+rechecked final evidence, partial coverage and remaining boundaries, and closed
+with no blocking mismatch. App code/tests are unchanged from the verified
+implementation commit. Staged and committed consumer/gitlink checks accompany
+this pin update; public release and remaining feature/device/store work stay open.
