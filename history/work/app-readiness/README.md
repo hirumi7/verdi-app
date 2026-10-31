@@ -923,3 +923,18 @@ its worker before advancing to another operation, rather than relying on a10ms
 sleep; the production BUSY-confirm race has its own Cubit regression. Documentation
 aggregate at the extraction design pin passed8/8 with268 tooling tests; staged
 consumer/gitlink checks pass. Final evidence publication and pin follow below.
+
+### Backup delivery evidence publication and final pin
+
+**Author:** Codex (AI assistant). **Date:** 2026-10-31 (Asia/Jakarta).
+
+Implementation commit `ecc67d64ed7ca8d7aa2dbcf649aa989879ffe781` is published on
+`codex/flutter-core-2026-10-30`. Published docs delivery commit and final app pin:
+`5a204ec29f29f9e4d18e38c95e7a3b4a15d14697`. Its aggregate passed8/8 with268 tooling
+tests (`/tmp/verdi-backup-docs-delivery.log`), and independent documentation review
+confirmed bounded claims. Canonical requirements/decisions/questions are unchanged
+from the pre-backup docs pin. Final normal development build/restart also passes
+(`/tmp/verdi-backup-normal-final.log`); QA Settings shows restored status and usable
+Create/Choose controls. Only evidence and the published gitlink change in this
+follow-up; implementation remains the verified commit above. Consumer/gitlink
+checks accompany adoption. Physical/max-size/fault-matrix/release gates stay open.
