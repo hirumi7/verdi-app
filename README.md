@@ -1,6 +1,6 @@
 # Verdi application
 
-This repository is the selected home for Verdi application code. Development includes a [pure Dart core](apps/mobile/packages/verdi_core/README.md), a tested Flutter/iOS preview and a [native SQLite foundation](apps/mobile/packages/verdi_native/README.md). The main development UI saves custom and catalog plants, care, history and drafts in native SQLite. A reviewed 24-species bundle supplies offline search, species information and explicit care-suggestion choices. The full product feature set and internal admin remain unfinished. Product requirements and human review records live in the independent docs repository, pinned here at [docs/](docs/README.md).
+This repository is the selected home for Verdi application code. Development includes a [pure Dart core](apps/mobile/packages/verdi_core/README.md), a tested Flutter/iOS preview and a [native SQLite foundation](apps/mobile/packages/verdi_native/README.md). The main development UI saves custom and catalog plants, care, combined history, journal notes and drafts in native SQLite, with original photos in managed local files. A reviewed 24-species bundle supplies offline search, species information and explicit care-suggestion choices. The full product feature set and internal admin remain unfinished. Product requirements and human review records live in the independent docs repository, pinned here at [docs/](docs/README.md).
 
 ## Start with the AI
 
@@ -147,3 +147,34 @@ from running it on an already upgraded installation. Native tests separately
 exercise real v1 migration, interrupted migration, retained frozen commands,
 malformed bundles and catalog updates. Regenerate the known/unknown-seed catalog
 vectors with `dart run tool/generate_catalog_vectors.dart` from `packages/verdi_core`.
+
+## Photos and journal verification
+
+The main preview now retains journal notes/dates/drafts and original photos in
+SQLite plus managed files. Photos can be attached from the native library, used
+as covers, replaced without changing their ID, or deleted with shared references
+updated atomically. Journal entries join care history in the plant timeline.
+Free original export uses an explicit metadata warning and the OS share sheet.
+Camera code is present; physical capture/protection tests remain outstanding.
+Optimization, comparison cards, full backup and release are separate scopes.
+
+The media integration test uses the real OS picker. Seed the bundled
+`assets/illustrations/empty-plants.png` and the distinct synthetic
+`packages/verdi_native/Tests/VerdiNativeTests/Fixtures/catalog/media-green.png`
+into the simulator Photos library using `xcrun simctl addmedia DEVICE_ID PATH`.
+Run phases in order on the same retained installation:
+
+```sh
+cd apps/mobile
+flutter test integration_test/photos_journal_test.dart -d DEVICE_ID --no-uninstall --dart-define=VERDI_MEDIA_PHASE=seed
+flutter test integration_test/photos_journal_test.dart -d DEVICE_ID --no-uninstall --dart-define=VERDI_MEDIA_PHASE=recover
+flutter test integration_test/photos_journal_test.dart -d DEVICE_ID --no-uninstall --dart-define=VERDI_MEDIA_PHASE=replace
+flutter test integration_test/photos_journal_test.dart -d DEVICE_ID --no-uninstall --dart-define=VERDI_MEDIA_PHASE=cover_export
+```
+
+Choose the plant illustration for `seed`, then the distinct green fixture for
+`replace` and `cover_export`. Cancel the final OS share sheet without sending.
+The test preserves other plants and verifies their IDs remain present; it retains
+its named synthetic plant/notes. It needs operator interaction and is not an
+unattended CI test. Use a new named fixture or a fresh test simulator for another
+full sequence; never reset an existing user's store merely to rerun tests.

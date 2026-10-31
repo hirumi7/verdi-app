@@ -1,5 +1,7 @@
 import 'dart:async';
 
+import '../../../media/domain/preparation_failure.dart';
+
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:injectable/injectable.dart';
@@ -19,6 +21,8 @@ abstract class PlantEditorState with _$PlantEditorState {
     @Default([]) List<RoutineRead> existingRoutines,
     @Default(false) bool saving,
     @Default(false) bool dirty,
+    @Default(false) bool photoPending,
+    @Default(false) bool photoFailed,
     String? errorCode,
     @Default({}) Map<String, String> errors,
   }) = _PlantEditorState;
@@ -39,6 +43,9 @@ class PlantEditorCubit extends Cubit<PlantEditorState> {
   int? _baseRevision;
   late String _draftId;
   CustomPlantFields? _original;
+  String? _photoPreparation, _photoSelection;
+  LocalDate? _photoDate;
+  int? _photoRevision;
   PlantEditorCubit(this._repository) : super(const PlantEditorState());
 
   Future<void> load(String? plantId) async {
@@ -64,7 +71,7 @@ class PlantEditorCubit extends Cubit<PlantEditorState> {
         state.copyWith(
           fields: editor.initialFields,
           draft: editor.draft,
-          loading: false,
+          loading: true,
           picking: plantId == null && editor.draft == null,
           existingRoutines:
               detail?.routines
@@ -74,6 +81,8 @@ class PlantEditorCubit extends Cubit<PlantEditorState> {
           dirty: editor.draft != null,
         ),
       );
+      if (editor.draft != null) await recoverPhoto();
+      if (!isClosed) emit(state.copyWith(loading: false));
     } catch (error) {
       if (!isClosed) {
         emit(
@@ -84,6 +93,8 @@ class PlantEditorCubit extends Cubit<PlantEditorState> {
   }
 
   void update({
+    String? coverPhotoId,
+    bool removeCover = false,
     String? name,
     String? species,
     String? location,
@@ -97,6 +108,7 @@ class PlantEditorCubit extends Cubit<PlantEditorState> {
     Iterable<String>? keep,
     Map<String, CareInterval>? apply,
   }) {
+    if (state.photoPending) return;
     final old = state.fields!;
     final selected = custom ? null : selection ?? old.catalogSelection;
     final nextSpecies =
@@ -118,6 +130,8 @@ class PlantEditorCubit extends Cubit<PlantEditorState> {
     final clearChoices = resetChoices || identityEdited;
     final fields = CustomPlantFields(
       name: name ?? old.name,
+      coverPhotoId: removeCover ? null : coverPhotoId ?? old.coverPhotoId,
+      readyPhotoIds: old.readyPhotoIds,
       speciesName: nextSpecies,
       location: location ?? old.location,
       notes: notes ?? old.notes,
@@ -292,6 +306,9 @@ class PlantEditorCubit extends Cubit<PlantEditorState> {
   }
 
   Future<PreparedCommand> preview() async {
+    if (state.photoPending || state.photoFailed) {
+      throw CommandRejected('MEDIA_NOT_READY');
+    }
     if (state.draft == null && _version == 0) _version++;
     await flush();
     try {
@@ -362,6 +379,8 @@ class PlantEditorCubit extends Cubit<PlantEditorState> {
             [],
         fields: CustomPlantFields(
           name: f.name,
+          coverPhotoId: f.coverPhotoId,
+          readyPhotoIds: f.readyPhotoIds,
           speciesName: f.speciesName,
           location: f.location,
           notes: f.notes,
@@ -375,6 +394,124 @@ class PlantEditorCubit extends Cubit<PlantEditorState> {
     );
     update();
     await flush();
+  }
+
+  Future<PlantDraft> photoDraft() async {
+    await flush();
+    if (state.draft == null) {
+      update();
+      await flush();
+    }
+    final draft = state.draft;
+    if (draft == null) throw const RecoveryUnavailable();
+    return draft;
+  }
+
+  Future<void> attachPhoto(String selection, LocalDate date) async {
+    if (state.photoPending) throw const RecoveryUnavailable();
+    final draft = await photoDraft();
+    _photoPreparation = _repository.newId();
+    _photoSelection = selection;
+    _photoDate = date;
+    _photoRevision = draft.revision;
+    emit(state.copyWith(photoPending: true, photoFailed: false));
+    await resolvePhoto(_photoPreparation!);
+  }
+
+  Future<void> resolvePhoto(String id) async {
+    try {
+      while (!isClosed) {
+        Map<String, Object?> status;
+        try {
+          status = await _repository.photoPreparation(id);
+        } on CommandRejected catch (e) {
+          if (e.code != 'NOT_FOUND' ||
+              _photoSelection == null ||
+              _photoRevision == null ||
+              _photoDate == null) {
+            rethrow;
+          }
+          status = await _repository.preparePhoto(
+            draftId: state.draft!.id,
+            draftRevision: _photoRevision!,
+            preparationId: id,
+            selectionId: _photoSelection!,
+            observedDate: _photoDate!,
+          );
+        }
+        if (status['kind'] == 'copying') {
+          await Future<void>.delayed(const Duration(milliseconds: 250));
+          continue;
+        }
+        if (status['kind'] == 'failed') {
+          emit(state.copyWith(photoPending: false, photoFailed: true));
+          throw CommandRejected(status['code'] as String);
+        }
+        if (status['kind'] != 'ready') {
+          emit(
+            state.copyWith(photoPending: false, errorCode: 'DRAFT_CONFLICT'),
+          );
+          throw CommandRejected('DRAFT_CONFLICT');
+        }
+        if (state.draft!.revision < (status['draftRevision'] as int)) {
+          await reloadPhotoDraft(
+            expectedRevision: status['draftRevision'] as int,
+          );
+        }
+        emit(state.copyWith(photoPending: false, photoFailed: false));
+        return;
+      }
+    } catch (e) {
+      if (preparationRejected(e)) {
+        emit(state.copyWith(photoPending: false, photoFailed: true));
+      }
+      rethrow;
+    }
+  }
+
+  Future<void> recoverPhoto() async {
+    if (!state.photoPending && _version != _acknowledged) await flush();
+    final draft = state.draft;
+    if (draft == null) return;
+    if (_photoPreparation != null) {
+      await resolvePhoto(_photoPreparation!);
+      return;
+    }
+    final history = await _repository.draftPreparations(draft.id);
+    if (history.isNotEmpty) {
+      final last = history.last;
+      _photoPreparation = last['preparationId'] as String;
+      _photoSelection = last['selectionId'] as String;
+      _photoRevision = last['draftRevision'] as int;
+      _photoDate = LocalDate.parse(last['observedDate'] as String);
+      emit(state.copyWith(photoPending: true));
+      await resolvePhoto(_photoPreparation!);
+    }
+  }
+
+  Future<void> retryPhoto() async {
+    await recoverPhoto();
+  }
+
+  void continueWithoutPhoto() {
+    if (state.photoPending) throw const RecoveryUnavailable();
+    emit(state.copyWith(photoFailed: false, errorCode: null));
+  }
+
+  Future<void> reloadPhotoDraft({required int expectedRevision}) async {
+    final editor = await _repository.editor(_plantId);
+    if (editor.draft?.id != _draftId ||
+        editor.draft?.revision != expectedRevision) {
+      emit(state.copyWith(photoPending: false, errorCode: 'DRAFT_CONFLICT'));
+      throw CommandRejected('DRAFT_CONFLICT');
+    }
+    emit(
+      state.copyWith(
+        draft: editor.draft,
+        fields: editor.initialFields,
+        dirty: true,
+      ),
+    );
   }
 
   Future<void> discard() async {

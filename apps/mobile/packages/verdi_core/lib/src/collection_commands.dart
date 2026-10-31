@@ -42,7 +42,7 @@ final class SaveDraft extends CoreCommand {
     'plantId': plantId,
     'basePlantRevision': basePlantRevision,
     'rawFields': fields._json(),
-    'photoIds': <String>[],
+    'photoIds': fields.readyPhotoIds,
   };
 }
 

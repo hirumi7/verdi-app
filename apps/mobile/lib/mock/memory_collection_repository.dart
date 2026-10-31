@@ -33,6 +33,23 @@ class MemoryCollectionRepository implements CollectionRepository {
   }
 
   @override
+  Future<CollectionSnapshot> mediaSnapshot() async =>
+      coordinator.readCollection(datasetId: datasetId);
+  @override
+  Future<Map<String, Object?>> preparePhoto({
+    required String draftId,
+    required int draftRevision,
+    required String preparationId,
+    required String selectionId,
+    required LocalDate observedDate,
+  }) async => throw CommandRejected('MEDIA_UNAVAILABLE');
+  @override
+  Future<Map<String, Object?>> photoPreparation(String preparationId) async =>
+      throw CommandRejected('MEDIA_UNAVAILABLE');
+  @override
+  Future<List<Map<String, Object?>>> draftPreparations(String draftId) async =>
+      [];
+  @override
   Future<CatalogState> catalog({bool retry = false}) async =>
       coordinator.catalog;
 

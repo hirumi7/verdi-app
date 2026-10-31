@@ -11,8 +11,13 @@ void _validateShape(CoreCommand command) {
     throw CommandRejected('FIELD_INVALID', {'draft': 'PAYLOAD_TOO_LARGE'});
   }
   switch (command) {
+    case MediaCommand():
+      _validateMedia(command);
     case SaveDraft():
       _id(command.draftId);
+      if (command.fields.coverPhotoId != null)
+        _id(command.fields.coverPhotoId!);
+      _photoIds(command.fields.readyPhotoIds);
       if (command.expectedRevision != null)
         _revision(command.expectedRevision!);
       if (command.mode == DraftMode.add) {
@@ -152,6 +157,7 @@ extension on MemoryOperationCoordinator {
   }
 
   _Plan _calculate(FrozenCommand intent, CareClock clock) {
+    if (intent.command is MediaCommand) return _planMedia(intent, clock);
     final current = _store._state.collection;
     final plants = {...current.plants};
     final routines = {...current.routines};
@@ -159,6 +165,11 @@ extension on MemoryOperationCoordinator {
     final drafts = {...current.drafts};
     final changes = {...current.scheduleChanges};
     final suggestions = {...current.suggestions};
+    final journalEntries = {...current.journalEntries},
+        journalDrafts = {...current.journalDrafts},
+        mediaDrafts = {...current.mediaDrafts},
+        photos = {...current.photos},
+        covers = {...current.covers};
     var collectionRevision = current.revision;
     var reminderGeneration = current.reminderGeneration;
     final resources = <String>{};
@@ -171,6 +182,8 @@ extension on MemoryOperationCoordinator {
     final command = intent.command;
 
     switch (command) {
+      case MediaCommand():
+        throw StateError('Handled by media planner');
       case Undo():
         final grant = _undoGrant(command.originalCommandId);
         var allocation = 0;
@@ -835,6 +848,73 @@ extension on MemoryOperationCoordinator {
           scheduleChanges: isSchedule ? 1 : 0,
         );
     }
+    if (command is SaveDraft) {
+      final owned = photos.values
+          .where((p) => p.draftId == command.draftId)
+          .map((p) => p.id)
+          .toSet();
+      if (owned.length != command.fields.readyPhotoIds.length ||
+          !owned.containsAll(command.fields.readyPhotoIds))
+        throw CommandRejected('DRAFT_CONFLICT');
+      final cover = command.fields.coverPhotoId;
+      if (cover != null &&
+          !(photos[cover]?.draftId == command.draftId ||
+              (command.plantId != null &&
+                  photos[cover]?.plantId == command.plantId)))
+        throw CommandRejected('FIELD_INVALID');
+    }
+    if (command is SavePlant || command is DiscardDraft) {
+      final draftId = command is SavePlant
+          ? command.draftId
+          : (command as DiscardDraft).draftId;
+      final draft = current.drafts[draftId]!;
+      final cover = command is SavePlant ? draft.fields.coverPhotoId : null;
+      if (command is SavePlant) {
+        if (cover == null) {
+          if (covers.remove(primaryId) != null) resources.add(primaryId!);
+        } else {
+          final photo = photos[cover];
+          if (photo == null ||
+              !(photo.plantId == primaryId || photo.draftId == draftId))
+            throw CommandRejected('FIELD_INVALID');
+          if (photo.draftId == draftId) {
+            photos[cover] = photo.ownedBy(primaryId!);
+            resources.add(cover);
+            revisions[cover] = photos[cover]!.revision;
+          }
+          if (covers[primaryId] != cover) {
+            covers[primaryId!] = cover;
+            resources.add(primaryId);
+          }
+        }
+      }
+      for (final photo
+          in photos.values.where((p) => p.draftId == draftId).toList()) {
+        photos.remove(photo.id);
+        resources.add(photo.id);
+      }
+    }
+    if (command is DeletePlant) {
+      final ownedDrafts = {
+        ...current.drafts.values
+            .where((d) => d.plantId == command.plantId)
+            .map((d) => d.id),
+        ...journalDrafts.values
+            .where((d) => d.plantId == command.plantId)
+            .map((d) => d.id),
+        ...mediaDrafts.values
+            .where((d) => d.plantId == command.plantId)
+            .map((d) => d.id),
+      };
+      journalEntries.removeWhere((_, e) => e.plantId == command.plantId);
+      journalDrafts.removeWhere((_, d) => d.plantId == command.plantId);
+      mediaDrafts.removeWhere((_, d) => d.plantId == command.plantId);
+      photos.removeWhere(
+        (_, p) =>
+            p.plantId == command.plantId || ownedDrafts.contains(p.draftId),
+      );
+      covers.remove(command.plantId);
+    }
     return _Plan(
       CollectionSnapshot._(
         current.datasetId,
@@ -846,6 +926,11 @@ extension on MemoryOperationCoordinator {
         reminderGeneration,
         changes,
         suggestions,
+        journalEntries,
+        journalDrafts,
+        mediaDrafts,
+        photos,
+        covers,
       ),
       effects,
       canonicalCommandJson(bindings),

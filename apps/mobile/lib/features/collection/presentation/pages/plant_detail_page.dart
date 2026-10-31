@@ -1,6 +1,9 @@
 import '../../../../core/di/injection.dart';
 import '../../data/repositories/collection_repository.dart';
 import '../../../catalog/presentation/widgets/species_picker.dart';
+import '../../../media/presentation/widgets/photo_preview.dart';
+
+import 'package:intl/intl.dart';
 
 import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
@@ -24,6 +27,9 @@ class _PlantDetailPageState extends State<PlantDetailPage> {
   ReadPage<TimelineEntry>? timeline;
   List<TimelineEntry> entries = [];
   bool loadingMore = false;
+  String? coverId;
+  Map<String, int> photoRevisions = {};
+  int coverRevision = 1;
   bool includeVoided = false;
   bool loading = true;
   String? error;
@@ -42,6 +48,7 @@ class _PlantDetailPageState extends State<PlantDetailPage> {
     try {
       final cubit = context.read<WorkspaceCubit>();
       final next = await cubit.detail(widget.plantId);
+      final media = await getIt<CollectionRepository>().mediaSnapshot();
       final history = await cubit.timeline(
         widget.plantId,
         includeVoided: includeVoided,
@@ -49,6 +56,11 @@ class _PlantDetailPageState extends State<PlantDetailPage> {
       if (mounted && token == sequence) {
         setState(() {
           detail = next;
+          photoRevisions = {
+            for (final photo in media.photos.values) photo.id: photo.revision,
+          };
+          coverId = media.covers[widget.plantId];
+          coverRevision = media.photos[coverId]?.revision ?? 1;
           timeline = history;
           entries = history.items;
           loading = false;
@@ -190,6 +202,33 @@ class _PlantDetailPageState extends State<PlantDetailPage> {
                 child: Text(s.addPastCare),
               ),
             if (d != null) ...[
+              if (coverId != null)
+                PhotoPreview(photoId: coverId!, revision: coverRevision),
+              Wrap(
+                spacing: 8,
+                children: [
+                  FilledButton.icon(
+                    onPressed: () async {
+                      await context.router.push(
+                        JournalEditorRoute(plantId: widget.plantId),
+                      );
+                      if (mounted) load();
+                    },
+                    icon: const Icon(Icons.add),
+                    label: Text(s.newJournalEntry),
+                  ),
+                  OutlinedButton.icon(
+                    onPressed: () async {
+                      await context.router.push(
+                        PhotosRoute(plantId: widget.plantId),
+                      );
+                      if (mounted) load();
+                    },
+                    icon: const Icon(Icons.photo_library_outlined),
+                    label: Text(s.photos),
+                  ),
+                ],
+              ),
               Text(
                 d.plant.speciesName,
                 style: Theme.of(context).textTheme.titleLarge,
@@ -415,11 +454,76 @@ class _PlantDetailPageState extends State<PlantDetailPage> {
                 },
               ),
               if (entries.isEmpty) Text(s.historyEmpty),
-              for (final entry in entries)
+              for (final (index, entry) in entries.indexed) ...[
+                if (index == 0 ||
+                    entries[index - 1].date.year != entry.date.year ||
+                    entries[index - 1].date.month != entry.date.month)
+                  Padding(
+                    padding: const EdgeInsets.symmetric(vertical: 12),
+                    child: Text(
+                      DateFormat.yMMMM().format(
+                        DateTime(entry.date.year, entry.date.month),
+                      ),
+                      style: Theme.of(context).textTheme.titleLarge,
+                    ),
+                  ),
                 Card(
                   child: Padding(
                     padding: const EdgeInsets.all(12),
-                    child: entry is CareTimelineEntry
+                    child: entry is JournalTimelineEntry
+                        ? Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(dateLabel(context, entry.date)),
+                              if (entry.entry.text.isNotEmpty)
+                                Text(entry.entry.text),
+                              for (final id in entry.entry.photoIds)
+                                InkWell(
+                                  onTap: () async {
+                                    await context.router.push(
+                                      PhotosRoute(
+                                        plantId: widget.plantId,
+                                        photoId: id,
+                                      ),
+                                    );
+                                    if (mounted) load();
+                                  },
+                                  child: PhotoPreview(
+                                    photoId: id,
+                                    revision: photoRevisions[id] ?? 1,
+                                  ),
+                                ),
+                              Wrap(
+                                spacing: 8,
+                                children: [
+                                  TextButton(
+                                    onPressed: () async {
+                                      await context.router.push(
+                                        JournalEditorRoute(
+                                          plantId: widget.plantId,
+                                          entryId: entry.id,
+                                        ),
+                                      );
+                                      if (mounted) load();
+                                    },
+                                    child: Text(s.editJournalEntry),
+                                  ),
+                                  TextButton(
+                                    onPressed: () => perform(
+                                      DeleteJournalEntry(
+                                        entry.id,
+                                        entry.entry.revision,
+                                      ),
+                                      s.deleteJournalEntry,
+                                      explanation: s.deleteJournalExplanation,
+                                    ),
+                                    child: Text(s.deleteJournalEntry),
+                                  ),
+                                ],
+                              ),
+                            ],
+                          )
+                        : entry is CareTimelineEntry
                         ? Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
@@ -546,6 +650,7 @@ class _PlantDetailPageState extends State<PlantDetailPage> {
                           ),
                   ),
                 ),
+              ],
               if (timeline?.nextCursor != null)
                 OutlinedButton(
                   onPressed: loadingMore ? null : moreHistory,

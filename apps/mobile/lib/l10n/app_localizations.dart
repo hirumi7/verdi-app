@@ -1215,6 +1215,372 @@ abstract class AppStrings {
   /// In en, this message translates to:
   /// **'Create “{query}” as a custom plant'**
   String createCustomQuery(String query);
+
+  /// No description provided for @journalAndPhotos.
+  ///
+  /// In en, this message translates to:
+  /// **'Journal and photos'**
+  String get journalAndPhotos;
+
+  /// No description provided for @plantPhoto.
+  ///
+  /// In en, this message translates to:
+  /// **'Plant photo'**
+  String get plantPhoto;
+
+  /// No description provided for @photoUnavailableRetry.
+  ///
+  /// In en, this message translates to:
+  /// **'Photo unavailable · Retry'**
+  String get photoUnavailableRetry;
+
+  /// No description provided for @newJournalEntry.
+  ///
+  /// In en, this message translates to:
+  /// **'New journal entry'**
+  String get newJournalEntry;
+
+  /// No description provided for @editJournalEntry.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit entry'**
+  String get editJournalEntry;
+
+  /// No description provided for @saveJournal.
+  ///
+  /// In en, this message translates to:
+  /// **'Save entry'**
+  String get saveJournal;
+
+  /// No description provided for @journalSaveExplanation.
+  ///
+  /// In en, this message translates to:
+  /// **'Save this observation and its attached photo to this plant. Care history and next checks stay unchanged.'**
+  String get journalSaveExplanation;
+
+  /// No description provided for @journalNote.
+  ///
+  /// In en, this message translates to:
+  /// **'Note'**
+  String get journalNote;
+
+  /// No description provided for @journalNoteLimit.
+  ///
+  /// In en, this message translates to:
+  /// **'Use up to 2,000 characters.'**
+  String get journalNoteLimit;
+
+  /// No description provided for @observationDate.
+  ///
+  /// In en, this message translates to:
+  /// **'Observation date'**
+  String get observationDate;
+
+  /// No description provided for @photoObservationDate.
+  ///
+  /// In en, this message translates to:
+  /// **'Photo observation date'**
+  String get photoObservationDate;
+
+  /// No description provided for @chooseObservationDate.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose observation date'**
+  String get chooseObservationDate;
+
+  /// No description provided for @invalidObservationDate.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose today or an earlier date.'**
+  String get invalidObservationDate;
+
+  /// No description provided for @journalHint.
+  ///
+  /// In en, this message translates to:
+  /// **'A photo or a note is enough. Change the date to log an earlier observation. All journal history stays available.'**
+  String get journalHint;
+
+  /// No description provided for @discardJournal.
+  ///
+  /// In en, this message translates to:
+  /// **'Discard this entry draft?'**
+  String get discardJournal;
+
+  /// No description provided for @discardJournalExplanation.
+  ///
+  /// In en, this message translates to:
+  /// **'Unsaved notes and newly attached photos in this draft will be removed. Saved entries and originals remain.'**
+  String get discardJournalExplanation;
+
+  /// No description provided for @saveNoteOnly.
+  ///
+  /// In en, this message translates to:
+  /// **'Save note only'**
+  String get saveNoteOnly;
+
+  /// No description provided for @saveNoteOnlyExplanation.
+  ///
+  /// In en, this message translates to:
+  /// **'Continue without the photo that failed to attach. Your note will be saved after you review it.'**
+  String get saveNoteOnlyExplanation;
+
+  /// No description provided for @continueAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Continue'**
+  String get continueAction;
+
+  /// No description provided for @removeAttachment.
+  ///
+  /// In en, this message translates to:
+  /// **'Remove attachment'**
+  String get removeAttachment;
+
+  /// No description provided for @camera.
+  ///
+  /// In en, this message translates to:
+  /// **'Camera'**
+  String get camera;
+
+  /// No description provided for @library.
+  ///
+  /// In en, this message translates to:
+  /// **'Library'**
+  String get library;
+
+  /// No description provided for @openSettings.
+  ///
+  /// In en, this message translates to:
+  /// **'Open Settings'**
+  String get openSettings;
+
+  /// No description provided for @reviewJournalConflict.
+  ///
+  /// In en, this message translates to:
+  /// **'Review newer version'**
+  String get reviewJournalConflict;
+
+  /// No description provided for @rebaseJournalExplanation.
+  ///
+  /// In en, this message translates to:
+  /// **'Keep this draft’s note, date and photos while accepting the current saved entry as its editing base. Review and save the entry separately.'**
+  String get rebaseJournalExplanation;
+
+  /// No description provided for @photos.
+  ///
+  /// In en, this message translates to:
+  /// **'Photos'**
+  String get photos;
+
+  /// No description provided for @photosEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'No saved photos yet. Add a photo to a journal entry or plant cover.'**
+  String get photosEmpty;
+
+  /// No description provided for @coverPhoto.
+  ///
+  /// In en, this message translates to:
+  /// **'Cover photo'**
+  String get coverPhoto;
+
+  /// No description provided for @setCover.
+  ///
+  /// In en, this message translates to:
+  /// **'Set as cover'**
+  String get setCover;
+
+  /// No description provided for @removeCover.
+  ///
+  /// In en, this message translates to:
+  /// **'Remove cover'**
+  String get removeCover;
+
+  /// No description provided for @changePhotoDate.
+  ///
+  /// In en, this message translates to:
+  /// **'Change photo date'**
+  String get changePhotoDate;
+
+  /// No description provided for @photoDateExplanation.
+  ///
+  /// In en, this message translates to:
+  /// **'Change only this photo’s observation date. Journal dates and care history remain unchanged.'**
+  String get photoDateExplanation;
+
+  /// No description provided for @exportOriginal.
+  ///
+  /// In en, this message translates to:
+  /// **'Export original'**
+  String get exportOriginal;
+
+  /// No description provided for @shareOriginal.
+  ///
+  /// In en, this message translates to:
+  /// **'Share original'**
+  String get shareOriginal;
+
+  /// No description provided for @originalMetadataWarning.
+  ///
+  /// In en, this message translates to:
+  /// **'The original file may include location, device and other embedded metadata. Share only if you want the selected destination to receive that information.'**
+  String get originalMetadataWarning;
+
+  /// No description provided for @originalHandedToOS.
+  ///
+  /// In en, this message translates to:
+  /// **'Original handed to the selected app.'**
+  String get originalHandedToOS;
+
+  /// No description provided for @shareCancelled.
+  ///
+  /// In en, this message translates to:
+  /// **'Sharing cancelled.'**
+  String get shareCancelled;
+
+  /// No description provided for @shareFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'The original could not be shared. Please retry.'**
+  String get shareFailed;
+
+  /// No description provided for @deletePhoto.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete photo'**
+  String get deletePhoto;
+
+  /// No description provided for @deletePhotoExplanation.
+  ///
+  /// In en, this message translates to:
+  /// **'Remove this original from covers, journal entries and drafts. Notes and unrelated care history stay. Photo-only entries that become empty are removed. Any open replacement or affected entry draft must be finished or discarded first.'**
+  String get deletePhotoExplanation;
+
+  /// No description provided for @replacePhoto.
+  ///
+  /// In en, this message translates to:
+  /// **'Replace photo'**
+  String get replacePhoto;
+
+  /// No description provided for @replacementExplanation.
+  ///
+  /// In en, this message translates to:
+  /// **'Every saved reference keeps the same photo identity. The existing original stays available until the replacement is saved successfully.'**
+  String get replacementExplanation;
+
+  /// No description provided for @reviewReplacement.
+  ///
+  /// In en, this message translates to:
+  /// **'Review replacement'**
+  String get reviewReplacement;
+
+  /// No description provided for @checkAttachment.
+  ///
+  /// In en, this message translates to:
+  /// **'Check attachment status'**
+  String get checkAttachment;
+
+  /// No description provided for @rebasePhotoExplanation.
+  ///
+  /// In en, this message translates to:
+  /// **'Keep the prepared replacement and accept the current photo as its base. Review the replacement separately before saving.'**
+  String get rebasePhotoExplanation;
+
+  /// No description provided for @discardReplacement.
+  ///
+  /// In en, this message translates to:
+  /// **'Discard replacement'**
+  String get discardReplacement;
+
+  /// No description provided for @discardReplacementExplanation.
+  ///
+  /// In en, this message translates to:
+  /// **'Remove this prepared replacement. The saved original and its references remain unchanged.'**
+  String get discardReplacementExplanation;
+
+  /// No description provided for @deleteJournalEntry.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete entry'**
+  String get deleteJournalEntry;
+
+  /// No description provided for @deleteJournalExplanation.
+  ///
+  /// In en, this message translates to:
+  /// **'Remove this entry and its open edit draft, including any unsaved draft photos. Saved originals remain in the gallery. Unrelated notes and care history stay.'**
+  String get deleteJournalExplanation;
+
+  /// No description provided for @photoOptionalHint.
+  ///
+  /// In en, this message translates to:
+  /// **'A photo is optional. Your other plant fields stay in the draft.'**
+  String get photoOptionalHint;
+
+  /// No description provided for @cameraDenied.
+  ///
+  /// In en, this message translates to:
+  /// **'Camera access is off. You can open Settings, choose Library, or continue without a photo.'**
+  String get cameraDenied;
+
+  /// No description provided for @cameraUnavailable.
+  ///
+  /// In en, this message translates to:
+  /// **'The camera is unavailable on this device. Choose Library or continue without a photo.'**
+  String get cameraUnavailable;
+
+  /// No description provided for @photoInvalid.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose a complete still JPEG, PNG or HEIC image. Animated or unreadable files cannot be attached.'**
+  String get photoInvalid;
+
+  /// No description provided for @photoTooLarge.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose a photo no larger than 64 MB and 100 megapixels.'**
+  String get photoTooLarge;
+
+  /// No description provided for @photoNotReady.
+  ///
+  /// In en, this message translates to:
+  /// **'The photo is not ready. Check its status or retry before saving.'**
+  String get photoNotReady;
+
+  /// No description provided for @photoMissing.
+  ///
+  /// In en, this message translates to:
+  /// **'The original file is unavailable. Your note and care history are still retained.'**
+  String get photoMissing;
+
+  /// No description provided for @photoSelectionExpired.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose the photo again. This temporary selection is no longer available.'**
+  String get photoSelectionExpired;
+
+  /// No description provided for @futureObservation.
+  ///
+  /// In en, this message translates to:
+  /// **'An observation cannot be dated in the future.'**
+  String get futureObservation;
+
+  /// No description provided for @emptyJournal.
+  ///
+  /// In en, this message translates to:
+  /// **'Add a note or a photo before saving.'**
+  String get emptyJournal;
+
+  /// No description provided for @photoContinueWithout.
+  ///
+  /// In en, this message translates to:
+  /// **'Continue without the new photo'**
+  String get photoContinueWithout;
+
+  /// No description provided for @journalDraftConflictExplanation.
+  ///
+  /// In en, this message translates to:
+  /// **'This draft changed elsewhere. Keep the text, date and selected photos shown in this editor, replacing the current draft fields? Saved journal entries remain unchanged until you review and save.'**
+  String get journalDraftConflictExplanation;
 }
 
 class _AppStringsDelegate extends LocalizationsDelegate<AppStrings> {

@@ -645,4 +645,210 @@ class AppStringsEn extends AppStrings {
   String createCustomQuery(String query) {
     return 'Create “$query” as a custom plant';
   }
+
+  @override
+  String get journalAndPhotos => 'Journal and photos';
+
+  @override
+  String get plantPhoto => 'Plant photo';
+
+  @override
+  String get photoUnavailableRetry => 'Photo unavailable · Retry';
+
+  @override
+  String get newJournalEntry => 'New journal entry';
+
+  @override
+  String get editJournalEntry => 'Edit entry';
+
+  @override
+  String get saveJournal => 'Save entry';
+
+  @override
+  String get journalSaveExplanation =>
+      'Save this observation and its attached photo to this plant. Care history and next checks stay unchanged.';
+
+  @override
+  String get journalNote => 'Note';
+
+  @override
+  String get journalNoteLimit => 'Use up to 2,000 characters.';
+
+  @override
+  String get observationDate => 'Observation date';
+
+  @override
+  String get photoObservationDate => 'Photo observation date';
+
+  @override
+  String get chooseObservationDate => 'Choose observation date';
+
+  @override
+  String get invalidObservationDate => 'Choose today or an earlier date.';
+
+  @override
+  String get journalHint =>
+      'A photo or a note is enough. Change the date to log an earlier observation. All journal history stays available.';
+
+  @override
+  String get discardJournal => 'Discard this entry draft?';
+
+  @override
+  String get discardJournalExplanation =>
+      'Unsaved notes and newly attached photos in this draft will be removed. Saved entries and originals remain.';
+
+  @override
+  String get saveNoteOnly => 'Save note only';
+
+  @override
+  String get saveNoteOnlyExplanation =>
+      'Continue without the photo that failed to attach. Your note will be saved after you review it.';
+
+  @override
+  String get continueAction => 'Continue';
+
+  @override
+  String get removeAttachment => 'Remove attachment';
+
+  @override
+  String get camera => 'Camera';
+
+  @override
+  String get library => 'Library';
+
+  @override
+  String get openSettings => 'Open Settings';
+
+  @override
+  String get reviewJournalConflict => 'Review newer version';
+
+  @override
+  String get rebaseJournalExplanation =>
+      'Keep this draft’s note, date and photos while accepting the current saved entry as its editing base. Review and save the entry separately.';
+
+  @override
+  String get photos => 'Photos';
+
+  @override
+  String get photosEmpty =>
+      'No saved photos yet. Add a photo to a journal entry or plant cover.';
+
+  @override
+  String get coverPhoto => 'Cover photo';
+
+  @override
+  String get setCover => 'Set as cover';
+
+  @override
+  String get removeCover => 'Remove cover';
+
+  @override
+  String get changePhotoDate => 'Change photo date';
+
+  @override
+  String get photoDateExplanation =>
+      'Change only this photo’s observation date. Journal dates and care history remain unchanged.';
+
+  @override
+  String get exportOriginal => 'Export original';
+
+  @override
+  String get shareOriginal => 'Share original';
+
+  @override
+  String get originalMetadataWarning =>
+      'The original file may include location, device and other embedded metadata. Share only if you want the selected destination to receive that information.';
+
+  @override
+  String get originalHandedToOS => 'Original handed to the selected app.';
+
+  @override
+  String get shareCancelled => 'Sharing cancelled.';
+
+  @override
+  String get shareFailed => 'The original could not be shared. Please retry.';
+
+  @override
+  String get deletePhoto => 'Delete photo';
+
+  @override
+  String get deletePhotoExplanation =>
+      'Remove this original from covers, journal entries and drafts. Notes and unrelated care history stay. Photo-only entries that become empty are removed. Any open replacement or affected entry draft must be finished or discarded first.';
+
+  @override
+  String get replacePhoto => 'Replace photo';
+
+  @override
+  String get replacementExplanation =>
+      'Every saved reference keeps the same photo identity. The existing original stays available until the replacement is saved successfully.';
+
+  @override
+  String get reviewReplacement => 'Review replacement';
+
+  @override
+  String get checkAttachment => 'Check attachment status';
+
+  @override
+  String get rebasePhotoExplanation =>
+      'Keep the prepared replacement and accept the current photo as its base. Review the replacement separately before saving.';
+
+  @override
+  String get discardReplacement => 'Discard replacement';
+
+  @override
+  String get discardReplacementExplanation =>
+      'Remove this prepared replacement. The saved original and its references remain unchanged.';
+
+  @override
+  String get deleteJournalEntry => 'Delete entry';
+
+  @override
+  String get deleteJournalExplanation =>
+      'Remove this entry and its open edit draft, including any unsaved draft photos. Saved originals remain in the gallery. Unrelated notes and care history stay.';
+
+  @override
+  String get photoOptionalHint =>
+      'A photo is optional. Your other plant fields stay in the draft.';
+
+  @override
+  String get cameraDenied =>
+      'Camera access is off. You can open Settings, choose Library, or continue without a photo.';
+
+  @override
+  String get cameraUnavailable =>
+      'The camera is unavailable on this device. Choose Library or continue without a photo.';
+
+  @override
+  String get photoInvalid =>
+      'Choose a complete still JPEG, PNG or HEIC image. Animated or unreadable files cannot be attached.';
+
+  @override
+  String get photoTooLarge =>
+      'Choose a photo no larger than 64 MB and 100 megapixels.';
+
+  @override
+  String get photoNotReady =>
+      'The photo is not ready. Check its status or retry before saving.';
+
+  @override
+  String get photoMissing =>
+      'The original file is unavailable. Your note and care history are still retained.';
+
+  @override
+  String get photoSelectionExpired =>
+      'Choose the photo again. This temporary selection is no longer available.';
+
+  @override
+  String get futureObservation =>
+      'An observation cannot be dated in the future.';
+
+  @override
+  String get emptyJournal => 'Add a note or a photo before saving.';
+
+  @override
+  String get photoContinueWithout => 'Continue without the new photo';
+
+  @override
+  String get journalDraftConflictExplanation =>
+      'This draft changed elsewhere. Keep the text, date and selected photos shown in this editor, replacing the current draft fields? Saved journal entries remain unchanged until you review and save.';
 }

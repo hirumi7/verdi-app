@@ -1,5 +1,10 @@
 import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+
+import '../../../../core/native/draft_bridge.g.dart';
+import '../../../media/presentation/widgets/photo_preview.dart';
+
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:verdi_core/verdi_core.dart';
 
@@ -13,7 +18,14 @@ import '../widgets/routine_fields_editor.dart';
 @RoutePage()
 class PlantEditorPage extends StatefulWidget {
   final String? plantId;
-  const PlantEditorPage({super.key, this.plantId});
+  final String? coverPhotoId;
+  final bool removeCover;
+  const PlantEditorPage({
+    super.key,
+    this.plantId,
+    this.coverPhotoId,
+    this.removeCover = false,
+  });
   @override
   State<PlantEditorPage> createState() => _PlantEditorPageState();
 }
@@ -22,6 +34,8 @@ class _PlantEditorPageState extends State<PlantEditorPage>
     with WidgetsBindingObserver {
   late final PlantEditorCubit editor;
   bool reviewing = false;
+  bool photoBusy = false;
+  String? photoError;
   bool leaving = false;
   final fieldKeys = {
     for (final name in ['name', 'speciesName', 'location', 'notes'])
@@ -45,7 +59,16 @@ class _PlantEditorPageState extends State<PlantEditorPage>
   @override
   void initState() {
     super.initState();
-    editor = getIt<PlantEditorCubit>()..load(widget.plantId);
+    editor = getIt<PlantEditorCubit>();
+    editor.load(widget.plantId).then((_) {
+      if (editor.state.fields != null &&
+          (widget.coverPhotoId != null || widget.removeCover)) {
+        editor.update(
+          coverPhotoId: widget.coverPhotoId,
+          removeCover: widget.removeCover,
+        );
+      }
+    });
     WidgetsBinding.instance.addObserver(this);
   }
 
@@ -70,7 +93,7 @@ class _PlantEditorPageState extends State<PlantEditorPage>
   }
 
   Future<void> back() async {
-    if (reviewing) return;
+    if (reviewing || photoBusy || editor.state.photoPending) return;
     final s = strings(context);
     if (editor.state.picking &&
         (widget.plantId != null || editor.state.draft != null)) {
@@ -220,6 +243,39 @@ class _PlantEditorPageState extends State<PlantEditorPage>
     }
   }
 
+  Future<void> pickPhoto(String source) async {
+    setState(() {
+      photoBusy = true;
+      photoError = null;
+    });
+    try {
+      await editor.photoDraft();
+      final selected = await MediaPlatformHostApi().choosePhoto(source);
+      if (selected == null || !mounted) return;
+      final today = DateTime.now();
+      final local = LocalDate(today.year, today.month, today.day);
+      final date = await chooseDate(
+        context,
+        initial: local,
+        latest: local,
+        helpText: strings(context).photoObservationDate,
+      );
+      if (date != null) await editor.attachPhoto(selected, date);
+    } catch (e) {
+      if (mounted) {
+        setState(
+          () => photoError = e is PlatformException
+              ? e.code
+              : e is DomainException
+              ? e.code
+              : 'UNKNOWN_OUTCOME',
+        );
+      }
+    } finally {
+      if (mounted) setState(() => photoBusy = false);
+    }
+  }
+
   @override
   Widget build(BuildContext context) => BlocProvider.value(
     value: editor,
@@ -227,8 +283,11 @@ class _PlantEditorPageState extends State<PlantEditorPage>
       builder: (context, state) {
         final s = strings(context);
         final f = state.fields;
+        final photoLocked = photoBusy || state.photoPending;
         return PopScope(
-          canPop: leaving || (!state.dirty && !reviewing && !state.picking),
+          canPop:
+              leaving ||
+              (!state.dirty && !reviewing && !state.picking && !photoLocked),
           onPopInvokedWithResult: (didPop, _) {
             if (!didPop) back();
           },
@@ -265,6 +324,84 @@ class _PlantEditorPageState extends State<PlantEditorPage>
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.stretch,
                       children: [
+                        if (photoLocked) const LinearProgressIndicator(),
+                        if (photoError != null ||
+                            state.photoFailed ||
+                            state.photoPending) ...[
+                          ErrorNotice(
+                            photoError ?? state.errorCode ?? 'MEDIA_NOT_READY',
+                          ),
+                          if (photoError == 'CAMERA_DENIED')
+                            TextButton(
+                              onPressed: () =>
+                                  MediaPlatformHostApi().openMediaSettings(),
+                              child: Text(s.openSettings),
+                            ),
+                          OutlinedButton(
+                            onPressed: photoBusy
+                                ? null
+                                : () async {
+                                    setState(() => photoBusy = true);
+                                    try {
+                                      await editor.recoverPhoto();
+                                      if (mounted) {
+                                        setState(() => photoError = null);
+                                      }
+                                    } catch (e) {
+                                      if (mounted) {
+                                        setState(
+                                          () =>
+                                              photoError = e is DomainException
+                                              ? e.code
+                                              : 'UNKNOWN_OUTCOME',
+                                        );
+                                      }
+                                    } finally {
+                                      if (mounted) {
+                                        setState(() => photoBusy = false);
+                                      }
+                                    }
+                                  },
+                            child: Text(s.checkAttachment),
+                          ),
+                          Text(s.photoOptionalHint),
+                          if (!state.photoPending)
+                            TextButton(
+                              onPressed: () {
+                                editor.continueWithoutPhoto();
+                                setState(() => photoError = null);
+                              },
+                              child: Text(s.photoContinueWithout),
+                            ),
+                        ],
+                        if (f.coverPhotoId != null) ...[
+                          PhotoPreview(photoId: f.coverPhotoId!),
+                          TextButton(
+                            onPressed: photoLocked
+                                ? null
+                                : () => editor.update(removeCover: true),
+                            child: Text(s.removeCover),
+                          ),
+                        ],
+                        Wrap(
+                          spacing: 8,
+                          children: [
+                            OutlinedButton.icon(
+                              onPressed: photoLocked
+                                  ? null
+                                  : () => pickPhoto('camera'),
+                              icon: const Icon(Icons.photo_camera_outlined),
+                              label: Text(s.camera),
+                            ),
+                            OutlinedButton.icon(
+                              onPressed: photoLocked
+                                  ? null
+                                  : () => pickPhoto('library'),
+                              icon: const Icon(Icons.photo_library_outlined),
+                              label: Text(s.library),
+                            ),
+                          ],
+                        ),
                         if (state.errorCode != null)
                           ErrorNotice(state.errorCode!),
                         if (state.errorCode == 'STALE_TARGET' ||
@@ -286,219 +423,262 @@ class _PlantEditorPageState extends State<PlantEditorPage>
                             ),
                           ),
                         const SizedBox(height: 16),
-                        TextFormField(
-                          key: fieldKeys['name'],
-                          focusNode: fieldFocus['name'],
-                          initialValue: f.name,
-                          decoration: InputDecoration(
-                            labelText: s.nickname,
-                            errorText: state.errors.containsKey('name')
-                                ? s.fieldInvalid
-                                : null,
-                          ),
-                          textInputAction: TextInputAction.next,
-                          onChanged: (v) => editor.update(name: v),
-                        ),
-                        const SizedBox(height: 16),
-                        TextButton.icon(
-                          onPressed: editor.openPicker,
-                          icon: const Icon(Icons.search),
-                          label: Text(s.changeSpecies),
-                        ),
-                        TextFormField(
-                          readOnly: f.catalogSelection != null,
-                          key: fieldKeys['speciesName'],
-                          focusNode: fieldFocus['speciesName'],
-                          initialValue: f.speciesName,
-                          decoration: InputDecoration(
-                            labelText: f.catalogSelection == null
-                                ? s.species
-                                : s.selectedSpecies,
-                            errorText:
-                                state.errors.containsKey('customSpeciesName')
-                                ? s.fieldInvalid
-                                : null,
-                          ),
-                          textInputAction: TextInputAction.next,
-                          onChanged: (v) => editor.update(species: v),
-                        ),
-                        const SizedBox(height: 16),
-                        TextFormField(
-                          key: fieldKeys['location'],
-                          focusNode: fieldFocus['location'],
-                          initialValue: f.location,
-                          decoration: InputDecoration(
-                            labelText: s.location,
-                            errorText: state.errors.containsKey('location')
-                                ? s.fieldInvalid
-                                : null,
-                          ),
-                          textInputAction: TextInputAction.next,
-                          onChanged: (v) => editor.update(location: v),
-                        ),
-                        const SizedBox(height: 16),
-                        TextFormField(
-                          key: fieldKeys['notes'],
-                          focusNode: fieldFocus['notes'],
-                          initialValue: f.notes,
-                          minLines: 3,
-                          maxLines: 8,
-                          decoration: InputDecoration(
-                            labelText: s.notes,
-                            errorText: state.errors.containsKey('notes')
-                                ? s.fieldInvalid
-                                : null,
-                          ),
-                          onChanged: (v) => editor.update(notes: v),
-                        ),
-                        const SizedBox(height: 16),
-                        if (f.catalogSelection == null)
-                          DropdownButtonFormField<CustomLight>(
-                            initialValue: f.light,
-                            isExpanded: true,
-                            decoration: InputDecoration(labelText: s.light),
-                            items: [
-                              for (final light in CustomLight.values)
-                                DropdownMenuItem(
-                                  value: light,
-                                  child: Text(switch (light) {
-                                    CustomLight.unknown => s.unknown,
-                                    CustomLight.low => s.lowLight,
-                                    CustomLight.medium => s.mediumLight,
-                                    CustomLight.brightIndirect =>
-                                      s.brightIndirect,
-                                    CustomLight.direct => s.directLight,
-                                  }),
+                        AbsorbPointer(
+                          absorbing: photoLocked,
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.stretch,
+                            children: [
+                              TextFormField(
+                                enabled: !photoLocked,
+                                key: fieldKeys['name'],
+                                focusNode: fieldFocus['name'],
+                                initialValue: f.name,
+                                decoration: InputDecoration(
+                                  labelText: s.nickname,
+                                  errorText: state.errors.containsKey('name')
+                                      ? s.fieldInvalid
+                                      : null,
                                 ),
-                            ],
-                            onChanged: (v) => editor.update(light: v),
-                          ),
-                        const SizedBox(height: 16),
-                        if (f.catalogSelection == null)
-                          DropdownButtonFormField<CustomToxicity>(
-                            initialValue: f.toxicity,
-                            isExpanded: true,
-                            decoration: InputDecoration(labelText: s.toxicity),
-                            items: [
-                              for (final value in CustomToxicity.values)
-                                DropdownMenuItem(
-                                  value: value,
-                                  child: Text(switch (value) {
-                                    CustomToxicity.unknown => s.unknown,
-                                    CustomToxicity.toxic => s.toxic,
-                                    CustomToxicity.nonToxic => s.nonToxic,
-                                  }),
+                                textInputAction: TextInputAction.next,
+                                onChanged: (v) => editor.update(name: v),
+                              ),
+                              const SizedBox(height: 16),
+                              TextButton.icon(
+                                onPressed: photoLocked
+                                    ? null
+                                    : editor.openPicker,
+                                icon: const Icon(Icons.search),
+                                label: Text(s.changeSpecies),
+                              ),
+                              TextFormField(
+                                enabled: !photoLocked,
+                                readOnly: f.catalogSelection != null,
+                                key: fieldKeys['speciesName'],
+                                focusNode: fieldFocus['speciesName'],
+                                initialValue: f.speciesName,
+                                decoration: InputDecoration(
+                                  labelText: f.catalogSelection == null
+                                      ? s.species
+                                      : s.selectedSpecies,
+                                  errorText:
+                                      state.errors.containsKey(
+                                        'customSpeciesName',
+                                      )
+                                      ? s.fieldInvalid
+                                      : null,
                                 ),
-                            ],
-                            onChanged: (v) => editor.update(toxicity: v),
-                          ),
-                        if (widget.plantId == null)
-                          RoutineFieldsEditor(
-                            fieldKeys: routineKeys,
-                            fieldFocus: routineFocus,
-                            routines: f.routines,
-                            suggestions: f.catalogSelection?.suggestions ?? [],
-                            errors: state.errors,
-                            onChanged: (routines) =>
-                                editor.update(routines: routines),
-                          ),
-                        if (editor.identityChanged) ...[
-                          Text(s.chooseSpeciesRoutine),
-                          for (final row in state.existingRoutines)
-                            Builder(
-                              builder: (context) {
-                                final id = row.routine.id,
-                                    proposal = f.catalogSelection?.suggestion(
-                                      row.careKind,
-                                    );
-                                return Card(
-                                  child: Padding(
-                                    padding: const EdgeInsets.all(12),
-                                    child: Column(
-                                      crossAxisAlignment:
-                                          CrossAxisAlignment.start,
-                                      children: [
-                                        Text(kindLabel(s, row.careKind)),
-                                        RadioGroup<String>(
-                                          groupValue:
-                                              f.keepRoutineIds.contains(id)
-                                              ? 'keep'
-                                              : f.applyRoutineIntervals
-                                                    .containsKey(id)
-                                              ? 'apply'
-                                              : null,
-                                          onChanged: (value) {
-                                            if (value == 'keep') {
-                                              editor.chooseRoutine(id, null);
-                                            } else if (proposal != null) {
-                                              editor.chooseRoutine(
-                                                id,
-                                                proposal.interval,
-                                              );
-                                            }
-                                          },
+                                textInputAction: TextInputAction.next,
+                                onChanged: (v) => editor.update(species: v),
+                              ),
+                              const SizedBox(height: 16),
+                              TextFormField(
+                                enabled: !photoLocked,
+                                key: fieldKeys['location'],
+                                focusNode: fieldFocus['location'],
+                                initialValue: f.location,
+                                decoration: InputDecoration(
+                                  labelText: s.location,
+                                  errorText:
+                                      state.errors.containsKey('location')
+                                      ? s.fieldInvalid
+                                      : null,
+                                ),
+                                textInputAction: TextInputAction.next,
+                                onChanged: (v) => editor.update(location: v),
+                              ),
+                              const SizedBox(height: 16),
+                              TextFormField(
+                                enabled: !photoLocked,
+                                key: fieldKeys['notes'],
+                                focusNode: fieldFocus['notes'],
+                                initialValue: f.notes,
+                                minLines: 3,
+                                maxLines: 8,
+                                decoration: InputDecoration(
+                                  labelText: s.notes,
+                                  errorText: state.errors.containsKey('notes')
+                                      ? s.fieldInvalid
+                                      : null,
+                                ),
+                                onChanged: (v) => editor.update(notes: v),
+                              ),
+                              const SizedBox(height: 16),
+                              if (f.catalogSelection == null)
+                                DropdownButtonFormField<CustomLight>(
+                                  initialValue: f.light,
+                                  isExpanded: true,
+                                  decoration: InputDecoration(
+                                    labelText: s.light,
+                                  ),
+                                  items: [
+                                    for (final light in CustomLight.values)
+                                      DropdownMenuItem(
+                                        value: light,
+                                        child: Text(switch (light) {
+                                          CustomLight.unknown => s.unknown,
+                                          CustomLight.low => s.lowLight,
+                                          CustomLight.medium => s.mediumLight,
+                                          CustomLight.brightIndirect =>
+                                            s.brightIndirect,
+                                          CustomLight.direct => s.directLight,
+                                        }),
+                                      ),
+                                  ],
+                                  onChanged: (v) => editor.update(light: v),
+                                ),
+                              const SizedBox(height: 16),
+                              if (f.catalogSelection == null)
+                                DropdownButtonFormField<CustomToxicity>(
+                                  initialValue: f.toxicity,
+                                  isExpanded: true,
+                                  decoration: InputDecoration(
+                                    labelText: s.toxicity,
+                                  ),
+                                  items: [
+                                    for (final value in CustomToxicity.values)
+                                      DropdownMenuItem(
+                                        value: value,
+                                        child: Text(switch (value) {
+                                          CustomToxicity.unknown => s.unknown,
+                                          CustomToxicity.toxic => s.toxic,
+                                          CustomToxicity.nonToxic => s.nonToxic,
+                                        }),
+                                      ),
+                                  ],
+                                  onChanged: (v) => editor.update(toxicity: v),
+                                ),
+                              if (widget.plantId == null)
+                                RoutineFieldsEditor(
+                                  fieldKeys: routineKeys,
+                                  fieldFocus: routineFocus,
+                                  routines: f.routines,
+                                  suggestions:
+                                      f.catalogSelection?.suggestions ?? [],
+                                  errors: state.errors,
+                                  onChanged: (routines) =>
+                                      editor.update(routines: routines),
+                                ),
+                              if (editor.identityChanged) ...[
+                                Text(s.chooseSpeciesRoutine),
+                                for (final row in state.existingRoutines)
+                                  Builder(
+                                    builder: (context) {
+                                      final id = row.routine.id,
+                                          proposal = f.catalogSelection
+                                              ?.suggestion(row.careKind);
+                                      return Card(
+                                        child: Padding(
+                                          padding: const EdgeInsets.all(12),
                                           child: Column(
+                                            crossAxisAlignment:
+                                                CrossAxisAlignment.start,
                                             children: [
-                                              RadioListTile(
-                                                value: 'keep',
-                                                title: Text(s.keepRoutine),
-                                                subtitle: Text(
-                                                  s.routineEvery(
-                                                    row.routine.interval.count,
-                                                    unitLabel(
-                                                      s,
-                                                      row.routine.interval.unit,
+                                              Text(kindLabel(s, row.careKind)),
+                                              RadioGroup<String>(
+                                                groupValue:
+                                                    f.keepRoutineIds.contains(
+                                                      id,
+                                                    )
+                                                    ? 'keep'
+                                                    : f.applyRoutineIntervals
+                                                          .containsKey(id)
+                                                    ? 'apply'
+                                                    : null,
+                                                onChanged: (value) {
+                                                  if (value == 'keep') {
+                                                    editor.chooseRoutine(
+                                                      id,
+                                                      null,
+                                                    );
+                                                  } else if (proposal != null) {
+                                                    editor.chooseRoutine(
+                                                      id,
+                                                      proposal.interval,
+                                                    );
+                                                  }
+                                                },
+                                                child: Column(
+                                                  children: [
+                                                    RadioListTile(
+                                                      value: 'keep',
+                                                      title: Text(
+                                                        s.keepRoutine,
+                                                      ),
+                                                      subtitle: Text(
+                                                        s.routineEvery(
+                                                          row
+                                                              .routine
+                                                              .interval
+                                                              .count,
+                                                          unitLabel(
+                                                            s,
+                                                            row
+                                                                .routine
+                                                                .interval
+                                                                .unit,
+                                                          ),
+                                                        ),
+                                                      ),
                                                     ),
-                                                  ),
+                                                    if (proposal != null)
+                                                      RadioListTile(
+                                                        value: 'apply',
+                                                        title: Text(
+                                                          s.applySuggestion,
+                                                        ),
+                                                        subtitle: Text(
+                                                          proposal.context,
+                                                        ),
+                                                      ),
+                                                  ],
                                                 ),
                                               ),
-                                              if (proposal != null)
-                                                RadioListTile(
-                                                  value: 'apply',
-                                                  title: Text(
-                                                    s.applySuggestion,
-                                                  ),
-                                                  subtitle: Text(
-                                                    proposal.context,
+                                              if (f.applyRoutineIntervals[id]
+                                                  case final interval?)
+                                                TextButton(
+                                                  onPressed: () async {
+                                                    final chosen =
+                                                        await chooseInterval(
+                                                          context,
+                                                          interval,
+                                                        );
+                                                    if (chosen != null) {
+                                                      editor.chooseRoutine(
+                                                        id,
+                                                        chosen,
+                                                      );
+                                                    }
+                                                  },
+                                                  child: Text(
+                                                    s.routineEvery(
+                                                      interval.count,
+                                                      unitLabel(
+                                                        s,
+                                                        interval.unit,
+                                                      ),
+                                                    ),
                                                   ),
                                                 ),
                                             ],
                                           ),
                                         ),
-                                        if (f.applyRoutineIntervals[id]
-                                            case final interval?)
-                                          TextButton(
-                                            onPressed: () async {
-                                              final chosen =
-                                                  await chooseInterval(
-                                                    context,
-                                                    interval,
-                                                  );
-                                              if (chosen != null) {
-                                                editor.chooseRoutine(
-                                                  id,
-                                                  chosen,
-                                                );
-                                              }
-                                            },
-                                            child: Text(
-                                              s.routineEvery(
-                                                interval.count,
-                                                unitLabel(s, interval.unit),
-                                              ),
-                                            ),
-                                          ),
-                                      ],
-                                    ),
+                                      );
+                                    },
                                   ),
-                                );
-                              },
-                            ),
-                        ],
-                        const SizedBox(height: 24),
-                        FilledButton(
-                          onPressed: reviewing ? null : save,
-                          child: Text(s.reviewSave),
+                              ],
+                              const SizedBox(height: 24),
+                              FilledButton(
+                                onPressed:
+                                    reviewing ||
+                                        photoLocked ||
+                                        state.photoFailed ||
+                                        photoError != null
+                                    ? null
+                                    : save,
+                                child: Text(s.reviewSave),
+                              ),
+                            ],
+                          ),
                         ),
                       ],
                     ),

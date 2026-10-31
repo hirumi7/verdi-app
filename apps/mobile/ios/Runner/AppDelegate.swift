@@ -6,6 +6,7 @@ import UIKit
   #if DEBUG
   private var draftBridge: DraftRepositoryBridge?
   private var coreBridge: CoreRepositoryBridge?
+  private var mediaBridge: MediaPlatformBridge?
   #endif
 
   override func application(
@@ -22,6 +23,9 @@ import UIKit
       do {
         let bridge = try CoreRepositoryBridge()
         coreBridge = bridge
+        let media = MediaPlatformBridge(repository:bridge.repository)
+        mediaBridge = media
+        MediaPlatformHostApiSetup.setUp(binaryMessenger:registrar.messenger(),api:media)
         CoreRepositoryHostApiSetup.setUp(binaryMessenger: registrar.messenger(), api: bridge)
       } catch { coreBridge = nil }
     }

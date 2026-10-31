@@ -1,3 +1,5 @@
+import '../../../media/presentation/widgets/photo_preview.dart';
+
 import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -82,22 +84,31 @@ class PlantsPage extends StatelessWidget {
                   child: Card(
                     child: ListTile(
                       contentPadding: const EdgeInsets.all(16),
-                      leading: ExcludeSemantics(
-                        child: Container(
-                          width: 48,
-                          height: 64,
-                          decoration: BoxDecoration(
-                            color: Theme.of(context)
-                                .colorScheme
-                                .primaryContainer,
-                            borderRadius: BorderRadius.circular(12),
-                          ),
-                          child: Icon(
-                            Icons.spa_outlined,
-                            color: Theme.of(context).colorScheme.primary,
-                          ),
-                        ),
-                      ),
+                      leading: row.coverPhotoId != null
+                          ? SizedBox(
+                              width: 48,
+                              child: PhotoPreview(
+                                photoId: row.coverPhotoId!,
+                                revision: row.coverPhotoRevision!,
+                                height: 64,
+                              ),
+                            )
+                          : ExcludeSemantics(
+                              child: Container(
+                                width: 48,
+                                height: 64,
+                                decoration: BoxDecoration(
+                                  color: Theme.of(context)
+                                      .colorScheme
+                                      .primaryContainer,
+                                  borderRadius: BorderRadius.circular(12),
+                                ),
+                                child: Icon(
+                                  Icons.spa_outlined,
+                                  color: Theme.of(context).colorScheme.primary,
+                                ),
+                              ),
+                            ),
                       title: Text(
                         row.plant.name,
                         style: Theme.of(context).textTheme.titleMedium,

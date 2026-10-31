@@ -555,6 +555,7 @@ class DraftBridgePigeonCodec: FlutterStandardMessageCodec, @unchecked Sendable {
   static let shared = DraftBridgePigeonCodec(readerWriter: DraftBridgePigeonCodecReaderWriter())
 }
 
+
 /// Generated protocol from Pigeon that represents a handler of messages from Flutter.
 protocol DraftRepositoryHostApi {
   func openDraftRepository(protocolVersion: Int64) throws -> DraftSessionMessage
@@ -780,6 +781,92 @@ class CoreRepositoryHostApiSetup {
       }
     } else {
       callCoreChannel.setMessageHandler(nil)
+    }
+  }
+}
+/// Main-isolate OS presentation. Opaque selection IDs and bounded preview bytes
+/// cross this boundary; caller-supplied filesystem paths never do.
+///
+/// Generated protocol from Pigeon that represents a handler of messages from Flutter.
+protocol MediaPlatformHostApi {
+  func choosePhoto(source: String) async throws -> String?
+  func previewPhoto(photoId: String) async throws -> FlutterStandardTypedData
+  func exportPhoto(photoId: String, photoRevision: Int64) async throws -> String
+  func openMediaSettings() async throws
+}
+
+/// Generated setup class from Pigeon to handle messages through the `binaryMessenger`.
+class MediaPlatformHostApiSetup {
+  static var codec: FlutterStandardMessageCodec { DraftBridgePigeonCodec.shared }
+  /// Sets up an instance of `MediaPlatformHostApi` to handle messages through the `binaryMessenger`.
+  static func setUp(binaryMessenger: FlutterBinaryMessenger, api: MediaPlatformHostApi?, messageChannelSuffix: String = "") {
+    let channelSuffix = messageChannelSuffix.count > 0 ? ".\(messageChannelSuffix)" : ""
+    let choosePhotoChannel = FlutterBasicMessageChannel(name: "dev.flutter.pigeon.verdi_mobile.MediaPlatformHostApi.choosePhoto\(channelSuffix)", binaryMessenger: binaryMessenger, codec: codec)
+    if let api = api {
+      choosePhotoChannel.setMessageHandler { message, reply in
+        let args = message as! [Any?]
+        let sourceArg = args[0] as! String
+        Task { @MainActor in
+          do {
+            let result = try await api.choosePhoto(source: sourceArg)
+            reply(wrapResult(result))
+          } catch {
+            reply(wrapError(error))
+          }
+        }
+      }
+    } else {
+      choosePhotoChannel.setMessageHandler(nil)
+    }
+    let previewPhotoChannel = FlutterBasicMessageChannel(name: "dev.flutter.pigeon.verdi_mobile.MediaPlatformHostApi.previewPhoto\(channelSuffix)", binaryMessenger: binaryMessenger, codec: codec)
+    if let api = api {
+      previewPhotoChannel.setMessageHandler { message, reply in
+        let args = message as! [Any?]
+        let photoIdArg = args[0] as! String
+        Task { @MainActor in
+          do {
+            let result = try await api.previewPhoto(photoId: photoIdArg)
+            reply(wrapResult(result))
+          } catch {
+            reply(wrapError(error))
+          }
+        }
+      }
+    } else {
+      previewPhotoChannel.setMessageHandler(nil)
+    }
+    let exportPhotoChannel = FlutterBasicMessageChannel(name: "dev.flutter.pigeon.verdi_mobile.MediaPlatformHostApi.exportPhoto\(channelSuffix)", binaryMessenger: binaryMessenger, codec: codec)
+    if let api = api {
+      exportPhotoChannel.setMessageHandler { message, reply in
+        let args = message as! [Any?]
+        let photoIdArg = args[0] as! String
+        let photoRevisionArg = args[1] as! Int64
+        Task { @MainActor in
+          do {
+            let result = try await api.exportPhoto(photoId: photoIdArg, photoRevision: photoRevisionArg)
+            reply(wrapResult(result))
+          } catch {
+            reply(wrapError(error))
+          }
+        }
+      }
+    } else {
+      exportPhotoChannel.setMessageHandler(nil)
+    }
+    let openMediaSettingsChannel = FlutterBasicMessageChannel(name: "dev.flutter.pigeon.verdi_mobile.MediaPlatformHostApi.openMediaSettings\(channelSuffix)", binaryMessenger: binaryMessenger, codec: codec)
+    if let api = api {
+      openMediaSettingsChannel.setMessageHandler { _, reply in
+        Task { @MainActor in
+          do {
+            try await api.openMediaSettings()
+            reply(wrapResult(nil))
+          } catch {
+            reply(wrapError(error))
+          }
+        }
+      }
+    } else {
+      openMediaSettingsChannel.setMessageHandler(nil)
     }
   }
 }

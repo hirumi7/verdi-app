@@ -4,7 +4,10 @@ Map<String, Object?> _map(Object? value) =>
     (value as Map).cast<String, Object?>();
 List<Object?> _list(Object? value) => (value as List).cast<Object?>();
 
-CustomPlantFields _storedFields(Object? value) {
+CustomPlantFields _storedFields(
+  Object? value, [
+  Iterable<String> ready = const [],
+]) {
   final m = _map(value);
   final selection = m['catalogSelection'] == null
       ? null
@@ -12,11 +15,12 @@ CustomPlantFields _storedFields(Object? value) {
           m['speciesId'] as String,
           m['catalogSelection'],
         );
-  if (m['coverPhotoId'] != null ||
-      !['custom', 'catalog'].contains(m['identityKind']) ||
+  if (!['custom', 'catalog'].contains(m['identityKind']) ||
       (m['identityKind'] == 'catalog') != (selection != null))
     throw CommandRejected('STORAGE_INVALID');
   final fields = CustomPlantFields(
+    coverPhotoId: m['coverPhotoId'] as String?,
+    readyPhotoIds: ready,
     name: m['name'] as String,
     location: m['location'] as String,
     notes: m['notes'] as String,
@@ -87,85 +91,90 @@ CareTarget _storedTarget(Object? value) {
 CoreCommand _storedCommand(String type, Map<String, Object?> p) {
   CareTarget target() => _storedTarget(p['target']);
   LocalDate d(String key) => LocalDate.parse(p[key] as String);
-  final command = switch (type) {
-    'SaveDraft' => SaveDraft(
-      draftId: p['draftId'] as String,
-      expectedRevision: p['expectedRevision'] as int?,
-      mode: DraftMode.values.byName(p['mode'] as String),
-      fields: _storedFields(p['rawFields']),
-      plantId: p['plantId'] as String?,
-      basePlantRevision: p['basePlantRevision'] as int?,
-    ),
-    'SavePlant' => SavePlant(
-      draftId: p['draftId'] as String,
-      draftRevision: p['draftRevision'] as int,
-    ),
-    'DiscardDraft' => DiscardDraft(
-      draftId: p['draftId'] as String,
-      draftRevision: p['draftRevision'] as int,
-      confirmed: p['confirmed'] as bool,
-    ),
-    'CompleteCurrent' => CompleteCurrent(target(), d('careDate')),
-    'CheckNotNeeded' => CheckNotNeeded(
-      target(),
-      d('checkDate'),
-      d('nextCheckDate'),
-    ),
-    'Snooze' => Snooze(target(), d('nextCheckDate')),
-    'Skip' => Skip(target()),
-    'AddPastCare' => AddPastCare(
-      target(),
-      d('careDate'),
-      CareStorage.outcome(p['outcome'] as String),
-    ),
-    'CorrectEvent' || 'RestoreEvent' => CorrectEvent(
-      target(),
-      eventId: p['eventId'] as String,
-      eventRevision: p['eventRevision'] as int,
-      careDate: d('careDate'),
-      outcome: CareStorage.outcome(p['outcome'] as String),
-      restore: type == 'RestoreEvent',
-    ),
-    'VoidEvent' => VoidEvent(
-      target(),
-      eventId: p['eventId'] as String,
-      eventRevision: p['eventRevision'] as int,
-    ),
-    'SetInterval' => SetInterval(
-      target(),
-      CareInterval(
-        _map(p['interval'])['count'] as int,
-        IntervalUnit.values.byName(_map(p['interval'])['unit'] as String),
-      ),
-      firstCheckDate: CareStorage.date(p['firstCheckDate']),
-    ),
-    'ClearOverride' => ClearOverride(
-      target(),
-      firstCheckDate: CareStorage.date(p['firstCheckDate']),
-    ),
-    'PauseRoutine' => PauseRoutine(target()),
-    'ResumeRoutine' => ResumeRoutine(target()),
-    'RetireRoutine' => RetireRoutine(target()),
-    'ArchivePlant' => ArchivePlant(
-      plantId: p['plantId'] as String,
-      plantRevision: p['plantRevision'] as int,
-    ),
-    'RestorePlant' => RestorePlant(
-      plantId: p['plantId'] as String,
-      plantRevision: p['plantRevision'] as int,
-    ),
-    'DeletePlant' => DeletePlant(
-      plantId: p['plantId'] as String,
-      plantRevision: p['plantRevision'] as int,
-    ),
-    'BulkComplete' => BulkComplete(
-      careKind: StandardCareKind.values.byName(p['careKind'] as String),
-      careDate: d('careDate'),
-      targets: _list(p['targets']).map(_storedTarget),
-    ),
-    'Undo' => Undo(p['originalCommandId'] as String),
-    _ => throw CommandRejected('PROTOCOL_INCOMPATIBLE'),
-  };
+  final command =
+      _storedMediaCommand(type, p) ??
+      switch (type) {
+        'SaveDraft' => SaveDraft(
+          draftId: p['draftId'] as String,
+          expectedRevision: p['expectedRevision'] as int?,
+          mode: DraftMode.values.byName(p['mode'] as String),
+          fields: _storedFields(
+            p['rawFields'],
+            _list(p['photoIds']).cast<String>(),
+          ),
+          plantId: p['plantId'] as String?,
+          basePlantRevision: p['basePlantRevision'] as int?,
+        ),
+        'SavePlant' => SavePlant(
+          draftId: p['draftId'] as String,
+          draftRevision: p['draftRevision'] as int,
+        ),
+        'DiscardDraft' => DiscardDraft(
+          draftId: p['draftId'] as String,
+          draftRevision: p['draftRevision'] as int,
+          confirmed: p['confirmed'] as bool,
+        ),
+        'CompleteCurrent' => CompleteCurrent(target(), d('careDate')),
+        'CheckNotNeeded' => CheckNotNeeded(
+          target(),
+          d('checkDate'),
+          d('nextCheckDate'),
+        ),
+        'Snooze' => Snooze(target(), d('nextCheckDate')),
+        'Skip' => Skip(target()),
+        'AddPastCare' => AddPastCare(
+          target(),
+          d('careDate'),
+          CareStorage.outcome(p['outcome'] as String),
+        ),
+        'CorrectEvent' || 'RestoreEvent' => CorrectEvent(
+          target(),
+          eventId: p['eventId'] as String,
+          eventRevision: p['eventRevision'] as int,
+          careDate: d('careDate'),
+          outcome: CareStorage.outcome(p['outcome'] as String),
+          restore: type == 'RestoreEvent',
+        ),
+        'VoidEvent' => VoidEvent(
+          target(),
+          eventId: p['eventId'] as String,
+          eventRevision: p['eventRevision'] as int,
+        ),
+        'SetInterval' => SetInterval(
+          target(),
+          CareInterval(
+            _map(p['interval'])['count'] as int,
+            IntervalUnit.values.byName(_map(p['interval'])['unit'] as String),
+          ),
+          firstCheckDate: CareStorage.date(p['firstCheckDate']),
+        ),
+        'ClearOverride' => ClearOverride(
+          target(),
+          firstCheckDate: CareStorage.date(p['firstCheckDate']),
+        ),
+        'PauseRoutine' => PauseRoutine(target()),
+        'ResumeRoutine' => ResumeRoutine(target()),
+        'RetireRoutine' => RetireRoutine(target()),
+        'ArchivePlant' => ArchivePlant(
+          plantId: p['plantId'] as String,
+          plantRevision: p['plantRevision'] as int,
+        ),
+        'RestorePlant' => RestorePlant(
+          plantId: p['plantId'] as String,
+          plantRevision: p['plantRevision'] as int,
+        ),
+        'DeletePlant' => DeletePlant(
+          plantId: p['plantId'] as String,
+          plantRevision: p['plantRevision'] as int,
+        ),
+        'BulkComplete' => BulkComplete(
+          careKind: StandardCareKind.values.byName(p['careKind'] as String),
+          careDate: d('careDate'),
+          targets: _list(p['targets']).map(_storedTarget),
+        ),
+        'Undo' => Undo(p['originalCommandId'] as String),
+        _ => throw CommandRejected('PROTOCOL_INCOMPATIBLE'),
+      };
   _validateShape(command);
   if (canonicalCommandJson(command._payload) != canonicalCommandJson(p))
     throw CommandRejected('STORAGE_INVALID');

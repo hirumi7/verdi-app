@@ -8,17 +8,19 @@ final class CoreRepositoryTests: XCTestCase {
     var now = Date(timeIntervalSince1970:0)
     var ticks: TimeInterval = 100
     var failure: SQLiteBoundary?
+    var blockWrites=false
     var repo: CoreRepository!
     var session = ""
     var dataset = ""
     var steps: [[String:CanonicalValue]] = []
     override func setUpWithError() throws {
         directory = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString)
-        let file = try XCTUnwrap(Bundle.module.url(forResource:"core-storage-v1",withExtension:"json",subdirectory:"Fixtures"))
+        let file = try XCTUnwrap(Bundle.module.url(forResource:"core-storage-v3",withExtension:"json",subdirectory:"Fixtures"))
         let fixture = try CoreSchema.object(CanonicalParser.parse(String(contentsOf:file).trimmingCharacters(in:.whitespacesAndNewlines)))
         steps = try CoreSchema.array(fixture["steps"]).map(CoreSchema.object)
         now = try date(CoreSchema.string(steps[0]["instant"]))
         repo = CoreRepository(directory:directory,fault:{ [weak self] boundary in
+            if self?.blockWrites == true && boundary == .beforeCommit {throw StorageFailure.unavailable}
             if self?.failure == boundary { self?.failure = nil; throw StorageFailure.unavailable }
         },now:{self.now},elapsed:{self.ticks},zone:{TimeZone(identifier:"Etc/UTC")!})
         try open()
@@ -87,8 +89,121 @@ final class CoreRepositoryTests: XCTestCase {
     func verifyRows(_ index: Int) throws {
         for table in CoreSchema.tables {
             let actual = try CanonicalCommand.hash(.array(allRows(table).map(CoreSchema.vector)))
-            XCTAssertEqual(actual,steps[index]["tableHashes"]?.object?[table]?.text,"step \(index), \(table)")
+            let expected=steps[index]["tableHashes"]?.object?[table]?.text
+            if expected==nil && ["journal_entries","journal_drafts","media_drafts","photos","plant_covers"].contains(table) {XCTAssertEqual(try allRows(table),[],"historical fixture must have no media rows")}
+            else {XCTAssertEqual(actual,expected,"step \(index), \(table)")}
         }
+    }
+    func testJournalCommandsMatchDartAndSurviveReopen() throws {
+        let file=try XCTUnwrap(Bundle.module.url(forResource:"journal-storage-v3",withExtension:"json",subdirectory:"Fixtures"))
+        steps=try CoreSchema.array(CoreSchema.object(CanonicalParser.parse(String(contentsOf:file).trimmingCharacters(in:.whitespacesAndNewlines)))["steps"]).map(CoreSchema.object)
+        for index in steps.indices {try execute(index);try open();try verifyRows(index)}
+    }
+    func testPhotoPreparationPersistsOriginalAndAcknowledgedPlantDraft() throws {
+        try execute(0)
+        let draft=try CoreSchema.string(steps[0]["intent"]?.object?["normalisedPayload"]?.object?["draftId"])
+        let source=try XCTUnwrap(Bundle.module.url(forResource:"generic",withExtension:"png",subdirectory:"Fixtures/catalog"))
+        let original=try Data(contentsOf:source),selection=try repo.retainMediaSelection(source:source,kind:"library"),prep=UUID().uuidString.lowercased()
+        let args:[String:CanonicalValue] = ["datasetId":.string(dataset),"draftId":.string(draft),"draftRevision":.integer(1),"preparationId":.string(prep),"selectionId":.string(selection),"observedDate":.string("2026-10-20")]
+        try call("preparePhoto",args)
+        var result:CanonicalValue = .null
+        for _ in 0..<100 {result=try call("photoPreparation",["preparationId":.string(prep)]);if result.object?["kind"]?.text != "copying" {break};Thread.sleep(forTimeInterval:0.02)}
+        XCTAssertEqual(result.object?["kind"]?.text,"ready")
+        XCTAssertEqual(result.object?["draftRevision"]?.integer,2)
+        let photo=try XCTUnwrap(result.object?["photo"]?.array),path=try CoreSchema.string(photo[4])
+        XCTAssertTrue(path.hasPrefix("media/"))
+        XCTAssertEqual(try Data(contentsOf:directory.appendingPathComponent(path)),original)
+        let saved=try allRows("photos"),drafts=try allRows("plant_drafts")
+        try open();XCTAssertEqual(try allRows("photos"),saved);XCTAssertEqual(try allRows("plant_drafts"),drafts)
+        XCTAssertEqual(try call("photoPreparation",["preparationId":.string(prep)]).json(),try result.json())
+        XCTAssertEqual(try call("preparePhoto",args).json(),try result.json())
+        var changed=args;changed["observedDate"] = .string("2026-10-19")
+        assertCode("COMMAND_ID_REUSED"){_=try call("preparePhoto",changed)}
+    }
+    func testSelectionExpiryIsEnforcedWithoutRestart() throws {
+        try execute(0)
+        let source=try XCTUnwrap(Bundle.module.url(forResource:"generic",withExtension:"png",subdirectory:"Fixtures/catalog"))
+        let selection=try repo.retainMediaSelection(source:source,kind:"library")
+        now=now.addingTimeInterval(86401)
+        let draft=try CoreSchema.string(steps[0]["intent"]?.object?["normalisedPayload"]?.object?["draftId"])
+        assertCode("MEDIA_SELECTION_EXPIRED"){_=try call("preparePhoto",["datasetId":.string(dataset),"draftId":.string(draft),"draftRevision":.integer(1),"preparationId":.string(UUID().uuidString.lowercased()),"selectionId":.string(selection),"observedDate":.string("2026-10-20")])}
+        XCTAssertEqual(try allRows("photos"),[])
+    }
+    func testPreparationFailureWriteCanRecoverWithoutSessionRestart() throws {
+        try execute(0)
+        let draft=try CoreSchema.string(steps[0]["intent"]?.object?["normalisedPayload"]?.object?["draftId"])
+        let source=try XCTUnwrap(Bundle.module.url(forResource:"generic",withExtension:"png",subdirectory:"Fixtures/catalog"))
+        let selection=try repo.retainMediaSelection(source:source,kind:"library"),id=UUID().uuidString.lowercased()
+        var failPublication=true
+        repo.mediaWorker.sync {repo.mediaFiles=try! MediaFiles(root:directory,fault:{boundary in
+            if boundary == .publish && failPublication {self.repo.queue.sync{self.blockWrites=true};throw CoreRepositoryError("IO_FAILURE")}
+        })}
+        var args:[String:CanonicalValue] = ["datasetId":.string(dataset),"draftId":.string(draft),"draftRevision":.integer(1),"preparationId":.string(id),"selectionId":.string(selection),"observedDate":.string("2026-10-20")]
+        try call("preparePhoto",args);repo.mediaWorker.sync{}
+        XCTAssertThrowsError(try call("photoPreparation",["preparationId":.string(id)]))
+        repo.queue.sync{blockWrites=false}
+        XCTAssertEqual(try call("photoPreparation",["preparationId":.string(id)]).object?["kind"]?.text,"failed")
+        XCTAssertEqual(try allRows("photos"),[])
+        failPublication=false
+        let retry=UUID().uuidString.lowercased();args["preparationId"] = .string(retry)
+        try call("preparePhoto",args);repo.mediaWorker.sync{}
+        XCTAssertEqual(try call("photoPreparation",["preparationId":.string(retry)]).object?["kind"]?.text,"ready")
+        XCTAssertEqual(try allRows("photos").count,1)
+    }
+    func testJournalDeletePreviewRejectsAdvancedEditDraft() throws {
+        let file=try XCTUnwrap(Bundle.module.url(forResource:"journal-storage-v3",withExtension:"json",subdirectory:"Fixtures"))
+        steps=try CoreSchema.array(CoreSchema.object(CanonicalParser.parse(String(contentsOf:file).trimmingCharacters(in:.whitespacesAndNewlines)))["steps"]).map(CoreSchema.object)
+        for i in 0..<9 {try execute(i)}
+        let prepared=try preview(plan(9)),before=try allRows("journal_entries")
+        try repo.queue.sync {try repo.database!.transaction{sql in try sql.execute("UPDATE journal_drafts SET revision=revision+1")}}
+        XCTAssertThrowsError(try call("commit",["plan":.object(prepared)]))
+        XCTAssertEqual(try allRows("journal_entries"),before)
+        XCTAssertEqual(try allRows("journal_drafts").count,1)
+    }
+    func testExactV2MigrationPreservesAllRowsAndFrozenCommand() throws {
+        try execute(0);_ = try plan(1);_ = try call("close")
+        let url=directory.appendingPathComponent("core.sqlite")
+        var raw:OpaquePointer?;XCTAssertEqual(sqlite3_open(url.path,&raw),SQLITE_OK)
+        XCTAssertEqual(sqlite3_exec(raw,"BEGIN; DROP TABLE plant_covers; DROP TABLE media_drafts; DROP TABLE journal_drafts; DROP TABLE journal_entries; DROP TABLE photos; DROP TABLE media_preparations; DROP TABLE media_selections; DROP TABLE media_files; DROP TABLE media_cleanup; PRAGMA user_version=2; COMMIT;",nil,nil,nil),SQLITE_OK)
+        sqlite3_close(raw)
+        let old=try SQLiteDatabase.open(at:url,schema:CoreSchema.schema(version:2))
+        let tables=Array(CoreSchema.tables.filter{!["plant_covers","media_drafts","journal_drafts","journal_entries","photos"].contains($0)})+["metadata","intents","reservations","receipts","outbox"]
+        let before=try old.read{sql in try tables.map{try sql.query("SELECT * FROM \($0) ORDER BY 1")}};try old.close()
+        try open()
+        XCTAssertEqual(try repo.queue.sync{try repo.database!.read{sql in try tables.map{try sql.query("SELECT * FROM \($0) ORDER BY 1")}}},before)
+        try execute(1)
+    }
+    func seedSavedPhoto() throws -> (String,URL) {
+        try execute(0);try execute(1)
+        let plant=try CoreSchema.text(allRows("plants").first![0]),id=UUID().uuidString.lowercased()
+        let files=try MediaFiles(root:directory),source=try XCTUnwrap(Bundle.module.url(forResource:"generic",withExtension:"png",subdirectory:"Fixtures/catalog"))
+        try files.importSelection(source,to:"staging/test.copy")
+        let info=try files.inspect("staging/test.copy"),path="media/\(id)/\(info.hash).png"
+        try files.publish("staging/test.copy",to:path)
+        try repo.queue.sync{try repo.database!.transaction{sql in
+            try sql.execute("INSERT INTO photos VALUES(?,?,NULL,1,?,?,?,?,?,?,'2026-10-20','library',NULL,?)",[.text(id),.text(plant),.text(path),.text(info.hash),.integer(info.bytes),.text(info.mime),.integer(info.width),.integer(info.height),.text(repo.mediaClock())])
+            try repo.registerMediaPath(sql,path)
+        }}
+        return(id,directory.appendingPathComponent(path))
+    }
+    func testExportLeaseSurvivesReconnectThenCleansAfterRelease() throws {
+        let (photo,original)=try seedSavedPhoto(),done=expectation(description:"export")
+        var result:Result<URL,Error>?
+        repo.exportOriginal(photoID:photo,revision:1){result=$0;done.fulfill()};wait(for:[done],timeout:5)
+        let url=try XCTUnwrap(result).get();XCTAssertEqual(try Data(contentsOf:url),try Data(contentsOf:original))
+        try open();repo.mediaWorker.sync{}
+        XCTAssertTrue(FileManager.default.fileExists(atPath:url.path))
+        repo.releaseExport(url);repo.mediaWorker.sync{}
+        XCTAssertFalse(FileManager.default.fileExists(atPath:url.path));XCTAssertTrue(FileManager.default.fileExists(atPath:original.path))
+    }
+    func testAbandonedExportExpiresAndOnlyKnownPathIsRemoved() throws {
+        let (photo,original)=try seedSavedPhoto(),done=expectation(description:"export")
+        var result:Result<URL,Error>?
+        repo.exportOriginal(photoID:photo,revision:1){result=$0;done.fulfill()};wait(for:[done],timeout:5)
+        let url=try XCTUnwrap(result).get(),unrelated=directory.appendingPathComponent("keep.txt")
+        try Data("keep".utf8).write(to:unrelated);now=now.addingTimeInterval(86401)
+        try call("retryMediaCleanup");repo.mediaWorker.sync{}
+        XCTAssertFalse(FileManager.default.fileExists(atPath:url.path));XCTAssertTrue(FileManager.default.fileExists(atPath:original.path));XCTAssertTrue(FileManager.default.fileExists(atPath:unrelated.path))
     }
     func assertCode(_ code: String, _ work: () throws -> Void, file: StaticString = #filePath, line: UInt = #line) {
         XCTAssertThrowsError(try work(),file:file,line:line) { error in
@@ -112,13 +227,13 @@ final class CoreRepositoryTests: XCTestCase {
             var raw: OpaquePointer?
             XCTAssertEqual(sqlite3_open(url.path,&raw),SQLITE_OK)
             defer {sqlite3_close(raw)}
-            XCTAssertEqual(sqlite3_exec(raw,"BEGIN; DROP TABLE routine_suggestions; DROP TABLE suggestion_snapshots; DROP TABLE plant_catalog; DROP TABLE catalog_head; DROP TABLE catalog_entries; DROP TABLE catalog_identity; PRAGMA user_version=1; COMMIT;",nil,nil,nil),SQLITE_OK)
+            XCTAssertEqual(sqlite3_exec(raw,"BEGIN; DROP TABLE plant_covers; DROP TABLE media_drafts; DROP TABLE journal_drafts; DROP TABLE journal_entries; DROP TABLE photos; DROP TABLE media_preparations; DROP TABLE media_selections; DROP TABLE media_files; DROP TABLE media_cleanup; DROP TABLE routine_suggestions; DROP TABLE suggestion_snapshots; DROP TABLE plant_catalog; DROP TABLE catalog_head; DROP TABLE catalog_entries; DROP TABLE catalog_identity; PRAGMA user_version=1; COMMIT;",nil,nil,nil),SQLITE_OK)
             sqlite3_close(raw);raw=nil
             db=try SQLiteDatabase.open(at:url,schema:CoreSchema.schema(version:1));try db.close()
-            XCTAssertThrowsError(try SQLiteDatabase.open(at:url,schema:CoreSchema.schema(),upgradeFrom:CoreSchema.schema(version:1),migrationStatements:CoreSchema.catalogDefinitions,fault:{if $0 == .beforeCommit {throw StorageFailure.unavailable}}))
+            XCTAssertThrowsError(try SQLiteDatabase.open(at:url,schema:CoreSchema.schema(),upgradeFrom:CoreSchema.schema(version:1),migrationStatements:CoreSchema.catalogDefinitions+CoreSchema.mediaDefinitions,fault:{if $0 == .beforeCommit {throw StorageFailure.unavailable}}))
             db=try SQLiteDatabase.open(at:url,schema:CoreSchema.schema(version:1))
             XCTAssertEqual(try db.read {sql in try tables.map{try sql.query("SELECT * FROM \($0) ORDER BY 1")}},before);try db.close()
-            XCTAssertThrowsError(try SQLiteDatabase.open(at:url,schema:CoreSchema.schema(),upgradeFrom:CoreSchema.schema(version:1),migrationStatements:CoreSchema.catalogDefinitions,fault:{if $0 == .afterCommit {throw StorageFailure.unavailable}}))
+            XCTAssertThrowsError(try SQLiteDatabase.open(at:url,schema:CoreSchema.schema(),upgradeFrom:CoreSchema.schema(version:1),migrationStatements:CoreSchema.catalogDefinitions+CoreSchema.mediaDefinitions,fault:{if $0 == .afterCommit {throw StorageFailure.unavailable}}))
             try open()
             db=try SQLiteDatabase.open(at:url,schema:CoreSchema.schema())
             XCTAssertEqual(try db.read {sql in try tables.map{try sql.query("SELECT * FROM \($0) ORDER BY 1")}},before);try db.close()
@@ -260,7 +375,7 @@ final class CoreRepositoryTests: XCTestCase {
             try execute(index)
             if [3,10,18,24,27].contains(index) { try open(); try verifyRows(index) }
         }
-        XCTAssertEqual(Set(steps.compactMap{$0["intent"]?.object?["commandType"]?.text}),CoreRegistry.commands)
+        XCTAssertEqual(Set(steps.compactMap{$0["intent"]?.object?["commandType"]?.text}),CoreRegistry.commands.subtracting(CoreRegistry.mediaCommands))
     }
     func testAtomicRollbackAndLostReplyResolveWithoutDuplicate() throws {
         let p = try plan(0)

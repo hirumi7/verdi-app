@@ -2,6 +2,8 @@ import Foundation
 
 extension CoreRegistry {
     static func validatePayload(_ type: String, _ p: [String:CanonicalValue]) throws {
+        try require(try CanonicalCommand.bytes(.object(p)).count<=1024*1024,"PLAN_LIMIT")
+        if mediaCommands.contains(type) {try validateMediaPayload(type,p);return}
         func keys(_ expected: [String]) throws { try require(Set(p.keys) == Set(expected),"FIELD_INVALID") }
         func id(_ key: String) throws { try CoreSchema.uuid(CoreSchema.string(p[key])) }
         func revision(_ key: String, nullable: Bool = false) throws {
@@ -22,7 +24,7 @@ extension CoreRegistry {
         case "SaveDraft":
             try keys(["draftId","expectedRevision","mode","plantId","basePlantRevision","rawFields","photoIds"])
             try id("draftId"); try revision("expectedRevision",nullable:true)
-            try require(p["photoIds"]?.array?.isEmpty == true,"FIELD_INVALID")
+            _=try mediaIDs(p["photoIds"])
             let mode = try CoreSchema.string(p["mode"])
             try validateRawFields(p["rawFields"],mode:mode)
             if mode == "add" { try require(p["plantId"]?.isNull == true && p["basePlantRevision"]?.isNull == true,"FIELD_INVALID") }
@@ -63,7 +65,7 @@ extension CoreRegistry {
         let fields = try CoreSchema.object(value)
         try require(["add","edit"].contains(mode) && Set(fields.keys) == Set(["name","location","notes","identityKind","coverPhotoId","speciesId","catalogSelection","customSpeciesName","customLight","customToxicity","routineInputs","baseRoutineRevisions","speciesChoices"]),"FIELD_INVALID")
         try require(["name","location","notes"].allSatisfy {fields[$0]?.units != nil},"FIELD_INVALID")
-        try require(fields["coverPhotoId"]?.isNull == true,"FIELD_INVALID")
+        if fields["coverPhotoId"]?.isNull != true {try CoreSchema.uuid(CoreSchema.string(fields["coverPhotoId"]))}
         if fields["identityKind"]?.text == "catalog" {
             _=try CatalogPackage.matches(fields["speciesId"],"^[A-Za-z0-9_-]{1,128}$")
             let selection=try CoreSchema.object(fields["catalogSelection"])

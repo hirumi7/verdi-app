@@ -99,6 +99,29 @@ final class NativeCollectionRepository implements CollectionRepository {
   }
 
   @override
+  Future<CollectionSnapshot> mediaSnapshot() => _call('mediaSnapshot');
+  @override
+  Future<Map<String, Object?>> preparePhoto({
+    required String draftId,
+    required int draftRevision,
+    required String preparationId,
+    required String selectionId,
+    required LocalDate observedDate,
+  }) => _call('preparePhoto', <String, Object?>{
+    'datasetId': datasetId,
+    'draftId': draftId,
+    'draftRevision': draftRevision,
+    'preparationId': preparationId,
+    'selectionId': selectionId,
+    'observedDate': observedDate.toString(),
+  });
+  @override
+  Future<Map<String, Object?>> photoPreparation(String preparationId) =>
+      _call('photoPreparation', preparationId);
+  @override
+  Future<List<Map<String, Object?>>> draftPreparations(String draftId) =>
+      _call('draftPreparations', draftId);
+  @override
   Future<CatalogState> catalog({bool retry = false}) => _call('catalog', retry);
 
   @override
@@ -646,6 +669,16 @@ final class _Worker {
     }
     final reader = projection.reader, dataset = projection.datasetId;
     switch (request.operation) {
+      case 'preparePhoto':
+        return _map(
+          await native('preparePhoto', value as Map<String, Object?>),
+        );
+      case 'photoPreparation':
+        return _map(await native('photoPreparation', {'preparationId': value}));
+      case 'draftPreparations':
+        return (await native('draftPreparations', {'draftId': value}) as List)
+            .map(_map)
+            .toList();
       case 'catalog':
         return loadCatalog(retry: value == true);
       case 'close':
@@ -739,6 +772,8 @@ final class _Worker {
         await hydrate();
     }
     switch (request.operation) {
+      case 'mediaSnapshot':
+        return projection.snapshot;
       case 'read':
         final (archived, query) = value as (bool, String);
         return WorkspaceRead(

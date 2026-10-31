@@ -244,6 +244,7 @@ class _CoreBootstrapState extends State<CoreBootstrap>
 }
 
 String _actionLabel(AppStrings s, CoreCommand command) => switch (command) {
+  MediaCommand() => s.journalAndPhotos,
   SaveDraft() => s.saveDraftAction,
   SavePlant() => s.reviewSave,
   DiscardDraft() => s.discard,

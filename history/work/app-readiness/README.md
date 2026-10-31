@@ -713,3 +713,90 @@ file publication/recovery and deletion-race findings. Docs aggregate passed 8/8
 Live Figma journal/editor/viewer references were inspected. This pin establishes
 bounded design readiness only; no new application behavior is verified yet.
 Optimization, comparison/cards and backup remain separate undelivered scopes.
+
+## Photos and journal delivery — 2026-10-31
+
+**Author:** Codex (AI assistant). **Date:** 2026-10-31 (Asia/Jakarta).
+
+Implementation contract: published/adopted docs
+`3bd62013d57bd4f9c10d619cf51937137ad5d4e7`, app pin commit `3108eef`.
+Affected REQ-011 and photo parts of REQ-006, preserving related REQ-007/008,
+REQ-014/015/018 and prior catalog/core behavior. No accepted requirement or decision
+was changed. This is the bounded normal-photo/journal development slice; whole
+requirements and public release remain incomplete.
+
+The main Flutter UI now has durable journal add/edit/backdate/delete, combined
+month-grouped care/journal history, native photo attachment, gallery/viewer,
+cover selection/removal, stable-ID replacement, observation-date editing, guarded
+shared-photo deletion and Free original export. Raw drafts and ready attachments
+survive restart. Fields retain their exact pending payload through uncertain saves;
+conflicts preserve local text and require current-version review. Photo failure
+requires explicit continuation; uncertain preparation cannot masquerade as failure.
+
+SQLite v3 adds media/journal tables to exact v1/v2 stores without changing old
+rows, IDs, command hashes or receipts. Native preparation retains picker data while
+the OS URL is valid, streams bounded copies on a separate worker, validates still
+JPEG/PNG/HEIC, records every destination before publication, and atomically attaches
+ready metadata to the guarded draft. Original bytes/metadata remain intact.
+Immutable replacement paths preserve shared IDs; tombstones prevent replay from
+reattaching consumed/deleted photos. Cleanup only unlinks known unreferenced paths;
+export copies remain leased across reconnect until OS completion/cancellation or
+24-hour expiry. Physical protection uses the established read-back policy, but no
+physical-device claim follows from simulator execution.
+
+Independent AI reviewer `core_readiness_review` found and rechecked fixes for
+canonical media paths, preserved selected-photo references, selection expiry,
+new-link file validation, inventory/lease cleanup, backup exclusion after rename,
+failure-to-persist-failure recovery, media protection read-back, frozen replacement
+selection/date, queued text preservation, usable conflict/consumed-draft recovery,
+attachment-removal autosave, gallery ties and shared-thumbnail revision refresh.
+The reviewer independently passed four native correction regressions and all
+16 journal/photo recovery tests. Scoped findings are closed; no full-product
+certification is claimed.
+
+Executed on Flutter 3.47.8 / Dart 3.13.7, macOS 14.6, Xcode 16.2 / SDK 18.2:
+
+- Core analyzer, format, **127 tests** and both walkthroughs pass. New shared
+  journal vectors cover 14 guarded transitions with native reopen equality.
+- Native **77 tests pass on macOS and iOS 18.3** (iPhone SE 3 simulator);
+  warnings-as-errors package build passes. Tests include exact v1/v2 migrations,
+  retained frozen commands, advanced draft rejection, original bytes/formats,
+  invalid/oversize/path failures, failed status-write recovery and export leases.
+- Flutter analyzer and **45 unit/widget tests pass**, including rapid field focus,
+  backdated notes, raw invalid drafts, uncertain attachment retry, acknowledged
+  revision races, consumed draft exit, immediate retry edits, attachment removal
+  after reopen and small-screen/320% text. Localization/build_runner generation
+  and Pigeon Dart/Swift reproducibility pass.
+- Real iPhone 16 / iOS 18.3 retained-installation integration phases `seed`,
+  `recover`, `replace`, and `cover_export` pass. Actual PHPicker selects synthetic
+  images; restart retains original photo/notes/draft; replacement changes bytes
+  but preserves ID/cover/journal links; deletion clears references while retaining
+  note/care; plant-editor upload saves a cover; the metadata-warning export opens
+  an actual OS sheet and cancellation is reported. No image was sent externally.
+  Other existing plants remain present and the care next-check stays unchanged.
+- The initial picker run timed out waiting for operator selection; rerun with
+  selection passed. The initial replacement test did not scroll to its offscreen
+  Library control; correcting the test navigation passed. Neither is counted as
+  a successful execution. Tests never reset or uninstall the retained store.
+
+Local logs: `/tmp/verdi-media-core-final.log`, `verdi-media-native-final.log`,
+`verdi-media-native-ios.log`, `verdi-media-widget-final.log`,
+`verdi-media-review-regressions.log`, `verdi-media-flutter-independent-final.log`,
+`verdi-media-independent-recheck.log`, `verdi-media-integration-{seed,recover,replace,export}.log`
+(all under `/tmp`). Exact invocation recipes are in the root and native READMEs.
+
+Remaining: physical camera/permission/first-unlock/protection/interruption tests;
+full VoiceOver/accessibility and large-library performance; photo optimization,
+Pro comparisons/derived cards, full backup/restore, reminders, StoreKit and admin;
+production identifiers/signing/current submission SDK and release verification.
+Original photos retain metadata; only explicit original export is exposed here.
+No optimization or privacy-safe derived export is implied. The user's rights and
+device/account confirmations stay preserved; simulator-first remains the direction.
+
+Final normal iOS simulator build passed (26.5-second Xcode build). A separate
+`verify` process on the retained iPhone 16 installation also passed after all
+review fixes (23.0-second build; 4-second test): cover, both journal notes,
+photo preview and existing plants survive; no broken-image error is rendered.
+Logs `/tmp/verdi-media-ios-build-final.log` and
+`/tmp/verdi-media-integration-final-reopen.log`. App/core analyzers, final format,
+Pigeon reproduction and diff checks pass. Independent scoped review is closed.

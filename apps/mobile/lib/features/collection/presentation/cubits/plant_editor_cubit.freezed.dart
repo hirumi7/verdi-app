@@ -21,6 +21,8 @@ mixin _$PlantEditorState {
   List<RoutineRead> get existingRoutines;
   bool get saving;
   bool get dirty;
+  bool get photoPending;
+  bool get photoFailed;
   String? get errorCode;
   Map<String, String> get errors;
 
@@ -56,6 +58,10 @@ mixin _$PlantEditorState {
                 other.saving == _this.saving) &&
             (identical(other.dirty, _this.dirty) ||
                 other.dirty == _this.dirty) &&
+            (identical(other.photoPending, _this.photoPending) ||
+                other.photoPending == _this.photoPending) &&
+            (identical(other.photoFailed, _this.photoFailed) ||
+                other.photoFailed == _this.photoFailed) &&
             (identical(other.errorCode, _this.errorCode) ||
                 other.errorCode == _this.errorCode) &&
             const DeepCollectionEquality().equals(other.errors, _this.errors));
@@ -73,6 +79,8 @@ mixin _$PlantEditorState {
       const DeepCollectionEquality().hash(_this.existingRoutines),
       _this.saving,
       _this.dirty,
+      _this.photoPending,
+      _this.photoFailed,
       _this.errorCode,
       const DeepCollectionEquality().hash(_this.errors),
     );
@@ -81,7 +89,7 @@ mixin _$PlantEditorState {
   @override
   String toString() {
     final _this = this as PlantEditorState;
-    return 'PlantEditorState(fields: ${_this.fields}, draft: ${_this.draft}, loading: ${_this.loading}, picking: ${_this.picking}, existingRoutines: ${_this.existingRoutines}, saving: ${_this.saving}, dirty: ${_this.dirty}, errorCode: ${_this.errorCode}, errors: ${_this.errors})';
+    return 'PlantEditorState(fields: ${_this.fields}, draft: ${_this.draft}, loading: ${_this.loading}, picking: ${_this.picking}, existingRoutines: ${_this.existingRoutines}, saving: ${_this.saving}, dirty: ${_this.dirty}, photoPending: ${_this.photoPending}, photoFailed: ${_this.photoFailed}, errorCode: ${_this.errorCode}, errors: ${_this.errors})';
   }
 }
 
@@ -100,6 +108,8 @@ abstract mixin class $PlantEditorStateCopyWith<$Res> {
     List<RoutineRead> existingRoutines,
     bool saving,
     bool dirty,
+    bool photoPending,
+    bool photoFailed,
     String? errorCode,
     Map<String, String> errors,
   });
@@ -125,6 +135,8 @@ class _$PlantEditorStateCopyWithImpl<$Res>
     Object? existingRoutines = null,
     Object? saving = null,
     Object? dirty = null,
+    Object? photoPending = null,
+    Object? photoFailed = null,
     Object? errorCode = freezed,
     Object? errors = null,
   }) {
@@ -157,6 +169,14 @@ class _$PlantEditorStateCopyWithImpl<$Res>
         dirty: null == dirty
             ? _self.dirty
             : dirty // ignore: cast_nullable_to_non_nullable
+                  as bool,
+        photoPending: null == photoPending
+            ? _self.photoPending
+            : photoPending // ignore: cast_nullable_to_non_nullable
+                  as bool,
+        photoFailed: null == photoFailed
+            ? _self.photoFailed
+            : photoFailed // ignore: cast_nullable_to_non_nullable
                   as bool,
         errorCode: freezed == errorCode
             ? _self.errorCode
@@ -272,6 +292,8 @@ extension PlantEditorStatePatterns on PlantEditorState {
       List<RoutineRead> existingRoutines,
       bool saving,
       bool dirty,
+      bool photoPending,
+      bool photoFailed,
       String? errorCode,
       Map<String, String> errors,
     )?
@@ -289,6 +311,8 @@ extension PlantEditorStatePatterns on PlantEditorState {
           _that.existingRoutines,
           _that.saving,
           _that.dirty,
+          _that.photoPending,
+          _that.photoFailed,
           _that.errorCode,
           _that.errors,
         );
@@ -320,6 +344,8 @@ extension PlantEditorStatePatterns on PlantEditorState {
       List<RoutineRead> existingRoutines,
       bool saving,
       bool dirty,
+      bool photoPending,
+      bool photoFailed,
       String? errorCode,
       Map<String, String> errors,
     )
@@ -336,6 +362,8 @@ extension PlantEditorStatePatterns on PlantEditorState {
           _that.existingRoutines,
           _that.saving,
           _that.dirty,
+          _that.photoPending,
+          _that.photoFailed,
           _that.errorCode,
           _that.errors,
         );
@@ -366,6 +394,8 @@ extension PlantEditorStatePatterns on PlantEditorState {
       List<RoutineRead> existingRoutines,
       bool saving,
       bool dirty,
+      bool photoPending,
+      bool photoFailed,
       String? errorCode,
       Map<String, String> errors,
     )?
@@ -382,6 +412,8 @@ extension PlantEditorStatePatterns on PlantEditorState {
           _that.existingRoutines,
           _that.saving,
           _that.dirty,
+          _that.photoPending,
+          _that.photoFailed,
           _that.errorCode,
           _that.errors,
         );
@@ -402,6 +434,8 @@ class _PlantEditorState implements PlantEditorState {
     List<RoutineRead> existingRoutines = const [],
     this.saving = false,
     this.dirty = false,
+    this.photoPending = false,
+    this.photoFailed = false,
     this.errorCode,
     Map<String, String> errors = const {},
   }) : _existingRoutines = existingRoutines,
@@ -433,6 +467,12 @@ class _PlantEditorState implements PlantEditorState {
   @override
   @JsonKey()
   final bool dirty;
+  @override
+  @JsonKey()
+  final bool photoPending;
+  @override
+  @JsonKey()
+  final bool photoFailed;
   @override
   final String? errorCode;
   final Map<String, String> _errors;
@@ -467,6 +507,10 @@ class _PlantEditorState implements PlantEditorState {
             ) &&
             (identical(other.saving, saving) || other.saving == saving) &&
             (identical(other.dirty, dirty) || other.dirty == dirty) &&
+            (identical(other.photoPending, photoPending) ||
+                other.photoPending == photoPending) &&
+            (identical(other.photoFailed, photoFailed) ||
+                other.photoFailed == photoFailed) &&
             (identical(other.errorCode, errorCode) ||
                 other.errorCode == errorCode) &&
             const DeepCollectionEquality().equals(other.errors, _errors));
@@ -483,6 +527,8 @@ class _PlantEditorState implements PlantEditorState {
       const DeepCollectionEquality().hash(_existingRoutines),
       saving,
       dirty,
+      photoPending,
+      photoFailed,
       errorCode,
       const DeepCollectionEquality().hash(_errors),
     );
@@ -490,7 +536,7 @@ class _PlantEditorState implements PlantEditorState {
 
   @override
   String toString() {
-    return 'PlantEditorState(fields: $fields, draft: $draft, loading: $loading, picking: $picking, existingRoutines: $existingRoutines, saving: $saving, dirty: $dirty, errorCode: $errorCode, errors: $errors)';
+    return 'PlantEditorState(fields: $fields, draft: $draft, loading: $loading, picking: $picking, existingRoutines: $existingRoutines, saving: $saving, dirty: $dirty, photoPending: $photoPending, photoFailed: $photoFailed, errorCode: $errorCode, errors: $errors)';
   }
 }
 
@@ -511,6 +557,8 @@ abstract mixin class _$PlantEditorStateCopyWith<$Res>
     List<RoutineRead> existingRoutines,
     bool saving,
     bool dirty,
+    bool photoPending,
+    bool photoFailed,
     String? errorCode,
     Map<String, String> errors,
   });
@@ -536,6 +584,8 @@ class __$PlantEditorStateCopyWithImpl<$Res>
     Object? existingRoutines = null,
     Object? saving = null,
     Object? dirty = null,
+    Object? photoPending = null,
+    Object? photoFailed = null,
     Object? errorCode = freezed,
     Object? errors = null,
   }) {
@@ -568,6 +618,14 @@ class __$PlantEditorStateCopyWithImpl<$Res>
         dirty: null == dirty
             ? _self.dirty
             : dirty // ignore: cast_nullable_to_non_nullable
+                  as bool,
+        photoPending: null == photoPending
+            ? _self.photoPending
+            : photoPending // ignore: cast_nullable_to_non_nullable
+                  as bool,
+        photoFailed: null == photoFailed
+            ? _self.photoFailed
+            : photoFailed // ignore: cast_nullable_to_non_nullable
                   as bool,
         errorCode: freezed == errorCode
             ? _self.errorCode

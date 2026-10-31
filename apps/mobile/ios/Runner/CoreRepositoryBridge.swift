@@ -4,7 +4,7 @@ import UIKit
 import VerdiNative
 
 final class CoreRepositoryBridge: CoreRepositoryHostApi {
-  private let repository: CoreRepository
+  let repository: CoreRepository
   private var observer: NSObjectProtocol?
   init() throws {
     let support = try FileManager.default.url(for: .applicationSupportDirectory, in: .userDomainMask, appropriateFor: nil, create: true)

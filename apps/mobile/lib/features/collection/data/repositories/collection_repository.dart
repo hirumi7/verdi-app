@@ -7,6 +7,16 @@ final class WorkspaceRead {
 }
 
 abstract interface class CollectionRepository {
+  Future<CollectionSnapshot> mediaSnapshot();
+  Future<Map<String, Object?>> preparePhoto({
+    required String draftId,
+    required int draftRevision,
+    required String preparationId,
+    required String selectionId,
+    required LocalDate observedDate,
+  });
+  Future<Map<String, Object?>> photoPreparation(String preparationId);
+  Future<List<Map<String, Object?>>> draftPreparations(String draftId);
   Future<CatalogState> catalog({bool retry = false});
   String get datasetId;
   String newId();

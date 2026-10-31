@@ -14,7 +14,7 @@ struct CoreClockFrame {
     }
     var value: CanonicalValue { .object(["today": .string(today), "instant": .string(instant), "zone": .string(zone)]) }
 }
-struct CorePreview { let command: String; let hash: String; let created: TimeInterval }
+struct CorePreview { let command: String; let hash: String; let created: TimeInterval; let mediaFingerprint:String }
 struct CoreUndoGrant {
     let acknowledgement: String
     let context: CanonicalValue
@@ -26,6 +26,10 @@ struct CoreUndoGrant {
 public final class CoreRepository {
     let directory: URL
     let queue = DispatchQueue(label: "verdi.native.core-repository")
+    let mediaWorker = DispatchQueue(label:"verdi.native.media-files")
+    var exportLeases:[String:Date]=[:]
+    var pendingMediaFailures:[String:(session:String,code:String)]=[:]
+    var mediaFiles:MediaFiles?
     var database: SQLiteDatabase?
     var sessionID = ""
     var datasetID = ""
@@ -50,9 +54,16 @@ public final class CoreRepository {
                 let args = try CoreSchema.object(CanonicalParser.parse(body))
                 if operation == "open" { return try open(args).json() }
                 guard args["sessionId"]?.text == sessionID, let db = database, !sessionID.isEmpty else { throw CoreRepositoryError("SESSION_INVALID") }
+                if ["preparePhoto","photoPreparation","draftPreparations"].contains(operation) {try persistMediaFailures(db)}
                 let value: CanonicalValue
                 switch operation {
                 case "close": try db.close(); database = nil; sessionID = ""; grants.removeAll(); previews.removeAll(); value = .null
+                case "preparePhoto": value = try beginPhotoPreparation(args,db)
+                case "draftPreparations":
+                    let draft=try CoreSchema.string(args["draftId"])
+                    value = try db.read {sql in .array(try sql.query("SELECT id,selection_id,observed_date,draft_revision FROM media_preparations WHERE draft_id=? ORDER BY created_at,id",[.text(draft)]).map{row in .object(["preparationId":CoreSchema.canonical(row[0]),"selectionId":CoreSchema.canonical(row[1]),"observedDate":CoreSchema.canonical(row[2]),"draftRevision":CoreSchema.canonical(row[3]),"status":try photoPreparation(sql,CoreSchema.text(row[0]))])})}
+                case "photoPreparation": value = try db.read { try photoPreparation($0,CoreSchema.string(args["preparationId"])) }
+                case "retryMediaCleanup": mediaWorker.async {self.cleanupMedia()}; value = .null
                 case "catalogMeta": value = try db.read {try catalogMeta($0)}
                 case "catalogRows": value = try db.read {try catalogRows($0,args)}
                 case "retryCatalog": tryCatalog(db); value = try db.read {try catalogMeta($0)}
@@ -118,8 +129,11 @@ public final class CoreRepository {
             guard parentSync == 0, parentClose == 0 else { throw StorageFailure.filesystem(errno) }
         }
         try protect(marker)
-        let db = try initialized ? SQLiteDatabase.open(at: file, schema: CoreSchema.schema(), upgradeFrom: CoreSchema.schema(version:1), migrationStatements: CoreSchema.catalogDefinitions, fault:fault)
-            : SQLiteDatabase.create(at: file, schema: CoreSchema.schema(dataset: UUID().uuidString.lowercased(), instant: CoreClockFrame.capture(now(), zone: zone()).instant), fault: fault)
+        let db: SQLiteDatabase
+        if initialized {
+            do { db = try SQLiteDatabase.open(at:file,schema:CoreSchema.schema(),upgradeFrom:CoreSchema.schema(version:2),migrationStatements:CoreSchema.mediaDefinitions,fault:fault) }
+            catch StorageFailure.schemaMismatch { db = try SQLiteDatabase.open(at:file,schema:CoreSchema.schema(),upgradeFrom:CoreSchema.schema(version:1),migrationStatements:CoreSchema.catalogDefinitions+CoreSchema.mediaDefinitions,fault:fault) }
+        } else { db = try SQLiteDatabase.create(at:file,schema:CoreSchema.schema(dataset:UUID().uuidString.lowercased(),instant:CoreClockFrame.capture(now(),zone:zone()).instant),fault:fault) }
         do {
             for suffix in ["", "-wal", "-shm"] {
                 let path = URL(fileURLWithPath: file.path + suffix)
@@ -127,9 +141,12 @@ public final class CoreRepository {
             }
             datasetID = try db.read { try CoreSchema.text($0.query("SELECT dataset_id FROM metadata")[0][0]) }
             sessionID = UUID().uuidString.lowercased(); database = db
+            mediaFiles = try MediaFiles(root:directory)
+            try recoverMedia(db)
+            mediaWorker.async {self.cleanupMedia()}
             tryCatalog(db)
             var result = try CoreSchema.object(db.read { try metadata($0) })
-            result["sessionId"] = .string(sessionID); result["profile"] = .string("custom_core_v1"); result["schemaVersion"] = .integer(2)
+            result["sessionId"] = .string(sessionID); result["profile"] = .string("custom_core_v1"); result["schemaVersion"] = .integer(3)
             result["fileProtectionVerified"] = .boolean(Self.deviceProtectionRequired)
             result["clock"] = CoreClockFrame.capture(now(), zone: zone()).value; result["capabilityRevision"] = .integer(1); result["access"] = .string("free")
             return .object(result)
@@ -179,13 +196,14 @@ public final class CoreRepository {
             guard try sql.query("SELECT id FROM reservations WHERE id=?", [.text(reserved)]).isEmpty, reserved != datasetID else { throw CoreRepositoryError("COMMAND_ID_REUSED") }
             try sql.execute("INSERT INTO reservations VALUES(?,?,?,0)", [.text(reserved), .text(reserved == id ? "command" : "entity"), .text(id)])
         }
-        if type == "SaveDraft" {
+        if ["SaveDraft","SaveJournalDraft","SaveMediaDraft"].contains(type) {
             let draft = try CoreSchema.string(payload["draftId"]); try CoreSchema.uuid(draft)
+            let kind = type == "SaveDraft" ? "draft":type == "SaveJournalDraft" ? "journalDraft":"mediaDraft"
             let prior = try sql.query("SELECT kind FROM reservations WHERE id=?", [.text(draft)])
             if prior.isEmpty {
                 guard draft != datasetID else { throw CoreRepositoryError("FIELD_INVALID") }
-                try sql.execute("INSERT INTO reservations VALUES(?,'draft',?,0)", [.text(draft), .text(id)])
-            } else if prior[0][0] != .text("draft") { throw CoreRepositoryError("FIELD_INVALID") }
+                try sql.execute("INSERT INTO reservations VALUES(?,?,?,0)", [.text(draft), .text(kind), .text(id)])
+            } else if prior[0][0] != .text(kind) { throw CoreRepositoryError("FIELD_INVALID") }
         }
         try sql.execute("INSERT INTO intents VALUES(?,?,?,?,'pending')", [.text(id), .text(type), .text(hash), .text(body)])
         return .null
@@ -206,10 +224,14 @@ public final class CoreRepository {
     private func preview(_ args: [String: CanonicalValue], _ db: SQLiteDatabase) throws -> CanonicalValue {
         let plan = try CoreSchema.object(args["plan"]); let parsed = try CoreRegistry.parse(plan, session: sessionID, dataset: datasetID)
         guard CoreRegistry.needsPreview(parsed.type) else { throw CoreRepositoryError("PLAN_INVALID") }
-        try db.read { sql in _ = try CoreRegistry.validate(sql, parsed, clock: CoreClockFrame.capture(now(), zone: zone()), grants: grants, elapsed: elapsed()) }
+        let mediaFingerprint = try db.read { sql -> String in
+            let changes = try CoreRegistry.validate(sql, parsed, clock: CoreClockFrame.capture(now(), zone: zone()), grants: grants, elapsed: elapsed())
+            try validateNewPhotoLinks(sql,parsed,changes)
+            return try CoreRegistry.mediaPreviewFingerprint(sql,parsed)
+        }
         if previews.count >= 128, let oldest = previews.min(by: { $0.value.created < $1.value.created })?.key { previews.removeValue(forKey: oldest) }
         let token = UUID().uuidString.lowercased()
-        previews[token] = CorePreview(command: parsed.id, hash: parsed.hash, created: elapsed())
+        previews[token] = CorePreview(command: parsed.id, hash: parsed.hash, created: elapsed(), mediaFingerprint:mediaFingerprint)
         return .object(["previewToken": .string(token),"expiresAt": .string(CoreClockFrame.capture(now().addingTimeInterval(600), zone: zone()).instant)])
     }
     private func commit(_ args: [String: CanonicalValue], _ db: SQLiteDatabase) throws -> CanonicalValue {
@@ -220,12 +242,20 @@ public final class CoreRepository {
             let clock = CoreClockFrame.capture(now(), zone: zone())
             if CoreRegistry.needsPreview(parsed.type) {
                 guard let token = parsed.body["previewToken"]?.text, let p = previews[token], p.command == parsed.id, p.hash == parsed.hash,
-                      elapsed() >= p.created, elapsed() - p.created < 600 else { throw CoreRepositoryError("PREVIEW_STALE") }
+                      elapsed() >= p.created, elapsed() - p.created < 600,
+                      try CoreRegistry.mediaPreviewFingerprint(sql,parsed)==p.mediaFingerprint else { throw CoreRepositoryError("PREVIEW_STALE") }
             }
             let changes = try CoreRegistry.validate(sql, parsed, clock: clock, grants: grants, elapsed: elapsed())
+            for change in changes where change.table=="photos" && change.action=="update" {
+                if change.before?[2] != .null || change.values[4] != change.before?[4] {
+                    guard let files=mediaFiles,files.exists(try CoreSchema.text(change.values[4])) else{throw CoreRepositoryError("MEDIA_MISSING")}
+                }
+            }
+            try validateNewPhotoLinks(sql,parsed,changes)
             undo = try CoreRegistry.captureUndo(sql, parsed, changes)
             try CoreRegistry.apply(sql, parsed, changes)
-            let content = !["SaveDraft","DiscardDraft"].contains(parsed.type)
+            try finishMediaMutations(sql,parsed,changes)
+            let content = !CoreRegistry.draftCommands.contains(parsed.type)
             try sql.execute("UPDATE metadata SET collection_revision=collection_revision+?,storage_revision=storage_revision+1 WHERE slot=1", [.integer(content ? 1 : 0)])
             if content { try sql.execute("INSERT INTO outbox SELECT 1,collection_revision FROM metadata WHERE slot=1 ON CONFLICT(slot) DO UPDATE SET dirty_revision=excluded.dirty_revision") }
             try CoreRegistry.validateResult(sql, parsed, changes)
@@ -233,10 +263,11 @@ public final class CoreRepository {
             try sql.execute("INSERT INTO receipts VALUES(?,?,?,?,0)", [.text(parsed.id),.text(parsed.payloadHash),.text(try result.json()),try undo.map { .text(try $0.json()) } ?? .null])
             try sql.execute("UPDATE intents SET body=NULL,status='committed' WHERE id=?", [.text(parsed.id)])
             try sql.execute("UPDATE reservations SET used=1 WHERE command_id=?", [.text(parsed.id)])
-            if parsed.type == "SaveDraft" { try sql.execute("UPDATE reservations SET used=1 WHERE id=?", [.text(try CoreSchema.string(parsed.payload["draftId"]))]) }
+            if ["SaveDraft","SaveJournalDraft","SaveMediaDraft"].contains(parsed.type) { try sql.execute("UPDATE reservations SET used=1 WHERE id=?", [.text(try CoreSchema.string(parsed.payload["draftId"]))]) }
             if parsed.type == "Undo" { try sql.execute("UPDATE receipts SET undone=1,undo_context=NULL WHERE id=?", [.text(try CoreSchema.string(parsed.payload["originalCommandId"]))]) }
             return result
         }
+        mediaWorker.async {self.cleanupMedia()}
         var ack: CanonicalValue = .null
         if let undo, parsed.type != "Undo" {
             let id = UUID().uuidString.lowercased(); grants[parsed.id] = CoreUndoGrant(acknowledgement: id, context: undo)

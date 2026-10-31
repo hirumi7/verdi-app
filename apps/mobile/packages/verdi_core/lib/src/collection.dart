@@ -9,6 +9,9 @@ import 'command_encoding.dart';
 import 'errors.dart';
 
 part 'collection_models.dart';
+part 'collection_media.dart';
+part 'collection_media_planner.dart';
+part 'collection_media_storage.dart';
 part 'collection_commands.dart';
 part 'collection_planner.dart';
 part 'collection_undo.dart';
@@ -168,6 +171,7 @@ final class MemoryOperationCoordinator {
             ? CustomPlantFields()
             : CustomPlantFields(
                 name: plant.name,
+                coverPhotoId: collection.covers[plant.id],
                 location: plant.location,
                 notes: plant.notes,
                 speciesName: plant.speciesName,
@@ -214,10 +218,17 @@ final class MemoryOperationCoordinator {
         throw CommandRejected('NOT_ELIGIBLE');
       return existing;
     }
-    if (command is SaveDraft && !_store._draftIds.contains(command.draftId)) {
-      if (!_store._reservedIds.add(command.draftId))
+    final newDraftId = command is SaveDraft
+        ? command.draftId
+        : command is SaveJournalDraft
+        ? command.draftId
+        : command is SaveMediaDraft
+        ? command.draftId
+        : null;
+    if (newDraftId != null && !_store._draftIds.contains(newDraftId)) {
+      if (!_store._reservedIds.add(newDraftId))
         throw CommandRejected('FIELD_INVALID');
-      _store._draftIds.add(command.draftId);
+      _store._draftIds.add(newDraftId);
     }
     final id = _store._allocate();
     var count = 0;
@@ -238,6 +249,10 @@ final class MemoryOperationCoordinator {
             );
       }
       count += draft.fields.applyRoutineIntervals.length * 2;
+    } else if (command is SaveJournalEntry) {
+      final draft = _store._state.collection.journalDrafts[command.draftId];
+      if (draft == null) throw CommandRejected('NOT_FOUND');
+      count = draft.entryId == null ? 1 : 0;
     } else if (command is RoutineCommand) {
       count = 1;
     } else if (command is BulkComplete) {
@@ -357,6 +372,8 @@ final class MemoryOperationCoordinator {
       {
         ..._store._state.usedDraftIds,
         if (command is SaveDraft) command.draftId,
+        if (command is SaveJournalDraft) command.draftId,
+        if (command is SaveMediaDraft) command.draftId,
       },
       {
         ..._store._state.undoneCommands,
@@ -378,6 +395,8 @@ final class MemoryOperationCoordinator {
         if (pending.commandId == commandId || pending.datasetId != datasetId)
           continue;
         final related = switch (pending.command) {
+          MediaCommand c =>
+            c.guardedDraftId != null && ownedIds.contains(c.guardedDraftId),
           SaveDraft c =>
             c.plantId == command.plantId || ownedIds.contains(c.draftId),
           SavePlant c => ownedIds.contains(c.draftId),

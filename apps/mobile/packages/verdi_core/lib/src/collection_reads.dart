@@ -40,9 +40,14 @@ class ReadPage<T> {
 final class PlantRow {
   final PlantCore plant;
   final LocalDate? nextCheckDate;
-  const PlantRow._(this.plant, this.nextCheckDate);
-  // Photos/catalog suggestions are outside the current custom-plant core.
-  String? get coverPhotoId => null;
+  final String? coverPhotoId;
+  final int? coverPhotoRevision;
+  const PlantRow._(
+    this.plant,
+    this.nextCheckDate,
+    this.coverPhotoId,
+    this.coverPhotoRevision,
+  );
 }
 
 final class PlantsPage {
@@ -88,7 +93,7 @@ final class PlantDetail {
 sealed class TimelineEntry {
   final String id;
   final String plantId;
-  final String routineId;
+  final String? routineId;
   final LocalDate date;
   final DateTime recordedAt;
   const TimelineEntry._(
@@ -98,6 +103,12 @@ sealed class TimelineEntry {
     this.date,
     this.recordedAt,
   );
+}
+
+final class JournalTimelineEntry extends TimelineEntry {
+  final JournalEntry entry;
+  JournalTimelineEntry._(this.entry)
+    : super._(entry.id, entry.plantId, null, entry.entryDate, entry.createdAt);
 }
 
 final class CareTimelineEntry extends TimelineEntry {
@@ -184,7 +195,7 @@ final class DoneTodayRow extends TodayRow {
         plant.name,
         care.careKind,
         care.careLabel,
-        care.routineId,
+        care.routineId!,
         care.date,
       );
   @override
@@ -304,7 +315,12 @@ extension CollectionReads on MemoryOperationCoordinator {
                   ].any((s) => _normalized(s).contains(search)),
             )
             .map((plant) {
-              return PlantRow._(plant, nextDates[plant.id]);
+              return PlantRow._(
+                plant,
+                nextDates[plant.id],
+                snapshot.covers[plant.id],
+                snapshot.photos[snapshot.covers[plant.id]]?.revision,
+              );
             })
             .toList()
           ..sort((a, b) {
@@ -409,6 +425,10 @@ extension CollectionReads on MemoryOperationCoordinator {
       throw CommandRejected('NOT_FOUND');
     final rows =
         <TimelineEntry>[
+          for (final entry in snapshot.journalEntries.values.where(
+            (e) => e.plantId == plantId,
+          ))
+            JournalTimelineEntry._(entry),
           for (final routine in snapshot.routines.values.where(
             (r) => r.plantId == plantId,
           ))

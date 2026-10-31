@@ -29,7 +29,7 @@ void main() {
         isNull,
       );
       final fixture = File(
-        '../verdi_native/Tests/VerdiNativeTests/Fixtures/core-storage-v1.json',
+        '../verdi_native/Tests/VerdiNativeTests/Fixtures/core-storage-v3.json',
       ).readAsStringSync().trim();
       expect(jsonDecode(s.json()), jsonDecode(fixture));
     },

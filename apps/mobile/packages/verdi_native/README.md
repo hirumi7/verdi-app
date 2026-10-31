@@ -143,3 +143,21 @@ current entry; unchanged stored selections retain their offline-edit exception.
 retention, atomic apply/rollback, corrupt reads, v1 pending-command migration and
 older-reader rejection. Regenerate shared transitions with
 `dart run tool/generate_catalog_vectors.dart` from the core package.
+
+## Photos and journal extension
+
+The permanent profile now migrates exact v1/v2 stores additively to schema v3,
+retaining IDs, rows, frozen commands and receipts. New media/journal commands use
+the same frozen-plan/preview/commit guards. A separate serialized file worker
+retains OS selections, validates JPEG/PNG/HEIC, publishes registered immutable
+originals, acknowledges draft ownership, and cleans only known unreferenced paths.
+Ready/failed/consumed/deleted preparation status is durable. File-copy or failed
+status-write recovery never resets the store. Original export copies are leased
+through OS completion/cancellation, same-process reconnect, or 24-hour expiry.
+
+`MediaFilesTests` exercises encoded formats, corruption, size/path boundaries,
+original-byte preservation and backup eligibility. Native repository tests cover
+v1/v2 migration, journal vectors/reopen, draft races, preparation replay, status
+write recovery and export leases. Simulator tests do not prove physical iOS data
+protection or power-loss durability. See the application handoff and focused
+`docs/technical/photos-journal-integration.md` contract for remaining boundaries.

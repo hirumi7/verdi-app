@@ -18,11 +18,11 @@ struct CoreDelta {
 }
 
 enum CoreRegistry {
-    static let commands: Set<String> = ["SaveDraft","SavePlant","DiscardDraft","CompleteCurrent","BulkComplete","CheckNotNeeded","Snooze","Skip","SetInterval","ClearOverride","PauseRoutine","ResumeRoutine","RetireRoutine","AddPastCare","CorrectEvent","RestoreEvent","VoidEvent","ArchivePlant","RestorePlant","DeletePlant","Undo"]
+    static let commands: Set<String> = Set(["SaveDraft","SavePlant","DiscardDraft","CompleteCurrent","BulkComplete","CheckNotNeeded","Snooze","Skip","SetInterval","ClearOverride","PauseRoutine","ResumeRoutine","RetireRoutine","AddPastCare","CorrectEvent","RestoreEvent","VoidEvent","ArchivePlant","RestorePlant","DeletePlant","Undo"]).union(mediaCommands)
     static let history: Set<String> = ["AddPastCare","CorrectEvent","RestoreEvent","VoidEvent"]
     static let schedule: Set<String> = ["Snooze","SetInterval","ClearOverride","PauseRoutine","ResumeRoutine","RetireRoutine"]
     static let eligibleUndo: Set<String> = ["CompleteCurrent","BulkComplete","CheckNotNeeded","Skip","Snooze"]
-    static func needsPreview(_ type: String) -> Bool { !["SaveDraft","DiscardDraft","Undo"].contains(type) }
+    static func needsPreview(_ type: String) -> Bool { !["SaveDraft","DiscardDraft","SaveJournalDraft","SaveMediaDraft","DiscardJournalDraft","DiscardMediaDraft","Undo"].contains(type) }
     static func require(_ condition: Bool, _ code: String = "PLAN_INVALID") throws { if !condition { throw CoreRepositoryError(code) } }
     static func parse(_ p: [String: CanonicalValue], session: String, dataset: String) throws -> CorePlan {
         try require(Set(p.keys) == Set(["sessionId","datasetId","commandId","commandType","normalisedPayload","payloadHash","expectedCollectionRevision","draftGuards","accessRevision","expectedToday","previewToken","effectsHash","planHash","statements","result","changeKind"]))
@@ -35,7 +35,7 @@ enum CoreRegistry {
         let hash = try CanonicalCommand.hash(.object(hashed)); try require(p["planHash"]?.text == hash)
         try validatePayload(type,payload)
         let statements = try CoreSchema.array(p["statements"]); try require(statements.count <= 10000, "PLAN_LIMIT")
-        try require(p["changeKind"]?.text == (["SaveDraft","DiscardDraft"].contains(type) ? "draft" : "collection"))
+        try require(p["changeKind"]?.text == (draftCommands.contains(type) ? "draft" : "collection"))
         try require(needsPreview(type) ? p["effectsHash"]?.text?.count == 64 : p["effectsHash"]?.isNull == true)
         return CorePlan(body:p,id:id,type:type,payload:payload,payloadHash:payloadHash,hash:hash)
     }
@@ -47,14 +47,14 @@ enum CoreRegistry {
         let allocated = try CoreSchema.array(frozen["allocatedIds"]).map { try CoreSchema.string($0) }
         let metadata = try sql.query("SELECT collection_revision FROM metadata")[0]
         try require(try CoreSchema.integer(metadata[0]) == CoreSchema.number(p.body["expectedCollectionRevision"]), "PREVIEW_STALE")
-        let draftOnly = ["SaveDraft","DiscardDraft"].contains(p.type)
+        let draftOnly = draftCommands.contains(p.type)
         try require(draftOnly ? p.body["expectedToday"]?.isNull == true : p.body["expectedToday"]?.text == clock.today, "PREVIEW_STALE")
         let guards = try CoreSchema.array(p.body["draftGuards"])
         var draftIDs: Set<String> = []
         for value in guards {
             let g = try CoreSchema.object(value), id = try CoreSchema.string(g["draftId"]); try CoreSchema.uuid(id)
             try require(Set(g.keys) == Set(["draftId","revision"]) && draftIDs.insert(id).inserted)
-            let row = try CoreSchema.row(sql,"plant_drafts",id)
+            let row = try draftRow(sql,id)
             try require(try CoreSchema.same(g["revision"],row.map { CoreSchema.canonical($0[1]) } ?? .null), "STALE_TARGET")
         }
         let statements = try CoreSchema.array(p.body["statements"])
@@ -70,11 +70,11 @@ enum CoreRegistry {
             if action == "insert" { try require(before == nil && statement["beforeHash"]?.isNull == true, "STALE_TARGET") }
             else { try require(before != nil, "STALE_TARGET"); try require(try CoreSchema.rowHash(before!) == CoreSchema.string(statement["beforeHash"]), "STALE_TARGET") }
             if action == "deleteTree" {
-                try require(table == "plants" && p.type == "DeletePlant" && raw.count == 10)
+                try require(table == "plants" && p.type == "DeletePlant" && [10,14].contains(raw.count))
                 changes.append(CoreDelta(table:table,action:action,id:id,before:before,values:[],raw:raw)); continue
             }
             if action == "delete" {
-                try require(((table == "plant_drafts" && ["SavePlant","DiscardDraft"].contains(p.type)) || (table == "plant_catalog" && p.type == "SavePlant")) && raw.count == 1)
+                try require(((table == "plant_drafts" && ["SavePlant","DiscardDraft"].contains(p.type)) || (["plant_catalog","photos","plant_covers"].contains(table) && ["SavePlant","DiscardDraft"].contains(p.type)) || (mediaCommands.contains(p.type) && ["journal_entries","journal_drafts","media_drafts","photos","plant_covers","plant_drafts"].contains(table))) && raw.count == 1)
                 changes.append(CoreDelta(table:table,action:action,id:id,before:before,values:[],raw:raw)); continue
             }
             try require(raw.count == CoreSchema.columns[table]!.count)
@@ -82,7 +82,7 @@ enum CoreRegistry {
             for (i, value) in raw.enumerated() {
                 let native = value.object?["native"]?.text
                 let recording = CoreSchema.instantColumns[table]?.contains(i) == true
-                let needsInstant = recording && (before == nil || (table == "plants" && i == 10) || (table == "routines" && i == 12) || (table == "plant_drafts" && i == 7))
+                let needsInstant = recording && (before == nil || (table == "plants" && i == 10) || (table == "routines" && i == 12) || (table == "plant_drafts" && i == 7) || (table == "journal_entries" && i == 7) || (table == "journal_drafts" && i == 8) || (table == "media_drafts" && i == 7))
                 if needsInstant { try require(native == "transaction_instant" && value.object?.count == 1); values.append(.text(clock.instant)); continue }
                 if before == nil && ((table == "care_events" && i == 9) || (table == "routine_changes" && i == 7)) {
                     try require(native == "transaction_zone" && value.object?.count == 1); values.append(.text(clock.zone)); continue
@@ -103,14 +103,14 @@ enum CoreRegistry {
                 if let revision = CoreSchema.revisions[table] { try require(try CoreSchema.integer(values[revision]) == CoreSchema.integer(before[revision]) + 1) }
             } else {
                 if !CoreSchema.linkedTables.contains(table) {try require(inserted.insert(id).inserted)}
-                if table == "plant_drafts" {
+                if draftTables.contains(table) {
                     let reservation = try sql.query("SELECT kind,used FROM reservations WHERE id=?", [.text(id)])
-                    try require(reservation.count == 1 && reservation[0][0] == .text("draft") && reservation[0][1] == .integer(0), "NOT_ELIGIBLE")
+                    try require(reservation.count == 1 && reservation[0][0] == .text(table == "plant_drafts" ? "draft" : table == "journal_drafts" ? "journalDraft":"mediaDraft") && reservation[0][1] == .integer(0), "NOT_ELIGIBLE")
                 } else if !CoreSchema.linkedTables.contains(table) { try require(allocated.contains(id)); if let revision = CoreSchema.revisions[table] { try require(values[revision] == .integer(1)) } }
             }
             changes.append(CoreDelta(table:table,action:action,id:id,before:before,values:values,raw:raw))
         }
-        try require(inserted.subtracting(changes.filter{$0.table == "plant_drafts"}.map(\.id)) == Set(allocated))
+        try require(inserted.subtracting(changes.filter{draftTables.contains($0.table)}.map(\.id)) == Set(allocated))
         try commandScope(sql,p,changes,allocated:allocated,guards:guards,clock:clock,grants:grants,elapsed:elapsed)
         return changes
     }
@@ -130,6 +130,7 @@ enum CoreRegistry {
         func guardDraft(_ id: String, _ revision: CanonicalValue?) throws {
             try require(guards.count == 1 && guards[0].object?["draftId"]?.text == id && (try CoreSchema.same(guards[0].object?["revision"],revision)))
         }
+        if mediaCommands.contains(p.type) {try mediaScope(sql,p,d,allocated:allocated,guards:guards,clock:clock);return}
         var requiresAccess = p.type == "RestorePlant"
         if p.type == "SaveDraft" {
             try only(["plant_drafts"]); try require(d.count == 1 && d[0].action != "delete")
@@ -140,17 +141,27 @@ enum CoreRegistry {
             try require(envelope["version"]?.integer == 1 && envelope.count == 2 && (try CoreSchema.same(envelope["fields"],p.payload["rawFields"])))
             if v[2] == .text("edit") { _ = try requiredRow(sql,"plants",CoreSchema.text(v[3])) }
             try require(allocated.isEmpty)
+            let owned=try sql.query("SELECT id FROM photos WHERE draft_id=? ORDER BY id",[.text(id)]).map{try CoreSchema.text($0[0])}
+            try require(owned == mediaIDs(p.payload["photoIds"]).sorted(),"DRAFT_CONFLICT")
+            if let cover=envelope["fields"]?.object?["coverPhotoId"]?.text {
+                let photo=try requiredRow(sql,"photos",cover)
+                try require(photo[2] == .text(id) || (v[3] != .null && photo[1]==v[3]))
+            }
         } else if p.type == "DiscardDraft" {
-            try require(d.count == 1 && d[0].table == "plant_drafts" && d[0].action == "delete" && p.payload["confirmed"]?.json() == "true")
-            try require(d[0].id == CoreSchema.string(p.payload["draftId"])); try guardDraft(d[0].id,p.payload["draftRevision"])
+            try only(["plant_drafts","photos"])
+            let draftID=try CoreSchema.string(p.payload["draftId"]),removed=of("plant_drafts")
+            try require(removed.count==1 && removed[0].id==draftID && removed[0].action=="delete" && p.payload["confirmed"]?.json()=="true")
+            try guardDraft(draftID,p.payload["draftRevision"])
+            try validatePlantMedia(sql,p,d,draft:requiredRow(sql,"plant_drafts",draftID),plant:nil)
         } else if p.type == "SavePlant" {
             let draftID = try CoreSchema.string(p.payload["draftId"]); try guardDraft(draftID,p.payload["draftRevision"])
             let draft = try requiredRow(sql,"plant_drafts",draftID), adding = draft[2] == .text("add")
             requiresAccess = adding
-            try only(["plants","routines","heads","care_events","plant_drafts","plant_catalog","suggestion_snapshots","routine_suggestions","routine_changes"])
+            try only(["plants","routines","heads","care_events","plant_drafts","plant_catalog","suggestion_snapshots","routine_suggestions","routine_changes","photos","plant_covers"])
             try require(of("plant_drafts").count == 1 && of("plant_drafts")[0].action == "delete" && of("plant_drafts")[0].id == draftID)
             try require(of("plants").count == 1)
             let plant = of("plants")[0], fields = try CoreSchema.object(CoreSchema.object(CanonicalParser.parse(CoreSchema.text(draft[5])))["fields"])
+            try validatePlantMedia(sql,p,d,draft:draft,plant:plant.id)
             let selection=try validateCatalogSelection(sql,plant:plant,fields:fields,changes:of("plant_catalog"))
             try require(plant.values[2] == .text(try validatedText(fields["name"],max:60,required:true)) && plant.values[3] == .text(try validatedText(fields["location"],max:40)) && plant.values[4] == .text(try validatedText(fields["notes"],max:2000,trim:false)))
             if let selection {
@@ -436,10 +447,13 @@ enum CoreRegistry {
         }
         for (i,query) in ["SELECT count(*) FROM suggestion_snapshots WHERE plant_id=?","SELECT count(*) FROM plant_catalog WHERE id=?","SELECT count(*) FROM routine_suggestions WHERE id IN (SELECT id FROM routines WHERE plant_id=?)"].enumerated() {try require(d.raw[7+i].integer == CoreSchema.integer(sql.query(query,[.text(d.id)])[0][0]),"PREVIEW_STALE")}
         let drafts = try ownedDrafts(sql,d.id)
-        try require(try CoreSchema.same(d.raw[6],drafts) && CoreSchema.same(.array(guards),drafts),"PREVIEW_STALE")
+        try require(try CoreSchema.same(d.raw[6],drafts),"PREVIEW_STALE")
+        try mediaDeleteGuards(sql,d,guards)
     }
     static func apply(_ sql: SQLiteSession, _ p: CorePlan, _ changes: [CoreDelta]) throws {
-        for d in changes {
+        let deleteOrder=["plant_covers":0,"media_drafts":1,"journal_drafts":2,"journal_entries":3,"photos":4]
+        let ordered = changes.filter{$0.action != "delete"} + changes.filter{$0.action == "delete"}.sorted{(deleteOrder[$0.table] ?? 0)<(deleteOrder[$1.table] ?? 0)}
+        for d in ordered {
             if d.action == "deleteTree" { try deleteTree(sql,d.id,p.id); continue }
             if d.action == "delete" {
                 try require(try sql.execute("DELETE FROM \(d.table) WHERE id=?", [.text(d.id)]) == 1,"STALE_TARGET"); continue
@@ -457,10 +471,11 @@ enum CoreRegistry {
         try require(missingHeads.isEmpty)
         let badEvents = try sql.query("SELECT e.id FROM care_events e JOIN routines r ON r.id=e.routine_id WHERE e.plant_id!=r.plant_id OR e.care_kind!=r.care_kind OR e.care_label!=r.label LIMIT 1")
         try require(badEvents.isEmpty)
+        try validateMediaGraph(sql)
     }
     static func deleteTree(_ sql: SQLiteSession, _ plant: String, _ command: String) throws {
         var owned: Set<String> = [plant]
-        for query in ["SELECT id FROM routines WHERE plant_id=?","SELECT id FROM care_events WHERE plant_id=?","SELECT id FROM plant_drafts WHERE plant_id=?"] {
+        for query in ["SELECT id FROM routines WHERE plant_id=?","SELECT id FROM care_events WHERE plant_id=?","SELECT id FROM plant_drafts WHERE plant_id=?","SELECT id FROM journal_entries WHERE plant_id=?","SELECT id FROM journal_drafts WHERE plant_id=?","SELECT id FROM media_drafts WHERE plant_id=?","SELECT id FROM photos WHERE plant_id=?"] {
             for row in try sql.query(query,[.text(plant)]) { owned.insert(try CoreSchema.text(row[0])) }
         }
         for row in try sql.query("SELECT result FROM receipts") {
@@ -469,7 +484,7 @@ enum CoreRegistry {
         }
         for row in try sql.query("SELECT id,body FROM intents WHERE status='pending' AND id!=?", [.text(command)]) {
             let body = try CoreSchema.object(CanonicalParser.parse(CoreSchema.text(row[1]))), payload = try CoreSchema.object(body["normalisedPayload"])
-            let related = payload["plantId"]?.text == plant || payload["target"]?.object?["plantId"]?.text == plant || payload["draftId"]?.text.map(owned.contains) == true || payload["targets"]?.array?.contains(where:{$0.object?["plantId"]?.text == plant}) == true
+            let related = payload["plantId"]?.text == plant || payload["target"]?.object?["plantId"]?.text == plant || payload["draftId"]?.text.map(owned.contains) == true || payload["entryId"]?.text.map(owned.contains) == true || payload["photoId"]?.text.map(owned.contains) == true || payload["targets"]?.array?.contains(where:{$0.object?["plantId"]?.text == plant}) == true
             if related { try sql.execute("UPDATE intents SET body=NULL,status='abandoned' WHERE id=?", [row[0]]) }
         }
         for row in try sql.query("SELECT id,undo_context FROM receipts WHERE undo_context IS NOT NULL") {
@@ -484,6 +499,19 @@ enum CoreRegistry {
                 }
             }
         }
+        let photoIDs=try sql.query("SELECT id,content_path FROM photos WHERE plant_id=? OR draft_id IN (SELECT id FROM plant_drafts WHERE plant_id=? UNION SELECT id FROM journal_drafts WHERE plant_id=? UNION SELECT id FROM media_drafts WHERE plant_id=?)",Array(repeating:.text(plant),count:4))
+        for row in photoIDs {try sql.execute("INSERT OR IGNORE INTO media_cleanup VALUES(?,?)",[row[1],.text(CoreClockFrame.capture(Date()).instant)])}
+        for row in try sql.query("SELECT id,photo_id,draft_revision,result_json FROM media_preparations WHERE plant_id=? OR draft_id IN (SELECT id FROM plant_drafts WHERE plant_id=? UNION SELECT id FROM journal_drafts WHERE plant_id=? UNION SELECT id FROM media_drafts WHERE plant_id=?)",Array(repeating:.text(plant),count:4)) {
+            let prior=row[3] == .null ? nil:try CanonicalParser.parse(CoreSchema.text(row[3])).object
+            let result:CanonicalValue = .object(["kind":.string("deleted"),"preparationId":CoreSchema.canonical(row[0]),"photoId":CoreSchema.canonical(row[1]),"draftRevision":prior?["draftRevision"] ?? CoreSchema.canonical(row[2])])
+            try sql.execute("UPDATE media_preparations SET state='deleted',plant_id=NULL,observed_date=NULL,error_code=NULL,result_json=? WHERE id=?",[.text(try result.json()),row[0]])
+            try sql.execute("INSERT OR IGNORE INTO media_cleanup SELECT relative_path,? FROM media_files WHERE preparation_id=?",[.text(CoreClockFrame.capture(Date()).instant),row[0]])
+        }
+        try sql.execute("DELETE FROM plant_covers WHERE id=?",[.text(plant)])
+        try sql.execute("DELETE FROM media_drafts WHERE plant_id=?",[.text(plant)])
+        try sql.execute("DELETE FROM journal_drafts WHERE plant_id=?",[.text(plant)])
+        try sql.execute("DELETE FROM journal_entries WHERE plant_id=?",[.text(plant)])
+        for row in photoIDs {try sql.execute("DELETE FROM photos WHERE id=?",[row[0]])}
         for query in [
             "DELETE FROM routine_suggestions WHERE id IN (SELECT id FROM routines WHERE plant_id=?)",
             "DELETE FROM suggestion_snapshots WHERE plant_id=?", "DELETE FROM plant_catalog WHERE id=?",
@@ -514,6 +542,12 @@ enum CoreRegistry {
         let primary: CanonicalValue, primaryType: CanonicalValue
         if p.type == "Undo" || p.type == "BulkComplete" { primary = .null; primaryType = .null }
         else if ["SaveDraft","DiscardDraft"].contains(p.type) { primary = p.payload["draftId"]!; primaryType = .string("draft") }
+        else if mediaCommands.contains(p.type) {
+            if p.type == "SaveJournalEntry" {primary = .string(d.first{$0.table=="journal_entries"}!.id);primaryType = .string("journal")}
+            else if p.type == "DeleteJournalEntry" {primary=p.payload["entryId"]!;primaryType = .string("journal")}
+            else if ["DeletePhoto","ReplacePhoto","UpdatePhotoObservation"].contains(p.type) {primary=p.payload["photoId"]!;primaryType = .string("photo")}
+            else {primary=p.payload["draftId"]!;primaryType = .string(p.type.contains("Journal") ? "journalDraft":"mediaDraft")}
+        }
         else if p.type == "SavePlant" { primary = .string(d.first{$0.table == "plants"}!.id); primaryType = .string("plant") }
         else if ["ArchivePlant","RestorePlant","DeletePlant"].contains(p.type) { primary = p.payload["plantId"]!; primaryType = .string("plant") }
         else if ["CorrectEvent","RestoreEvent","VoidEvent"].contains(p.type) { primary = p.payload["eventId"]!; primaryType = .string("event") }

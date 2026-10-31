@@ -7,6 +7,8 @@ import '../../features/collection/presentation/pages/plants_page.dart';
 import '../../features/collection/presentation/pages/plant_detail_page.dart';
 import '../../features/collection/presentation/pages/plant_editor_page.dart';
 import '../../features/collection/presentation/pages/settings_page.dart';
+import '../../features/journal/presentation/pages/journal_editor_page.dart';
+import '../../features/media/presentation/pages/photos_page.dart';
 part 'app_router.gr.dart';
 
 @AutoRouterConfig(replaceInRouteName: 'Page,Route')
@@ -24,6 +26,8 @@ class AppRouter extends RootStackRouter {
             AutoRoute(page: TodayRoute.page, initial: true),
             AutoRoute(page: PlantDetailRoute.page),
             AutoRoute(page: PlantEditorRoute.page),
+            AutoRoute(page: JournalEditorRoute.page),
+            AutoRoute(page: PhotosRoute.page),
           ],
         ),
         AutoRoute(
@@ -32,6 +36,8 @@ class AppRouter extends RootStackRouter {
             AutoRoute(page: PlantsRoute.page, initial: true),
             AutoRoute(page: PlantDetailRoute.page),
             AutoRoute(page: PlantEditorRoute.page),
+            AutoRoute(page: JournalEditorRoute.page),
+            AutoRoute(page: PhotosRoute.page),
           ],
         ),
         AutoRoute(page: SettingsRoute.page),

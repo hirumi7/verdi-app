@@ -15,6 +15,11 @@ final class CoreStorageProjection {
     'plant_catalog',
     'suggestion_snapshots',
     'routine_suggestions',
+    'journal_entries',
+    'journal_drafts',
+    'media_drafts',
+    'photos',
+    'plant_covers',
   ];
   final MemoryCoreStore _store;
   late final MemoryOperationCoordinator reader;
@@ -48,7 +53,7 @@ final class CoreStorageProjection {
       _revision(revision);
       _revision(storageRevision);
       final ids = <String>{};
-      final lengths = [11, 13, 5, 11, 12, 10, 8, 4, 11, 3];
+      final lengths = [11, 13, 5, 11, 12, 10, 8, 4, 11, 3, 8, 9, 8, 14, 2];
       for (var t = 0; t < tables.length; t++) {
         final tableIds = <String>{};
         for (final row in rows[tables[t]]!) {
@@ -57,7 +62,11 @@ final class CoreStorageProjection {
           _id(row[0] as String);
           if (!tableIds.add(row[0] as String))
             throw CommandRejected('STORAGE_INVALID');
-          if (!['plant_catalog', 'routine_suggestions'].contains(tables[t]) &&
+          if (![
+                'plant_catalog',
+                'routine_suggestions',
+                'plant_covers',
+              ].contains(tables[t]) &&
               !ids.add(row[0] as String))
             throw CommandRejected('STORAGE_INVALID');
         }
@@ -149,7 +158,10 @@ final class CoreStorageProjection {
         final fieldsEnvelope = _map(jsonDecode(r[5] as String));
         if (fieldsEnvelope['version'] != 1 || fieldsEnvelope.keys.length != 2)
           throw CommandRejected('STORAGE_INVALID');
-        final fields = _storedFields(fieldsEnvelope['fields']);
+        final fields = _storedFields(
+          fieldsEnvelope['fields'],
+          rows['photos']!.where((p) => p[2] == r[0]).map((p) => p[0] as String),
+        );
         final command = SaveDraft(
           draftId: r[0] as String,
           expectedRevision: r[1] as int,
@@ -230,6 +242,7 @@ final class CoreStorageProjection {
       if (rows['plant_catalog']!.any((c) => !plants.containsKey(c[0])) ||
           rows['routine_suggestions']!.any((c) => !routines.containsKey(c[0])))
         throw CommandRejected('STORAGE_INVALID');
+      final media = _HydratedMedia(rows, plants, drafts);
       final prior = _store._state;
       _store._state = _State(
         CollectionSnapshot._(
@@ -242,13 +255,22 @@ final class CoreStorageProjection {
           revision - 1,
           changes,
           suggestions,
+          media.entries,
+          media.drafts,
+          media.media,
+          media.photos,
+          media.covers,
         ),
         prior.receipts,
         prior.usedDraftIds,
         prior.undoneCommands,
       );
       _store._reservedIds.addAll(ids);
-      _store._draftIds.addAll(drafts.keys);
+      _store._draftIds.addAll([
+        ...drafts.keys,
+        ...media.drafts.keys,
+        ...media.media.keys,
+      ]);
       _rows = {
         for (final entry in rows.entries)
           entry.key: entry.value
@@ -322,6 +344,8 @@ final class CoreStorageProjection {
     _store._intents[id] = c;
     _store._reservedIds.addAll([id, ...allocated]);
     if (command is SaveDraft) _store._draftIds.add(command.draftId);
+    if (command is SaveJournalDraft) _store._draftIds.add(command.draftId);
+    if (command is SaveMediaDraft) _store._draftIds.add(command.draftId);
     return c;
   }
 
@@ -366,6 +390,35 @@ final class CoreStorageProjection {
                     r.appliedSuggestionId != null,
               )
               .length,
+          snapshot.journalEntries.values
+              .where((e) => e.plantId == command.plantId)
+              .length,
+          snapshot.photos.values
+              .where(
+                (p) =>
+                    p.plantId == command.plantId ||
+                    snapshot.drafts[p.draftId]?.plantId == command.plantId ||
+                    snapshot.journalDrafts[p.draftId]?.plantId ==
+                        command.plantId ||
+                    snapshot.mediaDrafts[p.draftId]?.plantId == command.plantId,
+              )
+              .length,
+          [
+            for (final d
+                in snapshot.journalDrafts.values
+                    .where((d) => d.plantId == command.plantId)
+                    .toList()
+                  ..sort((a, b) => a.id.compareTo(b.id)))
+              {'draftId': d.id, 'revision': d.revision},
+          ],
+          [
+            for (final d
+                in snapshot.mediaDrafts.values
+                    .where((d) => d.plantId == command.plantId)
+                    .toList()
+                  ..sort((a, b) => a.id.compareTo(b.id)))
+              {'draftId': d.id, 'revision': d.revision},
+          ],
         ],
       });
     } else {
@@ -380,7 +433,10 @@ final class CoreStorageProjection {
             if (before == null ||
                 (table == 'plants' && index == 10) ||
                 (table == 'routines' && index == 12) ||
-                (table == 'plant_drafts' && index == 7))
+                (table == 'plant_drafts' && index == 7) ||
+                (table == 'journal_entries' && index == 7) ||
+                (table == 'journal_drafts' && index == 8) ||
+                (table == 'media_drafts' && index == 7))
               values[index] = {'native': 'transaction_instant'};
           }
           if (before == null && table == 'care_events') {
@@ -419,6 +475,39 @@ final class CoreStorageProjection {
       p.notices,
     );
     final draftGuards = <Map<String, Object?>>[];
+    if (command is MediaCommand) {
+      final ids = <String>{
+        if (command.guardedDraftId != null) command.guardedDraftId!,
+      };
+      if (command is DeleteJournalEntry)
+        ids.addAll(
+          snapshot.journalDrafts.values
+              .where((d) => d.entryId == command.entryId)
+              .map((d) => d.id),
+        );
+      if (command is DeletePhoto)
+        ids.addAll(
+          snapshot.drafts.values
+              .where((d) => d.fields.coverPhotoId == command.photoId)
+              .map((d) => d.id),
+        );
+      if (command is DeletePhoto)
+        ids.addAll(
+          snapshot.journalDrafts.values
+              .where((d) => d.fields.selectedPhotoIds.contains(command.photoId))
+              .map((d) => d.id),
+        );
+      for (final id in ids.toList()..sort()) {
+        draftGuards.add({
+          'draftId': id,
+          'revision': id == command.guardedDraftId
+              ? command.guardedDraftRevision
+              : snapshot.journalDrafts[id]?.revision ??
+                    snapshot.mediaDrafts[id]?.revision ??
+                    snapshot.drafts[id]?.revision,
+        });
+      }
+    }
     if (command is SaveDraft)
       draftGuards.add({
         'draftId': command.draftId,
@@ -437,6 +526,16 @@ final class CoreStorageProjection {
     if (command is DeletePlant) {
       draftGuards.addAll(
         snapshot.drafts.values
+            .where((d) => d.plantId == command.plantId)
+            .map((d) => {'draftId': d.id, 'revision': d.revision}),
+      );
+      draftGuards.addAll(
+        snapshot.journalDrafts.values
+            .where((d) => d.plantId == command.plantId)
+            .map((d) => {'draftId': d.id, 'revision': d.revision}),
+      );
+      draftGuards.addAll(
+        snapshot.mediaDrafts.values
             .where((d) => d.plantId == command.plantId)
             .map((d) => {'draftId': d.id, 'revision': d.revision}),
       );
@@ -481,15 +580,11 @@ final class CoreStorageProjection {
                   snapshot.drafts[command.draftId]?.mode == DraftMode.add)
           ? 1
           : null,
-      'expectedToday': command is SaveDraft || command is DiscardDraft
-          ? null
-          : clock.today.toString(),
+      'expectedToday': _draftOnly(command) ? null : clock.today.toString(),
       'effectsHash': command._needsPreview ? canonicalValueHash(effects) : null,
       'statements': statements,
       'result': _successJson(result),
-      'changeKind': command is SaveDraft || command is DiscardDraft
-          ? 'draft'
-          : 'collection',
+      'changeKind': _draftOnly(command) ? 'draft' : 'collection',
     };
     final hash = canonicalValueHash(map);
     map['previewToken'] = null;
@@ -639,6 +734,17 @@ final class CoreStorageProjection {
         v.capturedAt.toIso8601String(),
       ]);
     }
+    result['journal_entries']!.addAll(
+      s.journalEntries.values.map((e) => e.toRow()),
+    );
+    result['journal_drafts']!.addAll(
+      s.journalDrafts.values.map((d) => d.toRow()),
+    );
+    result['media_drafts']!.addAll(s.mediaDrafts.values.map((d) => d.toRow()));
+    result['photos']!.addAll(s.photos.values.map((p) => p.toRow()));
+    result['plant_covers']!.addAll(
+      s.covers.entries.map((e) => <Object?>[e.key, e.value]),
+    );
     // Preserve exact native timestamp spellings on unchanged rows.
     for (final t in tables) {
       final old = {for (final r in _rows[t]!) r[0]: r};
@@ -655,6 +761,10 @@ final class CoreStorageProjection {
   }
 
   static const _instantColumns = <String, List<int>>{
+    'journal_entries': [6, 7],
+    'journal_drafts': [7, 8],
+    'media_drafts': [6, 7],
+    'photos': [13],
     'suggestion_snapshots': [10],
     'plants': [9, 10],
     'routines': [11, 12],

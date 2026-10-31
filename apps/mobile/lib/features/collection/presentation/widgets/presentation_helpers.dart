@@ -133,6 +133,15 @@ String kindLabel(AppStrings s, StandardCareKind kind, {bool actual = false}) =>
     };
 
 String errorLabel(AppStrings s, String code) => switch (code) {
+  'CAMERA_DENIED' => s.cameraDenied,
+  'CAMERA_UNAVAILABLE' || 'MEDIA_UNAVAILABLE' => s.cameraUnavailable,
+  'MEDIA_INVALID' => s.photoInvalid,
+  'MEDIA_TOO_LARGE' => s.photoTooLarge,
+  'MEDIA_BUSY' || 'MEDIA_NOT_READY' => s.photoNotReady,
+  'MEDIA_MISSING' => s.photoMissing,
+  'MEDIA_SELECTION_EXPIRED' => s.photoSelectionExpired,
+  'FUTURE_OBSERVATION_DATE' => s.futureObservation,
+  'EMPTY_ENTRY' => s.emptyJournal,
   'CATALOG_SELECTION_STALE' || 'CATALOG_CHANGED' => s.catalogStale,
   'UNDO_EXPIRED' || 'UNDO_CHANGED' || 'UNDO_UNAVAILABLE' => s.undoUnavailable,
   'STALE_TARGET' ||

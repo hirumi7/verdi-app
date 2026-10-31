@@ -131,3 +131,17 @@ abstract class CoreRepositoryHostApi {
   @TaskQueue(type: TaskQueueType.serialBackgroundThread)
   String callCore(String operation, String canonicalBody);
 }
+
+/// Main-isolate OS presentation. Opaque selection IDs and bounded preview bytes
+/// cross this boundary; caller-supplied filesystem paths never do.
+@HostApi()
+abstract class MediaPlatformHostApi {
+  @async
+  String? choosePhoto(String source);
+  @async
+  Uint8List previewPhoto(String photoId);
+  @async
+  String exportPhoto(String photoId, int photoRevision);
+  @async
+  void openMediaSettings();
+}

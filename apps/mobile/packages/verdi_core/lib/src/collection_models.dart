@@ -51,6 +51,8 @@ final class CustomPlantFields {
   final String location;
   final String notes;
   final String speciesName;
+  final String? coverPhotoId;
+  final List<String> readyPhotoIds;
   final CustomLight light;
   final CustomToxicity toxicity;
   final List<RoutineInput> routines;
@@ -64,6 +66,8 @@ final class CustomPlantFields {
     this.location = '',
     this.notes = '',
     this.speciesName = '',
+    this.coverPhotoId,
+    Iterable<String> readyPhotoIds = const [],
     this.light = CustomLight.unknown,
     this.toxicity = CustomToxicity.unknown,
     Iterable<RoutineInput> routines = const [],
@@ -71,7 +75,8 @@ final class CustomPlantFields {
     Iterable<String> keepRoutineIds = const [],
     this.catalogSelection,
     Map<String, CareInterval> applyRoutineIntervals = const {},
-  }) : routines = List.unmodifiable(routines),
+  }) : readyPhotoIds = List.unmodifiable(readyPhotoIds),
+       routines = List.unmodifiable(routines),
        baseRoutineRevisions = Map.unmodifiable(baseRoutineRevisions),
        keepRoutineIds = List.unmodifiable(keepRoutineIds),
        applyRoutineIntervals = Map.unmodifiable(applyRoutineIntervals);
@@ -84,7 +89,7 @@ final class CustomPlantFields {
       'location': location,
       'notes': notes,
       'identityKind': catalogSelection == null ? 'custom' : 'catalog',
-      'coverPhotoId': null,
+      'coverPhotoId': coverPhotoId,
       'speciesId': catalogSelection?.speciesId,
       'catalogSelection': catalogSelection?.toJson(),
       'customSpeciesName': catalogSelection == null ? speciesName : null,
@@ -291,6 +296,11 @@ final class CollectionSnapshot {
   final Map<String, PlantDraft> drafts;
   final Map<String, ScheduleChange> scheduleChanges;
   final Map<String, SuggestionSnapshot> suggestions;
+  final Map<String, JournalEntry> journalEntries;
+  final Map<String, JournalDraft> journalDrafts;
+  final Map<String, MediaDraft> mediaDrafts;
+  final Map<String, PlantPhoto> photos;
+  final Map<String, String> covers;
 
   /// Fake reminder invalidation only; no OS notification is scheduled.
   final int reminderGeneration;
@@ -304,12 +314,22 @@ final class CollectionSnapshot {
     this.reminderGeneration, [
     Map<String, ScheduleChange> scheduleChanges = const {},
     Map<String, SuggestionSnapshot> suggestions = const {},
+    Map<String, JournalEntry> journalEntries = const {},
+    Map<String, JournalDraft> journalDrafts = const {},
+    Map<String, MediaDraft> mediaDrafts = const {},
+    Map<String, PlantPhoto> photos = const {},
+    Map<String, String> covers = const {},
   ]) : plants = Map.unmodifiable(plants),
        routines = Map.unmodifiable(routines),
        careKinds = Map.unmodifiable(careKinds),
        drafts = Map.unmodifiable(drafts),
        scheduleChanges = Map.unmodifiable(scheduleChanges),
-       suggestions = Map.unmodifiable(suggestions);
+       suggestions = Map.unmodifiable(suggestions),
+       journalEntries = Map.unmodifiable(journalEntries),
+       journalDrafts = Map.unmodifiable(journalDrafts),
+       mediaDrafts = Map.unmodifiable(mediaDrafts),
+       photos = Map.unmodifiable(photos),
+       covers = Map.unmodifiable(covers);
 
   List<PlantCore> get activePlants =>
       List.unmodifiable(plants.values.where((p) => !p.archived));

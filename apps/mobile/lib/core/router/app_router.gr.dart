@@ -11,6 +11,122 @@
 part of 'app_router.dart';
 
 /// generated route for
+/// [JournalEditorPage]
+class JournalEditorRoute extends PageRouteInfo<JournalEditorRouteArgs> {
+  JournalEditorRoute({
+    Key? key,
+    required String plantId,
+    String? entryId,
+    List<PageRouteInfo>? children,
+  }) : super(
+         JournalEditorRoute.name,
+         args: JournalEditorRouteArgs(
+           key: key,
+           plantId: plantId,
+           entryId: entryId,
+         ),
+         initialChildren: children,
+       );
+
+  static const String name = 'JournalEditorRoute';
+
+  static PageInfo page = PageInfo(
+    name,
+    builder: (data) {
+      final args = data.argsAs<JournalEditorRouteArgs>();
+      return JournalEditorPage(
+        key: args.key,
+        plantId: args.plantId,
+        entryId: args.entryId,
+      );
+    },
+  );
+}
+
+class JournalEditorRouteArgs {
+  const JournalEditorRouteArgs({this.key, required this.plantId, this.entryId});
+
+  final Key? key;
+
+  final String plantId;
+
+  final String? entryId;
+
+  @override
+  String toString() {
+    return 'JournalEditorRouteArgs{key: $key, plantId: $plantId, entryId: $entryId}';
+  }
+
+  @override
+  bool operator ==(Object other) {
+    if (identical(this, other)) return true;
+    if (other is! JournalEditorRouteArgs) return false;
+    return key == other.key &&
+        plantId == other.plantId &&
+        entryId == other.entryId;
+  }
+
+  @override
+  int get hashCode => key.hashCode ^ plantId.hashCode ^ entryId.hashCode;
+}
+
+/// generated route for
+/// [PhotosPage]
+class PhotosRoute extends PageRouteInfo<PhotosRouteArgs> {
+  PhotosRoute({
+    Key? key,
+    required String plantId,
+    String? photoId,
+    List<PageRouteInfo>? children,
+  }) : super(
+         PhotosRoute.name,
+         args: PhotosRouteArgs(key: key, plantId: plantId, photoId: photoId),
+         initialChildren: children,
+       );
+
+  static const String name = 'PhotosRoute';
+
+  static PageInfo page = PageInfo(
+    name,
+    builder: (data) {
+      final args = data.argsAs<PhotosRouteArgs>();
+      return PhotosPage(
+        key: args.key,
+        plantId: args.plantId,
+        photoId: args.photoId,
+      );
+    },
+  );
+}
+
+class PhotosRouteArgs {
+  const PhotosRouteArgs({this.key, required this.plantId, this.photoId});
+
+  final Key? key;
+
+  final String plantId;
+
+  final String? photoId;
+
+  @override
+  String toString() {
+    return 'PhotosRouteArgs{key: $key, plantId: $plantId, photoId: $photoId}';
+  }
+
+  @override
+  bool operator ==(Object other) {
+    if (identical(this, other)) return true;
+    if (other is! PhotosRouteArgs) return false;
+    return key == other.key &&
+        plantId == other.plantId &&
+        photoId == other.photoId;
+  }
+
+  @override
+  int get hashCode => key.hashCode ^ plantId.hashCode ^ photoId.hashCode;
+}
+
+/// generated route for
 /// [PlantDetailPage]
 class PlantDetailRoute extends PageRouteInfo<PlantDetailRouteArgs> {
   PlantDetailRoute({
@@ -60,12 +176,22 @@ class PlantDetailRouteArgs {
 /// generated route for
 /// [PlantEditorPage]
 class PlantEditorRoute extends PageRouteInfo<PlantEditorRouteArgs> {
-  PlantEditorRoute({Key? key, String? plantId, List<PageRouteInfo>? children})
-    : super(
-        PlantEditorRoute.name,
-        args: PlantEditorRouteArgs(key: key, plantId: plantId),
-        initialChildren: children,
-      );
+  PlantEditorRoute({
+    Key? key,
+    String? plantId,
+    String? coverPhotoId,
+    bool removeCover = false,
+    List<PageRouteInfo>? children,
+  }) : super(
+         PlantEditorRoute.name,
+         args: PlantEditorRouteArgs(
+           key: key,
+           plantId: plantId,
+           coverPhotoId: coverPhotoId,
+           removeCover: removeCover,
+         ),
+         initialChildren: children,
+       );
 
   static const String name = 'PlantEditorRoute';
 
@@ -75,32 +201,53 @@ class PlantEditorRoute extends PageRouteInfo<PlantEditorRouteArgs> {
       final args = data.argsAs<PlantEditorRouteArgs>(
         orElse: () => const PlantEditorRouteArgs(),
       );
-      return PlantEditorPage(key: args.key, plantId: args.plantId);
+      return PlantEditorPage(
+        key: args.key,
+        plantId: args.plantId,
+        coverPhotoId: args.coverPhotoId,
+        removeCover: args.removeCover,
+      );
     },
   );
 }
 
 class PlantEditorRouteArgs {
-  const PlantEditorRouteArgs({this.key, this.plantId});
+  const PlantEditorRouteArgs({
+    this.key,
+    this.plantId,
+    this.coverPhotoId,
+    this.removeCover = false,
+  });
 
   final Key? key;
 
   final String? plantId;
 
+  final String? coverPhotoId;
+
+  final bool removeCover;
+
   @override
   String toString() {
-    return 'PlantEditorRouteArgs{key: $key, plantId: $plantId}';
+    return 'PlantEditorRouteArgs{key: $key, plantId: $plantId, coverPhotoId: $coverPhotoId, removeCover: $removeCover}';
   }
 
   @override
   bool operator ==(Object other) {
     if (identical(this, other)) return true;
     if (other is! PlantEditorRouteArgs) return false;
-    return key == other.key && plantId == other.plantId;
+    return key == other.key &&
+        plantId == other.plantId &&
+        coverPhotoId == other.coverPhotoId &&
+        removeCover == other.removeCover;
   }
 
   @override
-  int get hashCode => key.hashCode ^ plantId.hashCode;
+  int get hashCode =>
+      key.hashCode ^
+      plantId.hashCode ^
+      coverPhotoId.hashCode ^
+      removeCover.hashCode;
 }
 
 /// generated route for
