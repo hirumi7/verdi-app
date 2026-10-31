@@ -16,6 +16,8 @@ final class MediaPlatformBridge: NSObject, MediaPlatformHostApi, PHPickerViewCon
     return controller
   }
   func choosePhoto(source: String) async throws -> String? {
+    let lease=try repository.acquirePlatformLease()
+    defer {repository.releasePlatformLease(lease)}
     guard selection==nil else {throw PigeonError(code:"MEDIA_BUSY",message:nil,details:nil)}
     if source=="camera" {
       guard AVCaptureDevice.default(for:.video) != nil else {throw PigeonError(code:"CAMERA_UNAVAILABLE",message:nil,details:nil)}

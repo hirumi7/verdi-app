@@ -33,7 +33,10 @@ private struct JSONTokenReader {
         position += 1
     }
     mutating func literal(_ value: String) throws {
-        for byte in value.utf8 { try take(byte) }
+        for byte in value.utf8 {
+            guard peek == byte else { throw CanonicalParseFailure.malformed }
+            position += 1
+        }
     }
     mutating func string() throws -> [UInt16] {
         try take(34)

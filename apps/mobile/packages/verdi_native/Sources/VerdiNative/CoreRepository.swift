@@ -24,7 +24,14 @@ struct CoreUndoGrant {
 /// One serialized native owner for the permanent custom_core_v1 installation.
 /// JSON envelopes contain bounded typed protocol values, never arbitrary SQL.
 public final class CoreRepository {
-    let directory: URL
+    let installationDirectory: URL
+    var directory: URL
+    var backupControl: BackupControl?
+    lazy var backupEngine = BackupEngine(core: self)
+    var backupReadLease = false
+    var replacementAdmissionClosed = false
+    var platformLeases: [String:String] = [:]
+    var backupFault: ((BackupBoundary) throws -> Void)?
     let queue = DispatchQueue(label: "verdi.native.core-repository")
     let mediaWorker = DispatchQueue(label:"verdi.native.media-files")
     var exportLeases:[String:Date]=[:]
@@ -45,13 +52,14 @@ public final class CoreRepository {
     init(directory: URL, fault: ((SQLiteBoundary) throws -> Void)?, now: @escaping () -> Date = Date.init,
          elapsed: @escaping () -> TimeInterval = { ProcessInfo.processInfo.systemUptime }, zone: @escaping () -> TimeZone = { .current }, catalog: (() throws -> BundledCatalogBytes)? = nil) {
         self.catalogProvider=catalog
-        self.directory = directory; self.fault = fault; self.now = now; self.elapsed = elapsed; self.zone = zone
+        self.installationDirectory = directory; self.directory = directory; self.fault = fault; self.now = now; self.elapsed = elapsed; self.zone = zone
     }
     public func invalidateUndo() { queue.sync { grants.removeAll() } }
     public func call(operation: String, body: String) throws -> String {
         try queue.sync {
             do {
                 let args = try CoreSchema.object(CanonicalParser.parse(body))
+                guard !replacementAdmissionClosed else {throw CoreRepositoryError("BUSY")}
                 if operation == "open" { return try open(args).json() }
                 guard args["sessionId"]?.text == sessionID, let db = database, !sessionID.isEmpty else { throw CoreRepositoryError("SESSION_INVALID") }
                 if ["preparePhoto","photoPreparation","draftPreparations"].contains(operation) {try persistMediaFailures(db)}
@@ -67,6 +75,7 @@ public final class CoreRepository {
                 case "catalogMeta": value = try db.read {try catalogMeta($0)}
                 case "catalogRows": value = try db.read {try catalogRows($0,args)}
                 case "retryCatalog": tryCatalog(db); value = try db.read {try catalogMeta($0)}
+                case "getSettings": value = try db.read {try CanonicalParser.parse(CoreSchema.text($0.query("SELECT payload_json FROM user_settings WHERE slot=1")[0][0]))}
                 case "clock": value = CoreClockFrame.capture(now(), zone: zone()).value
                 case "metadata": value = try db.read { try metadata($0) }
                 case "readRows": value = try db.read { try readRows($0, args) }
@@ -114,6 +123,12 @@ public final class CoreRepository {
         guard args["protocolVersion"]?.integer == 1, args["profile"]?.text == "custom_core_v1" else { throw CoreRepositoryError("PROTOCOL_INCOMPATIBLE") }
         sessionID = ""; previews.removeAll(); grants.removeAll()
         if let database { try database.close(); self.database = nil }
+        if BackupControl.exists(installationDirectory) {
+            if backupControl == nil {backupControl = try BackupControl(legacy:installationDirectory,fault:backupFault)}
+            try backupControl!.recover(at:mediaClock())
+            directory = try backupControl!.activeURL()
+            try backupEngine.recoverInterrupted(backupControl!)
+        } else if BackupControl.requiresRecovery(installationDirectory) {throw CoreRepositoryError("STORAGE_UNAVAILABLE")}
         let manager = FileManager.default, marker = directory.appendingPathComponent("initialized"), file = directory.appendingPathComponent("core.sqlite")
         try manager.createDirectory(at: directory, withIntermediateDirectories: true); try protect(directory)
         let initialized = manager.fileExists(atPath: marker.path)
@@ -131,8 +146,7 @@ public final class CoreRepository {
         try protect(marker)
         let db: SQLiteDatabase
         if initialized {
-            do { db = try SQLiteDatabase.open(at:file,schema:CoreSchema.schema(),upgradeFrom:CoreSchema.schema(version:2),migrationStatements:CoreSchema.mediaDefinitions,fault:fault) }
-            catch StorageFailure.schemaMismatch { db = try SQLiteDatabase.open(at:file,schema:CoreSchema.schema(),upgradeFrom:CoreSchema.schema(version:1),migrationStatements:CoreSchema.catalogDefinitions+CoreSchema.mediaDefinitions,fault:fault) }
+            db = try Self.openDatabase(file,fault:fault)
         } else { db = try SQLiteDatabase.create(at:file,schema:CoreSchema.schema(dataset:UUID().uuidString.lowercased(),instant:CoreClockFrame.capture(now(),zone:zone()).instant),fault:fault) }
         do {
             for suffix in ["", "-wal", "-shm"] {
@@ -145,12 +159,35 @@ public final class CoreRepository {
             try recoverMedia(db)
             mediaWorker.async {self.cleanupMedia()}
             tryCatalog(db)
+            if let backupControl {try backupEngine.acknowledgeReopen(backupControl,dataset:datasetID)}
             var result = try CoreSchema.object(db.read { try metadata($0) })
-            result["sessionId"] = .string(sessionID); result["profile"] = .string("custom_core_v1"); result["schemaVersion"] = .integer(3)
+            result["sessionId"] = .string(sessionID); result["profile"] = .string("custom_core_v1"); result["schemaVersion"] = .integer(4)
             result["fileProtectionVerified"] = .boolean(Self.deviceProtectionRequired)
             result["clock"] = CoreClockFrame.capture(now(), zone: zone()).value; result["capabilityRevision"] = .integer(1); result["access"] = .string("free")
             return .object(result)
         } catch { try? db.close(); throw error }
+    }
+    static func openDatabase(_ file:URL, fault:((SQLiteBoundary)throws->Void)? = nil) throws -> SQLiteDatabase {
+        for version:Int32 in [3,2,1] {
+            let migration = (version == 1 ? CoreSchema.catalogDefinitions : []) + (version <= 2 ? CoreSchema.mediaDefinitions : []) + CoreSchema.settingsDefinitions + [CoreSchema.settingsSeed]
+            do {return try SQLiteDatabase.open(at:file,schema:CoreSchema.schema(),upgradeFrom:CoreSchema.schema(version:version),migrationStatements:migration,fault:fault)}
+            catch StorageFailure.schemaMismatch {continue}
+        }
+        throw StorageFailure.schemaMismatch
+    }
+    /// Native OS controllers hold a generation lease until every callback ends.
+    public func acquirePlatformLease() throws -> String {
+        try queue.sync {
+            guard !replacementAdmissionClosed, database != nil, !sessionID.isEmpty else {throw CoreRepositoryError("BUSY")}
+            let id=UUID().uuidString.lowercased();platformLeases[id]=datasetID;return id
+        }
+    }
+    public func releasePlatformLease(_ id:String) {queue.sync {_=platformLeases.removeValue(forKey:id)}}
+    func control() throws -> BackupControl {
+        if let backupControl {return backupControl}
+        guard database != nil, !datasetID.isEmpty else {throw CoreRepositoryError("SESSION_INVALID")}
+        let created=try BackupControl(legacy:installationDirectory,dataset:datasetID,fault:backupFault)
+        backupControl=created;return created
     }
     func metadata(_ sql: SQLiteSession) throws -> CanonicalValue {
         let rows = try sql.query("SELECT dataset_id,collection_revision,storage_revision FROM metadata")

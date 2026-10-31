@@ -145,3 +145,28 @@ abstract class MediaPlatformHostApi {
   @async
   void openMediaSettings();
 }
+
+/// Installation-local jobs survive replacement of the customer dataset.
+@HostApi()
+abstract class BackupPlatformHostApi {
+  @async
+  String startExport(String request);
+  @async
+  String? chooseBackup();
+  @async
+  String startImport(String request);
+  @async
+  String backupStatus(String request);
+  @async
+  String latestBackupOperation(String request);
+  @async
+  String confirmImport(String request);
+  @async
+  String cancelBackup(String request);
+  @async
+  String retryImport(String request);
+  @async
+  String renewExportHandle(String request);
+  @async
+  String shareBackup(String request);
+}

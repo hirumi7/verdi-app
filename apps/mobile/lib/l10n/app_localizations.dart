@@ -127,7 +127,7 @@ abstract class AppStrings {
   /// No description provided for @developmentDetails.
   ///
   /// In en, this message translates to:
-  /// **'Plants, care history and drafts stay on this device between launches. Purchases, photos, backups and notifications are not connected yet.'**
+  /// **'Plants, care history, journals, photos and drafts stay on this device between launches. Purchases and notifications are not connected yet.'**
   String get developmentDetails;
 
   /// No description provided for @noPlants.
@@ -1581,6 +1581,198 @@ abstract class AppStrings {
   /// In en, this message translates to:
   /// **'This draft changed elsewhere. Keep the text, date and selected photos shown in this editor, replacing the current draft fields? Saved journal entries remain unchanged until you review and save.'**
   String get journalDraftConflictExplanation;
+
+  /// No description provided for @backupTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Backup & restore'**
+  String get backupTitle;
+
+  /// No description provided for @backupExplanation.
+  ///
+  /// In en, this message translates to:
+  /// **'Keep a portable copy of your plants, care history, journals, photos and saved drafts. Backup and restore are free.'**
+  String get backupExplanation;
+
+  /// No description provided for @backupPrivacy.
+  ///
+  /// In en, this message translates to:
+  /// **'The ZIP includes your private notes and photos. It is not password-encrypted. Share it only with a destination you trust.'**
+  String get backupPrivacy;
+
+  /// No description provided for @backupCreate.
+  ///
+  /// In en, this message translates to:
+  /// **'Create backup'**
+  String get backupCreate;
+
+  /// No description provided for @backupChoose.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose backup file'**
+  String get backupChoose;
+
+  /// No description provided for @backupReplaceTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Replace this collection?'**
+  String get backupReplaceTitle;
+
+  /// No description provided for @backupReplaceWarning.
+  ///
+  /// In en, this message translates to:
+  /// **'Restoring replaces all plants, care history, journals, photos, saved drafts and preferences on this device with the backup. It does not merge collections. Create a backup first if you want to keep your current collection.'**
+  String get backupReplaceWarning;
+
+  /// No description provided for @backupReplace.
+  ///
+  /// In en, this message translates to:
+  /// **'Replace collection'**
+  String get backupReplace;
+
+  /// No description provided for @backupWorking.
+  ///
+  /// In en, this message translates to:
+  /// **'Preparing and checking your backup…'**
+  String get backupWorking;
+
+  /// No description provided for @backupReplacing.
+  ///
+  /// In en, this message translates to:
+  /// **'Restoring your collection. Wait for verification before leaving this screen.'**
+  String get backupReplacing;
+
+  /// No description provided for @backupPreview.
+  ///
+  /// In en, this message translates to:
+  /// **'Ready to restore'**
+  String get backupPreview;
+
+  /// No description provided for @backupCounts.
+  ///
+  /// In en, this message translates to:
+  /// **'{active} active plants · {archived} archived plants\n{events} history entries · {journals} journal entries · {photos} photos'**
+  String backupCounts(
+    String active,
+    String archived,
+    String events,
+    String journals,
+    String photos,
+  );
+
+  /// No description provided for @backupCreated.
+  ///
+  /// In en, this message translates to:
+  /// **'File created'**
+  String get backupCreated;
+
+  /// No description provided for @backupHanded.
+  ///
+  /// In en, this message translates to:
+  /// **'Shared with another app'**
+  String get backupHanded;
+
+  /// No description provided for @backupKeepOutside.
+  ///
+  /// In en, this message translates to:
+  /// **'Save a copy outside Verdi and this device. Creating a file or opening the share sheet does not verify an external backup.'**
+  String get backupKeepOutside;
+
+  /// No description provided for @backupShare.
+  ///
+  /// In en, this message translates to:
+  /// **'Share / Save a copy'**
+  String get backupShare;
+
+  /// No description provided for @backupShareCancelled.
+  ///
+  /// In en, this message translates to:
+  /// **'Sharing was cancelled. The file is still available here.'**
+  String get backupShareCancelled;
+
+  /// No description provided for @backupShareFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Sharing did not finish. Your file is still available; try another destination.'**
+  String get backupShareFailed;
+
+  /// No description provided for @backupRestored.
+  ///
+  /// In en, this message translates to:
+  /// **'Your backup was restored and the collection was reopened.'**
+  String get backupRestored;
+
+  /// No description provided for @backupCancelled.
+  ///
+  /// In en, this message translates to:
+  /// **'Cancelled. Your current collection is unchanged.'**
+  String get backupCancelled;
+
+  /// No description provided for @backupCheckStatus.
+  ///
+  /// In en, this message translates to:
+  /// **'Check restore status'**
+  String get backupCheckStatus;
+
+  /// No description provided for @backupReviewAgain.
+  ///
+  /// In en, this message translates to:
+  /// **'Validate and review again'**
+  String get backupReviewAgain;
+
+  /// No description provided for @backupStale.
+  ///
+  /// In en, this message translates to:
+  /// **'Your collection or saved drafts changed after this preview. Validate again and review the new preview.'**
+  String get backupStale;
+
+  /// No description provided for @backupBusy.
+  ///
+  /// In en, this message translates to:
+  /// **'Finish any pending save or photo selection and close any share sheet, then try again. Your collection has not been replaced.'**
+  String get backupBusy;
+
+  /// No description provided for @backupDiskFull.
+  ///
+  /// In en, this message translates to:
+  /// **'There is not enough free space to create and verify a safe copy. Free some device storage, then try again.'**
+  String get backupDiskFull;
+
+  /// No description provided for @backupMissingPhoto.
+  ///
+  /// In en, this message translates to:
+  /// **'An original photo is missing. Your other content is still available. Resolve the missing photo before creating a complete backup.'**
+  String get backupMissingPhoto;
+
+  /// No description provided for @backupUnsupported.
+  ///
+  /// In en, this message translates to:
+  /// **'This backup version is not supported by this version of Verdi. Your collection is unchanged.'**
+  String get backupUnsupported;
+
+  /// No description provided for @backupLimit.
+  ///
+  /// In en, this message translates to:
+  /// **'This backup exceeds a supported size or content limit. Nothing was truncated or replaced.'**
+  String get backupLimit;
+
+  /// No description provided for @backupInvalid.
+  ///
+  /// In en, this message translates to:
+  /// **'This file is incomplete, damaged or not a supported Verdi backup. Your collection has not been replaced.'**
+  String get backupInvalid;
+
+  /// No description provided for @backupFailure.
+  ///
+  /// In en, this message translates to:
+  /// **'The operation could not finish. Keep your backup file. Check the status or try again; Verdi retains the previous collection during recovery.'**
+  String get backupFailure;
+
+  /// No description provided for @backupLocaleFallback.
+  ///
+  /// In en, this message translates to:
+  /// **'The restored language preference is retained, but is not supported yet. Verdi is using device formatting.'**
+  String get backupLocaleFallback;
 }
 
 class _AppStringsDelegate extends LocalizationsDelegate<AppStrings> {

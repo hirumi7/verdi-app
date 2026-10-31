@@ -79,6 +79,8 @@ final class NativeCollectionRepository implements CollectionRepository {
   @override
   late LocalDate today;
   bool fileProtectionVerified = false;
+  bool _closed = false;
+  Map<String, Object?> settings = {};
   List<PendingCoreAction> pendingActions = [];
   NativeCollectionRepository._();
   static Future<NativeCollectionRepository> open() async {
@@ -173,6 +175,7 @@ final class NativeCollectionRepository implements CollectionRepository {
       datasetId = opened['datasetId'] as String;
       today = opened['today'] as LocalDate;
       fileProtectionVerified = opened['fileProtectionVerified'] as bool;
+      settings = _map(opened['settings']);
       pendingActions = opened['pending'] as List<PendingCoreAction>;
     } catch (_) {
       _stop();
@@ -224,11 +227,13 @@ final class NativeCollectionRepository implements CollectionRepository {
     Object? value,
     String? commandId,
   ]) async {
+    if (_closed) throw const RecoveryUnavailable();
     if (_commands == null) await _connect();
     return _send<T>(operation, value, commandId);
   }
 
   Future<void> close() async {
+    _closed = true;
     try {
       if (_commands != null) await _send<void>('close');
     } finally {
@@ -664,6 +669,7 @@ final class _Worker {
         'datasetId': projection.datasetId,
         'today': projection.clock.today,
         'fileProtectionVerified': opened['fileProtectionVerified'],
+        'settings': _map(await native('getSettings')),
         'pending': actions,
       };
     }

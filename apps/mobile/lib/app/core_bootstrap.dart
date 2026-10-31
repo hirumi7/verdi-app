@@ -9,6 +9,7 @@ import '../features/collection/presentation/cubits/workspace_cubit.dart';
 import '../features/collection/presentation/widgets/presentation_helpers.dart';
 import '../l10n/app_localizations.dart';
 import 'app.dart';
+import '../features/backup/presentation/backup_page.dart';
 
 /// A failed open never becomes an empty collection. Retry retains native files.
 class CoreBootstrap extends StatefulWidget {
@@ -28,6 +29,8 @@ class _CoreBootstrapState extends State<CoreBootstrap>
   List<PendingCoreAction> pending = [];
   bool busy = true, ready = false;
   String? error;
+  bool restored = false;
+  bool replacingDataset = false;
   @override
   void initState() {
     super.initState();
@@ -51,7 +54,14 @@ class _CoreBootstrapState extends State<CoreBootstrap>
     setState(() => busy = true);
     try {
       final old = repository;
-      if (old != null) await old.close();
+      if (old != null) {
+        try {
+          await old.close();
+        } catch (_) {
+          if (!replacingDataset) rethrow;
+        }
+      }
+      repository = null;
       repository = await widget.openRepository();
       await recoveryWorkspace?.close();
       recoveryWorkspace = WorkspaceCubit(repository!);
@@ -74,6 +84,7 @@ class _CoreBootstrapState extends State<CoreBootstrap>
   }
 
   Future<void> _finish() async {
+    await getIt.reset();
     await configureDependencies(environment: 'native', repository: repository);
     if (mounted) setState(() => ready = true);
   }
@@ -145,9 +156,49 @@ class _CoreBootstrapState extends State<CoreBootstrap>
     if (mounted) setState(() => busy = false);
   }
 
+  Future<void> _reopenAfterRestore(bool didRestore) async {
+    setState(() {
+      ready = false;
+      busy = true;
+      replacingDataset = true;
+      restored = didRestore;
+      error = null;
+    });
+    await WidgetsBinding.instance.endOfFrame;
+    if (mounted) await _open();
+  }
+
   @override
   Widget build(BuildContext context) {
-    if (ready) return const VerdiApp();
+    if (ready) {
+      final settings = repository!.settings;
+      final locale = settings['localeOverride'] as String?;
+      final supported =
+          locale == null || const ['en', 'en-US', 'en-GB'].contains(locale);
+      return BackupHost(
+        datasetId: repository!.datasetId,
+        newId: repository!.newId,
+        reopen: _reopenAfterRestore,
+        child: VerdiApp(
+          key: ValueKey(repository!.datasetId),
+          restored: restored,
+          localeFallback: !supported,
+          locale: supported && locale != null
+              ? Locale.fromSubtags(
+                  languageCode: 'en',
+                  countryCode: locale.contains('-')
+                      ? locale.split('-').last
+                      : null,
+                )
+              : null,
+          themeMode: settings['theme'] == 'dark'
+              ? ThemeMode.dark
+              : settings['theme'] == 'light'
+              ? ThemeMode.light
+              : ThemeMode.system,
+        ),
+      );
+    }
     Widget page = Builder(
       builder: (context) => Scaffold(
         body: SafeArea(

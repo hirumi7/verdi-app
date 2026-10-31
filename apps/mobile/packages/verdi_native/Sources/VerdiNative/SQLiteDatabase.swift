@@ -10,19 +10,21 @@ final class SQLiteDatabase {
     private let queueKey = DispatchSpecificKey<UInt8>()
     private var handle: OpaquePointer?
     private var usable = false
+    private let controlProfile: Bool
     private let fault: ((SQLiteBoundary) throws -> Void)?
 
-    private init(fault: ((SQLiteBoundary) throws -> Void)?) {
+    private init(fault: ((SQLiteBoundary) throws -> Void)?, controlProfile: Bool = false) {
+        self.controlProfile = controlProfile
         self.fault = fault
         queue.setSpecific(key: queueKey, value: 1)
     }
 
     static func create(
-        at url: URL, schema: CompiledSchema,
+        at url: URL, schema: CompiledSchema, controlProfile: Bool = false,
         fault: ((SQLiteBoundary) throws -> Void)? = nil
     ) throws -> SQLiteDatabase {
         let target = try canonicalTarget(url)
-        let database = SQLiteDatabase(fault: fault)
+        let database = SQLiteDatabase(fault: fault, controlProfile: controlProfile)
         try database.queue.sync {
             try database.checkInput(url, schema)
             // A missing main file with old sidecars is not a new database.
@@ -52,9 +54,9 @@ final class SQLiteDatabase {
         return database
     }
 
-    static func open(at url: URL, schema: CompiledSchema, upgradeFrom: CompiledSchema? = nil, migrationStatements: [String] = [], fault: ((SQLiteBoundary) throws -> Void)? = nil) throws -> SQLiteDatabase {
+    static func open(at url: URL, schema: CompiledSchema, upgradeFrom: CompiledSchema? = nil, migrationStatements: [String] = [], controlProfile: Bool = false, fault: ((SQLiteBoundary) throws -> Void)? = nil) throws -> SQLiteDatabase {
         let target = try canonicalTarget(url)
-        let database = SQLiteDatabase(fault: fault)
+        let database = SQLiteDatabase(fault: fault, controlProfile: controlProfile)
         try database.queue.sync {
             try database.checkInput(url, schema)
             var info = stat()
@@ -101,6 +103,50 @@ final class SQLiteDatabase {
         try scheduled {
             try requireUsable()
             return try atomic(work)
+        }
+    }
+
+    /// Compiled import boundary only; foreign keys are checked before commit.
+    func importTransaction<T>(_ work: (SQLiteSession) throws -> T) throws -> T {
+        try scheduled {
+            try requireUsable()
+            return try atomic { sql in
+                try self.control("PRAGMA defer_foreign_keys = ON")
+                let result = try work(sql)
+                guard try self.raw("PRAGMA foreign_key_check").isEmpty else { throw StorageFailure.integrityFailure }
+                return result
+            }
+        }
+    }
+    func checkpoint() throws {
+        try scheduled {
+            try requireUsable()
+            let rows = try raw("PRAGMA wal_checkpoint(TRUNCATE)")
+            guard rows.first?.first == .integer(0) else { throw CoreRepositoryError("BUSY") }
+        }
+    }
+    /// SQLite, not filesystem copying, owns the WAL-consistent snapshot.
+    func snapshot(to target: URL) throws {
+        try scheduled {
+            try requireUsable()
+            let path = try Self.canonicalTarget(target)
+            let fd = Darwin.open(path, O_WRONLY | O_CREAT | O_EXCL | O_NOFOLLOW, S_IRUSR | S_IWUSR)
+            guard fd >= 0 else { throw StorageFailure.filesystem(errno) }
+            guard Darwin.close(fd) == 0 else { throw StorageFailure.filesystem(errno) }
+            var destination: OpaquePointer?
+            let status = sqlite3_open_v2(path, &destination, SQLITE_OPEN_READWRITE | SQLITE_OPEN_FULLMUTEX | SQLITE_OPEN_NOFOLLOW, nil)
+            guard status == SQLITE_OK,
+                  let destination else { if let destination { sqlite3_close(destination) }; throw StorageFailure.unavailable }
+            var closed = false
+            defer { if !closed { sqlite3_close(destination) } }
+            guard let backup = sqlite3_backup_init(destination, "main", handle, "main") else { throw StorageFailure.unavailable }
+            let result = sqlite3_backup_step(backup, -1), finish = sqlite3_backup_finish(backup)
+            guard result == SQLITE_DONE, finish == SQLITE_OK else { throw StorageFailure.unavailable }
+            // The copied header can retain WAL mode without sidecars. Convert the
+            // private clone to a closed standalone database before readonly validation.
+            guard sqlite3_exec(destination, "PRAGMA journal_mode=DELETE", nil, nil, nil) == SQLITE_OK else {throw StorageFailure.unavailable}
+            guard sqlite3_close(destination) == SQLITE_OK else { throw StorageFailure.unavailable }
+            closed = true
         }
     }
 
@@ -183,10 +229,14 @@ final class SQLiteDatabase {
 
     private func configure() throws {
         try control("PRAGMA foreign_keys = ON")
-        try control("PRAGMA journal_mode = WAL")
-        try control("PRAGMA synchronous = FULL")
+        try control(controlProfile ? "PRAGMA journal_mode = DELETE" : "PRAGMA journal_mode = WAL")
+        try control(controlProfile ? "PRAGMA synchronous = EXTRA" : "PRAGMA synchronous = FULL")
+        if controlProfile {
+            try control("PRAGMA fullfsync = ON")
+            guard try raw("PRAGMA fullfsync") == [[.integer(1)]] else { throw StorageFailure.settingsUnsupported }
+        }
         let values = try diagnosticValues()
-        guard values.foreignKeys == 1, values.journalMode == "wal", values.synchronous == 2,
+        guard values.foreignKeys == 1, values.journalMode == (controlProfile ? "delete" : "wal"), values.synchronous == (controlProfile ? 3 : 2),
               values.busyTimeoutMilliseconds == 2500 else { throw StorageFailure.settingsUnsupported }
     }
 

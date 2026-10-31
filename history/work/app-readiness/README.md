@@ -837,3 +837,89 @@ Accepted requirements and decisions are unchanged. Implementation is starting;
 this entry is not delivery evidence. Preserve existing collections and use a
 separate synthetic simulator for replacement tests. Physical/max-size/release
 verification remains outstanding.
+
+
+### Backup/restore integration delivery
+
+**Author:** Codex (AI assistant). **Date:** 2026-10-31 (Asia/Jakarta).
+
+Implemented against published docs `3daec51cdaa912155ceaec36d506a4ecea5ad1b8`
+and the independently reviewed extraction clarification
+`79ecf5453e6562c66a8b0902e4e991387078e45e`, adopted before its implementation.
+REQ-012 is partially delivered; REQ-006/007/008/011/014/015/018 preservation and
+regression behavior are included. Accepted requirements/decisions are unchanged.
+
+Settings now supports free backup creation, explicit native share/save, Files
+selection, validated counts, cancellation, replacement confirmation and repository/
+router reopening. ZIP format2 contains all15 implemented content tables, settings
+and original media. It never imports payment or command authority. Exactv1/v2/v3
+SQLite stores migrate additively to v4 settings; the separate draft harness is
+preserved. The unreleased documentary format1 is explicitly unsupported.
+
+SQLite backup snapshots and media read leases create coherent exports. Strict ZIP
+preflight plus bounded platform-zlib extraction verifies record ranges, CRC,
+hashes, paths and stream consumption; streamed JSON validates scalar/graph/audit/
+draft bounds before preview. New datasets stage in private generations. A separate
+DELETE/EXTRA/fullfsync control database owns prepared/switch/verify recovery;
+legacy registration keeps the original directory. Pending actions, OS shares and
+changed content/drafts/preferences prevent replacement. Old generations stay
+retained; temporary artifacts expire through durable inventory and leases.
+Restored replacement drafts receive new local capabilities and preserve stable
+photo identity. The Flutter bootstrap discards old routes/providers and applies
+restored theme/locale only after opening the new dataset.
+
+Verification environment: Flutter3.47.8/Dart3.13.7, Xcode16.2/SDK18.2, macOS14.6;
+iOS18.3 on the separate **Verdi Backup QA 2026-10-31** iPhone16 simulator
+`CD70BD52-1239-4C9E-A998-8D8962DA0354`. The retained normal iPhone16 simulator
+`D295B33A-55D0-4E4C-BFE1-606766766988` was not replaced or reset. Package iOS tests
+used the existing SE3 simulator in the XCTest sandbox, not its app collection.
+
+Actual UI evidence: native create → File created; share cancel retains file;
+Save to Files reports OS handoff without claiming an external verified copy;
+Files picker validates counts; cancel confirmation preserves old generation;
+confirmed restore reopens new collection. Rich fixture:6active+1archived,6events,
+1journal,3photos, all3draft types, ready replacement, dark/en-GB settings. Main UI
+shows retained note/care/photo and the restored theme/date format. A separate
+`--no-uninstall --dart-define=VERDI_BACKUP_PHASE=rich` run verifies native restart
+hydration and opens/cancels the restored replacement review through the main UI.
+No backup was sent to another person or remote service.
+
+Independent reviewer `core_readiness_review` rechecked design and implementation;
+no remaining scoped blocker. Corrections include snapshot WAL handling, exact draft
+validation, audit/date hydration compatibility, old-store reopening after failed
+close, failure-status retry, leased expiry cleanup, old rejected-generation expiry,
+ZIP64 offset-zero/library mismatch, raw-deflate chunk refill, temporary worker
+ownership, confirmation BUSY recovery and the success-banner Overlay dependency.
+Regressions exercise actual process deaths at bootstrap/staging/prepared/switched/
+verified boundaries, close failure/reopening, stale preview/settings/drafts,
+malformed archives/rows, cancellation and over-limit content preservation.
+
+Logs under `/tmp`: `verdi-backup-native-full.log`, `verdi-backup-native-tests.log`,
+`verdi-backup-native-ios.log`, `verdi-backup-swift-build.log`,
+`verdi-backup-core-tests.log`, `verdi-backup-core-analyze.log`,
+`verdi-backup-flutter-tests.log`, `verdi-backup-flutter-analyze.log`,
+`verdi-backup-ui-tests.log`, `verdi-backup-format.log`,
+`verdi-backup-generation.log`, `verdi-backup-pigeon.log`,
+`verdi-backup-ios-integration.log`, `verdi-backup-rich-ui.log`,
+`verdi-backup-normal-run.log`, `verdi-backup-docs-extraction.log`.
+The independent valid-deflate boundary fixture is committed with an expected hash.
+
+Remaining: full physical-device/protection/power-loss tests, exhaustive I/O fault
+and neither-generation-valid matrix, maximum-size/disk-exhaustion performance,
+full VoiceOver checks, notifications, StoreKit and public release. macOS subprocess
+termination is not physical power-loss proof. Deferred product features remain
+absent from this current-content format. No whole requirement or release-readiness
+claim is made. The next product slice remains separately reviewed.
+
+
+Final executed checks for this delivery: native macOS `swift test` **104 passed**;
+iOS `xcodebuild -scheme VerdiNative -destination 'platform=iOS Simulator,id=993B7FB1-DD39-4922-9DF9-6AB0CE25DEDD' -derivedDataPath /tmp/verdi-native-ios-build test`
+**101 passed** (three macOS-only subprocess harness tests excluded by platform).
+Swift warnings-as-errors build passes. Flutter **51 tests**, analyzer, formatter,
+localization/build_runner and Pigeon reproducibility pass. Dart core **127 tests**
+and analyzer pass. Main iOS seed/create integration and separate rich-restart/
+replacement-review integration both pass. The native async test helper now drains
+its worker before advancing to another operation, rather than relying on a10ms
+sleep; the production BUSY-confirm race has its own Cubit regression. Documentation
+aggregate at the extraction design pin passed8/8 with268 tooling tests; staged
+consumer/gitlink checks pass. Final evidence publication and pin follow below.

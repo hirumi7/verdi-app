@@ -13,7 +13,7 @@ extension CoreRepository {
     public func retainMediaSelection(source:URL,kind:String) throws -> String {
         let id=UUID().uuidString.lowercased(),path="selections/\(id).source"
         let context:(SQLiteDatabase,MediaFiles,String)=try queue.sync {
-            guard ["camera","library"].contains(kind),let db=database,let files=mediaFiles,!sessionID.isEmpty else{throw CoreRepositoryError("SESSION_INVALID")}
+            guard !replacementAdmissionClosed,["camera","library"].contains(kind),let db=database,let files=mediaFiles,!sessionID.isEmpty else{throw CoreRepositoryError("SESSION_INVALID")}
             try db.transaction {sql in
                 try registerMediaPath(sql,path,selection:id)
                 try sql.execute("INSERT INTO media_selections VALUES(?,?,?,'copying',?)",[.text(id),.text(path),.text(kind),.text(mediaClock())])
@@ -171,7 +171,7 @@ extension CoreRepository {
     func cleanupMedia() {
         guard let files=mediaFiles else{return}
         let paths:[String]=queue.sync {
-            guard let db=database else{return []}
+            guard !replacementAdmissionClosed,!backupReadLease,let db=database else{return []}
             return (try? db.transaction{sql in
                 let expiry=CoreClockFrame.capture(now().addingTimeInterval(-86400),zone:zone()).instant
                 try sql.execute("UPDATE media_selections SET state='expired' WHERE created_at<? AND state='ready'",[.text(expiry)])
@@ -182,7 +182,7 @@ extension CoreRepository {
         for path in paths {
             let allowed:Bool=queue.sync {
                 exportLeases=exportLeases.filter{$0.value>now()}
-                guard let db=database,exportLeases[path]==nil else{return false}
+                guard !replacementAdmissionClosed,!backupReadLease,let db=database,exportLeases[path]==nil else{return false}
                 return (try? db.read{sql in
                     try sql.query("SELECT id FROM photos WHERE content_path=?",[.text(path)]).isEmpty && sql.query("SELECT f.relative_path FROM media_files f JOIN media_preparations p ON p.id=f.preparation_id WHERE f.relative_path=? AND p.state IN ('copying','ready')",[.text(path)]).isEmpty && sql.query("SELECT id FROM media_selections WHERE relative_path=? AND state IN ('copying','ready')",[.text(path)]).isEmpty
                 }) ?? false

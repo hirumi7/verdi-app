@@ -29,7 +29,7 @@ extension CoreRepository {
         mediaWorker.async { [self] in
             do {
                 let pair:(MediaFiles,String)=try queue.sync {
-                    guard let db=database,let files=mediaFiles else{throw CoreRepositoryError("SESSION_INVALID")}
+                    guard !replacementAdmissionClosed,let db=database,let files=mediaFiles else{throw CoreRepositoryError("SESSION_INVALID")}
                     let path=try db.read{sql -> String in try CoreRegistry.originalPath(CoreRegistry.requiredRow(sql,"photos",photoID))}
                     return (files,path)
                 }
@@ -43,7 +43,7 @@ extension CoreRepository {
         mediaWorker.async { [self] in
             do {
                 let pair:(MediaFiles,String)=try queue.sync {
-                    guard let db=database,let files=mediaFiles else{throw CoreRepositoryError("SESSION_INVALID")}
+                    guard !replacementAdmissionClosed,let db=database,let files=mediaFiles else{throw CoreRepositoryError("SESSION_INVALID")}
                     let path=try db.read{sql -> String in
                         let p=try CoreRegistry.requiredRow(sql,"photos",photoID)
                         try CoreRegistry.require(p[1] != .null && p[3] == .integer(revision),"STALE_TARGET")

@@ -23,6 +23,7 @@
 		AD1000000000000000000005 /* DraftRepositoryBridge.swift in Sources */ = {isa = PBXBuildFile; fileRef = AD1000000000000000000006 /* DraftRepositoryBridge.swift */; };
 		CB1000000000000000000005 /* CoreRepositoryBridge.swift in Sources */ = {isa = PBXBuildFile; fileRef = CB1000000000000000000006 /* CoreRepositoryBridge.swift */; };
 		CB2000000000000000000005 /* MediaPlatformBridge.swift in Sources */ = {isa = PBXBuildFile; fileRef = CB2000000000000000000006 /* MediaPlatformBridge.swift */; };
+		CB3000000000000000000005 /* BackupPlatformBridge.swift in Sources */ = {isa = PBXBuildFile; fileRef = CB3000000000000000000006 /* BackupPlatformBridge.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -78,6 +79,7 @@
 		AD1000000000000000000006 /* DraftRepositoryBridge.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DraftRepositoryBridge.swift; sourceTree = "<group>"; };
 		CB1000000000000000000006 /* CoreRepositoryBridge.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CoreRepositoryBridge.swift; sourceTree = "<group>"; };
 		CB2000000000000000000006 /* MediaPlatformBridge.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MediaPlatformBridge.swift; sourceTree = "<group>"; };
+		CB3000000000000000000006 /* BackupPlatformBridge.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BackupPlatformBridge.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -171,6 +173,7 @@
 				AD1000000000000000000006 /* DraftRepositoryBridge.swift */,
 				CB1000000000000000000006 /* CoreRepositoryBridge.swift */,
 				CB2000000000000000000006 /* MediaPlatformBridge.swift */,
+				CB3000000000000000000006 /* BackupPlatformBridge.swift */,
 				7884E8672EC3CC0400C636F2 /* SceneDelegate.swift */,
 				74858FAD1ED2DC5600515810 /* Runner-Bridging-Header.h */,
 			);
@@ -393,6 +396,7 @@
 				AD1000000000000000000005 /* DraftRepositoryBridge.swift in Sources */,
 				CB1000000000000000000005 /* CoreRepositoryBridge.swift in Sources */,
 				CB2000000000000000000005 /* MediaPlatformBridge.swift in Sources */,
+				CB3000000000000000000005 /* BackupPlatformBridge.swift in Sources */,
 				1498D2341E8E89220040F4C2 /* GeneratedPluginRegistrant.m in Sources */,
 				7884E8682EC3CC0700C636F2 /* SceneDelegate.swift in Sources */,
 			);

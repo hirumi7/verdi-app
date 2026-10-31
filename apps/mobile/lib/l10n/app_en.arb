@@ -5,7 +5,7 @@
   "plants": "Plants",
   "settings": "Settings",
   "developmentNotice": "Development preview · on-device storage",
-  "developmentDetails": "Plants, care history and drafts stay on this device between launches. Purchases, photos, backups and notifications are not connected yet.",
+  "developmentDetails": "Plants, care history, journals, photos and drafts stay on this device between launches. Purchases and notifications are not connected yet.",
   "noPlants": "No plants yet",
   "noPlantsBody": "Give your first plant a place here, then choose when to check on it.",
   "addPlant": "Add a plant",
@@ -365,5 +365,55 @@
   "futureObservation": "An observation cannot be dated in the future.",
   "emptyJournal": "Add a note or a photo before saving.",
   "photoContinueWithout": "Continue without the new photo",
-  "journalDraftConflictExplanation": "This draft changed elsewhere. Keep the text, date and selected photos shown in this editor, replacing the current draft fields? Saved journal entries remain unchanged until you review and save."
+  "journalDraftConflictExplanation": "This draft changed elsewhere. Keep the text, date and selected photos shown in this editor, replacing the current draft fields? Saved journal entries remain unchanged until you review and save.",
+  "backupTitle": "Backup & restore",
+  "backupExplanation": "Keep a portable copy of your plants, care history, journals, photos and saved drafts. Backup and restore are free.",
+  "backupPrivacy": "The ZIP includes your private notes and photos. It is not password-encrypted. Share it only with a destination you trust.",
+  "backupCreate": "Create backup",
+  "backupChoose": "Choose backup file",
+  "backupReplaceTitle": "Replace this collection?",
+  "backupReplaceWarning": "Restoring replaces all plants, care history, journals, photos, saved drafts and preferences on this device with the backup. It does not merge collections. Create a backup first if you want to keep your current collection.",
+  "backupReplace": "Replace collection",
+  "backupWorking": "Preparing and checking your backup…",
+  "backupReplacing": "Restoring your collection. Wait for verification before leaving this screen.",
+  "backupPreview": "Ready to restore",
+  "backupCounts": "{active} active plants · {archived} archived plants\n{events} history entries · {journals} journal entries · {photos} photos",
+  "@backupCounts": {
+    "placeholders": {
+      "active": {
+        "type": "String"
+      },
+      "archived": {
+        "type": "String"
+      },
+      "events": {
+        "type": "String"
+      },
+      "journals": {
+        "type": "String"
+      },
+      "photos": {
+        "type": "String"
+      }
+    }
+  },
+  "backupCreated": "File created",
+  "backupHanded": "Shared with another app",
+  "backupKeepOutside": "Save a copy outside Verdi and this device. Creating a file or opening the share sheet does not verify an external backup.",
+  "backupShare": "Share / Save a copy",
+  "backupShareCancelled": "Sharing was cancelled. The file is still available here.",
+  "backupShareFailed": "Sharing did not finish. Your file is still available; try another destination.",
+  "backupRestored": "Your backup was restored and the collection was reopened.",
+  "backupCancelled": "Cancelled. Your current collection is unchanged.",
+  "backupCheckStatus": "Check restore status",
+  "backupReviewAgain": "Validate and review again",
+  "backupStale": "Your collection or saved drafts changed after this preview. Validate again and review the new preview.",
+  "backupBusy": "Finish any pending save or photo selection and close any share sheet, then try again. Your collection has not been replaced.",
+  "backupDiskFull": "There is not enough free space to create and verify a safe copy. Free some device storage, then try again.",
+  "backupMissingPhoto": "An original photo is missing. Your other content is still available. Resolve the missing photo before creating a complete backup.",
+  "backupUnsupported": "This backup version is not supported by this version of Verdi. Your collection is unchanged.",
+  "backupLimit": "This backup exceeds a supported size or content limit. Nothing was truncated or replaced.",
+  "backupInvalid": "This file is incomplete, damaged or not a supported Verdi backup. Your collection has not been replaced.",
+  "backupFailure": "The operation could not finish. Keep your backup file. Check the status or try again; Verdi retains the previous collection during recovery.",
+  "backupLocaleFallback": "The restored language preference is retained, but is not supported yet. Verdi is using device formatting."
 }

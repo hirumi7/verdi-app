@@ -870,3 +870,195 @@ class MediaPlatformHostApiSetup {
     }
   }
 }
+/// Installation-local jobs survive replacement of the customer dataset.
+///
+/// Generated protocol from Pigeon that represents a handler of messages from Flutter.
+protocol BackupPlatformHostApi {
+  func startExport(request: String) async throws -> String
+  func chooseBackup() async throws -> String?
+  func startImport(request: String) async throws -> String
+  func backupStatus(request: String) async throws -> String
+  func latestBackupOperation(request: String) async throws -> String
+  func confirmImport(request: String) async throws -> String
+  func cancelBackup(request: String) async throws -> String
+  func retryImport(request: String) async throws -> String
+  func renewExportHandle(request: String) async throws -> String
+  func shareBackup(request: String) async throws -> String
+}
+
+/// Generated setup class from Pigeon to handle messages through the `binaryMessenger`.
+class BackupPlatformHostApiSetup {
+  static var codec: FlutterStandardMessageCodec { DraftBridgePigeonCodec.shared }
+  /// Sets up an instance of `BackupPlatformHostApi` to handle messages through the `binaryMessenger`.
+  static func setUp(binaryMessenger: FlutterBinaryMessenger, api: BackupPlatformHostApi?, messageChannelSuffix: String = "") {
+    let channelSuffix = messageChannelSuffix.count > 0 ? ".\(messageChannelSuffix)" : ""
+    let startExportChannel = FlutterBasicMessageChannel(name: "dev.flutter.pigeon.verdi_mobile.BackupPlatformHostApi.startExport\(channelSuffix)", binaryMessenger: binaryMessenger, codec: codec)
+    if let api = api {
+      startExportChannel.setMessageHandler { message, reply in
+        let args = message as! [Any?]
+        let requestArg = args[0] as! String
+        Task { @MainActor in
+          do {
+            let result = try await api.startExport(request: requestArg)
+            reply(wrapResult(result))
+          } catch {
+            reply(wrapError(error))
+          }
+        }
+      }
+    } else {
+      startExportChannel.setMessageHandler(nil)
+    }
+    let chooseBackupChannel = FlutterBasicMessageChannel(name: "dev.flutter.pigeon.verdi_mobile.BackupPlatformHostApi.chooseBackup\(channelSuffix)", binaryMessenger: binaryMessenger, codec: codec)
+    if let api = api {
+      chooseBackupChannel.setMessageHandler { _, reply in
+        Task { @MainActor in
+          do {
+            let result = try await api.chooseBackup()
+            reply(wrapResult(result))
+          } catch {
+            reply(wrapError(error))
+          }
+        }
+      }
+    } else {
+      chooseBackupChannel.setMessageHandler(nil)
+    }
+    let startImportChannel = FlutterBasicMessageChannel(name: "dev.flutter.pigeon.verdi_mobile.BackupPlatformHostApi.startImport\(channelSuffix)", binaryMessenger: binaryMessenger, codec: codec)
+    if let api = api {
+      startImportChannel.setMessageHandler { message, reply in
+        let args = message as! [Any?]
+        let requestArg = args[0] as! String
+        Task { @MainActor in
+          do {
+            let result = try await api.startImport(request: requestArg)
+            reply(wrapResult(result))
+          } catch {
+            reply(wrapError(error))
+          }
+        }
+      }
+    } else {
+      startImportChannel.setMessageHandler(nil)
+    }
+    let backupStatusChannel = FlutterBasicMessageChannel(name: "dev.flutter.pigeon.verdi_mobile.BackupPlatformHostApi.backupStatus\(channelSuffix)", binaryMessenger: binaryMessenger, codec: codec)
+    if let api = api {
+      backupStatusChannel.setMessageHandler { message, reply in
+        let args = message as! [Any?]
+        let requestArg = args[0] as! String
+        Task { @MainActor in
+          do {
+            let result = try await api.backupStatus(request: requestArg)
+            reply(wrapResult(result))
+          } catch {
+            reply(wrapError(error))
+          }
+        }
+      }
+    } else {
+      backupStatusChannel.setMessageHandler(nil)
+    }
+    let latestBackupOperationChannel = FlutterBasicMessageChannel(name: "dev.flutter.pigeon.verdi_mobile.BackupPlatformHostApi.latestBackupOperation\(channelSuffix)", binaryMessenger: binaryMessenger, codec: codec)
+    if let api = api {
+      latestBackupOperationChannel.setMessageHandler { message, reply in
+        let args = message as! [Any?]
+        let requestArg = args[0] as! String
+        Task { @MainActor in
+          do {
+            let result = try await api.latestBackupOperation(request: requestArg)
+            reply(wrapResult(result))
+          } catch {
+            reply(wrapError(error))
+          }
+        }
+      }
+    } else {
+      latestBackupOperationChannel.setMessageHandler(nil)
+    }
+    let confirmImportChannel = FlutterBasicMessageChannel(name: "dev.flutter.pigeon.verdi_mobile.BackupPlatformHostApi.confirmImport\(channelSuffix)", binaryMessenger: binaryMessenger, codec: codec)
+    if let api = api {
+      confirmImportChannel.setMessageHandler { message, reply in
+        let args = message as! [Any?]
+        let requestArg = args[0] as! String
+        Task { @MainActor in
+          do {
+            let result = try await api.confirmImport(request: requestArg)
+            reply(wrapResult(result))
+          } catch {
+            reply(wrapError(error))
+          }
+        }
+      }
+    } else {
+      confirmImportChannel.setMessageHandler(nil)
+    }
+    let cancelBackupChannel = FlutterBasicMessageChannel(name: "dev.flutter.pigeon.verdi_mobile.BackupPlatformHostApi.cancelBackup\(channelSuffix)", binaryMessenger: binaryMessenger, codec: codec)
+    if let api = api {
+      cancelBackupChannel.setMessageHandler { message, reply in
+        let args = message as! [Any?]
+        let requestArg = args[0] as! String
+        Task { @MainActor in
+          do {
+            let result = try await api.cancelBackup(request: requestArg)
+            reply(wrapResult(result))
+          } catch {
+            reply(wrapError(error))
+          }
+        }
+      }
+    } else {
+      cancelBackupChannel.setMessageHandler(nil)
+    }
+    let retryImportChannel = FlutterBasicMessageChannel(name: "dev.flutter.pigeon.verdi_mobile.BackupPlatformHostApi.retryImport\(channelSuffix)", binaryMessenger: binaryMessenger, codec: codec)
+    if let api = api {
+      retryImportChannel.setMessageHandler { message, reply in
+        let args = message as! [Any?]
+        let requestArg = args[0] as! String
+        Task { @MainActor in
+          do {
+            let result = try await api.retryImport(request: requestArg)
+            reply(wrapResult(result))
+          } catch {
+            reply(wrapError(error))
+          }
+        }
+      }
+    } else {
+      retryImportChannel.setMessageHandler(nil)
+    }
+    let renewExportHandleChannel = FlutterBasicMessageChannel(name: "dev.flutter.pigeon.verdi_mobile.BackupPlatformHostApi.renewExportHandle\(channelSuffix)", binaryMessenger: binaryMessenger, codec: codec)
+    if let api = api {
+      renewExportHandleChannel.setMessageHandler { message, reply in
+        let args = message as! [Any?]
+        let requestArg = args[0] as! String
+        Task { @MainActor in
+          do {
+            let result = try await api.renewExportHandle(request: requestArg)
+            reply(wrapResult(result))
+          } catch {
+            reply(wrapError(error))
+          }
+        }
+      }
+    } else {
+      renewExportHandleChannel.setMessageHandler(nil)
+    }
+    let shareBackupChannel = FlutterBasicMessageChannel(name: "dev.flutter.pigeon.verdi_mobile.BackupPlatformHostApi.shareBackup\(channelSuffix)", binaryMessenger: binaryMessenger, codec: codec)
+    if let api = api {
+      shareBackupChannel.setMessageHandler { message, reply in
+        let args = message as! [Any?]
+        let requestArg = args[0] as! String
+        Task { @MainActor in
+          do {
+            let result = try await api.shareBackup(request: requestArg)
+            reply(wrapResult(result))
+          } catch {
+            reply(wrapError(error))
+          }
+        }
+      }
+    } else {
+      shareBackupChannel.setMessageHandler(nil)
+    }
+  }
+}

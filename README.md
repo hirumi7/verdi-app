@@ -96,7 +96,9 @@ SQLite connection/bootstrap/transaction infrastructure. Run `swift test` and
 Its README supplies the iOS simulator package-test command and scope limits.
 The permanent current-core schema is distinct from the preserved synthetic
 foundation and draft-harness schemas. Main UI data is in Application Support/
-VerdiCore; no backup/import/reset API is enabled. Simulator file protection remains
+VerdiCore initially; validated restores select a new sibling generation through an
+installation-local recovery database. Settings now exposes free backup/restore.
+Simulator file protection remains
 unverified; device, store, missing-feature and release checks remain outstanding.
 
 
@@ -178,3 +180,23 @@ The test preserves other plants and verifies their IDs remain present; it retain
 its named synthetic plant/notes. It needs operator interaction and is not an
 unattended CI test. Use a new named fixture or a fresh test simulator for another
 full sequence; never reset an existing user's store merely to rerun tests.
+
+## Backup and restore verification
+
+Settings → Backup & restore creates a portable ZIP, opens explicit iOS sharing,
+and validates a selected ZIP before a replace-not-merge confirmation. Format2
+contains the complete implemented `custom_core_v1` content and preferences;
+unreleased documentary format1 is not an import format. Replacement reopens the
+Flutter repository/router with a new dataset identity. Old collections remain
+retained until recovery verifies the new generation. No entitlement is imported.
+
+Use a **separate disposable simulator** for replacement tests. The retained
+normal development collection must not be overwritten by QA. Run
+`integration_test/backup_restore_test.dart` with `--no-uninstall`; default `seed`
+creates the named QA plant and tests native backup creation. The `rich` phase
+(`--dart-define=VERDI_BACKUP_PHASE=rich`) verifies a previously imported rich
+synthetic fixture, restart hydration and replacement-draft review. It assumes
+that fixture, and never silently resets another collection. Generate it with
+`VERDI_BACKUP_FIXTURE_OUTPUT=/tmp/verdi-backup-rich.zip swift test --filter
+ testBackupRich` in the native package; use the OS Files picker to import it.
+The handoff records actual simulator IDs, results and remaining release checks.

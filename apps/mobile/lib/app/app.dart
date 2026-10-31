@@ -11,11 +11,14 @@ class VerdiApp extends StatefulWidget {
   final WorkspaceCubit? workspace;
   final Locale? locale;
   final ThemeMode themeMode;
+  final bool restored, localeFallback;
   const VerdiApp({
     super.key,
     this.workspace,
     this.locale,
     this.themeMode = ThemeMode.system,
+    this.restored = false,
+    this.localeFallback = false,
   });
   @override
   State<VerdiApp> createState() => _VerdiAppState();
@@ -23,6 +26,7 @@ class VerdiApp extends StatefulWidget {
 
 class _VerdiAppState extends State<VerdiApp> with WidgetsBindingObserver {
   final _router = AppRouter();
+  bool _noticeDismissed = false;
   late final WorkspaceCubit _workspace;
   @override
   void initState() {
@@ -66,6 +70,42 @@ class _VerdiAppState extends State<VerdiApp> with WidgetsBindingObserver {
       ],
       localizationsDelegates: AppStrings.localizationsDelegates,
       routerConfig: _router.config(),
+      builder: (context, child) => Column(
+        children: [
+          if (!_noticeDismissed && (widget.restored || widget.localeFallback))
+            Material(
+              child: SafeArea(
+                bottom: false,
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 16,
+                    vertical: 8,
+                  ),
+                  child: Row(
+                    children: [
+                      Expanded(
+                        child: Text(
+                          widget.localeFallback
+                              ? AppStrings.of(context).backupLocaleFallback
+                              : AppStrings.of(context).backupRestored,
+                        ),
+                      ),
+                      Semantics(
+                        label: AppStrings.of(context).close,
+                        child: IconButton(
+                          onPressed: () =>
+                              setState(() => _noticeDismissed = true),
+                          icon: const Icon(Icons.close),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+          Expanded(child: child ?? const SizedBox.shrink()),
+        ],
+      ),
     ),
   );
 }

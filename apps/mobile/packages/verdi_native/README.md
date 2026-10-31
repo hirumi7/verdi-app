@@ -13,7 +13,9 @@ Free-cap checks and acknowledgement/Undo deadlines. The generated bridge and one
 Dart service isolate connect the main UI. Schema mismatch/corruption never resets.
 
 The earlier foundation and isolated draft harness remain separate and tested.
-Their historical contracts appear below. This profile does not enable media, backup/import/generation switching, notifications, purchases or release.
+Their historical contracts appear below. Main-profile media and backup/generation
+switching are connected through the DEBUG Flutter runner; notifications, purchases
+and release remain unavailable.
 
 The package has no remote dependencies. It links the OS SQLite3 library and uses
 one serial Dispatch queue per connection, FULLMUTEX, WAL/FULL, foreign keys and a
@@ -161,3 +163,28 @@ v1/v2 migration, journal vectors/reopen, draft races, preparation replay, status
 write recovery and export leases. Simulator tests do not prove physical iOS data
 protection or power-loss durability. See the application handoff and focused
 `docs/technical/photos-journal-integration.md` contract for remaining boundaries.
+
+
+## Current backup and restore profile
+
+Schema4 adds guarded user settings to the preserved schema3 tables; exact v1/v2/v3
+migrations remain additive. `BackupEngine` owns asynchronous export/import jobs;
+`BackupControl` owns the installation pointer and durable replacement recovery.
+Legacy registration never moves the only collection. Closed staged generations
+contain both SQLite content and managed original files, and old generations remain
+available during verification. Archive validation cannot grant purchase state.
+
+FormatVersion2/dataSchemaVersion2 serializes the exact15 current content tables,
+preferences and photo inventory. ZIP32/ZIP64 preflight, streaming JSON, CRC/hash,
+record/graph validation and raw-deflate decoding enforce compiled bounds before
+preview. ZIPFoundation is pinned for creation; Apple's zlib handles bounded
+extraction, including valid offset-zero ZIP64 and exact input-chunk boundaries.
+See THIRD_PARTY_NOTICES.md. The former unreleased target-format1 is unsupported.
+
+`swift test --filter Backup` exercises content/draft/media/settings round trips,
+hostile input, stale previews, failure recovery, expiry/share leases and actual
+separate-process deaths on macOS. iOS package tests exclude the macOS subprocess
+harness; the main Flutter integration additionally covers the real document picker,
+share sheet, successful generation reopening and downstream draft UI. Physical
+power-loss/protection, maximum-size resources and the exhaustive I/O fault matrix
+remain separate release gates; simulated failures are not power-loss proof.

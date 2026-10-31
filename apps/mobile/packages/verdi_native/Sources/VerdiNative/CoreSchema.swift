@@ -71,11 +71,15 @@ enum CoreSchema {
         "CREATE TABLE media_files(relative_path TEXT PRIMARY KEY NOT NULL,preparation_id TEXT,selection_id TEXT,created_at TEXT NOT NULL)",
         "CREATE TABLE media_cleanup(relative_path TEXT PRIMARY KEY NOT NULL,created_at TEXT NOT NULL)",
     ]
-    static let definitions = legacyDefinitions + catalogDefinitions + mediaDefinitions
-    static func schema(dataset: String? = nil, instant: String = "", version: Int32 = 3) -> CompiledSchema {
-        let expected = version == 1 ? legacyDefinitions : version == 2 ? legacyDefinitions + catalogDefinitions : definitions
+    static let settingsDefinitions = [
+        "CREATE TABLE user_settings(slot INTEGER PRIMARY KEY CHECK(slot=1),revision INTEGER NOT NULL CHECK(revision BETWEEN 1 AND 9007199254740991),payload_json TEXT NOT NULL)",
+    ]
+    static var settingsSeed: String { "INSERT INTO user_settings VALUES(1,1,'\(try! BackupSettings.defaults.json())')" }
+    static let definitions = legacyDefinitions + catalogDefinitions + mediaDefinitions + settingsDefinitions
+    static func schema(dataset: String? = nil, instant: String = "", version: Int32 = 4) -> CompiledSchema {
+        let expected = version == 1 ? legacyDefinitions : version == 2 ? legacyDefinitions + catalogDefinitions : version == 3 ? legacyDefinitions + catalogDefinitions + mediaDefinitions : definitions
         return CompiledSchema(applicationID: 0x56435231, version: version,
-            statements: expected + (dataset.map { ["INSERT INTO metadata VALUES(1,'\($0)','custom_core_v1',1,1,'\(instant)')"] } ?? [])) { sql in
+            statements: expected + (version >= 4 ? [settingsSeed] : []) + (dataset.map { ["INSERT INTO metadata VALUES(1,'\($0)','custom_core_v1',1,1,'\(instant)')"] } ?? [])) { sql in
             let metadata = try sql.query("SELECT slot,dataset_id,profile,collection_revision,storage_revision FROM metadata")
             guard metadata.count == 1, metadata[0][0] == .integer(1), metadata[0][2] == .text("custom_core_v1") else { throw StorageFailure.integrityFailure }
             try uuid(text(metadata[0][1]))

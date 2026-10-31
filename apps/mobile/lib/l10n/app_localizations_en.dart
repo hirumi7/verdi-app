@@ -26,7 +26,7 @@ class AppStringsEn extends AppStrings {
 
   @override
   String get developmentDetails =>
-      'Plants, care history and drafts stay on this device between launches. Purchases, photos, backups and notifications are not connected yet.';
+      'Plants, care history, journals, photos and drafts stay on this device between launches. Purchases and notifications are not connected yet.';
 
   @override
   String get noPlants => 'No plants yet';
@@ -851,4 +851,123 @@ class AppStringsEn extends AppStrings {
   @override
   String get journalDraftConflictExplanation =>
       'This draft changed elsewhere. Keep the text, date and selected photos shown in this editor, replacing the current draft fields? Saved journal entries remain unchanged until you review and save.';
+
+  @override
+  String get backupTitle => 'Backup & restore';
+
+  @override
+  String get backupExplanation =>
+      'Keep a portable copy of your plants, care history, journals, photos and saved drafts. Backup and restore are free.';
+
+  @override
+  String get backupPrivacy =>
+      'The ZIP includes your private notes and photos. It is not password-encrypted. Share it only with a destination you trust.';
+
+  @override
+  String get backupCreate => 'Create backup';
+
+  @override
+  String get backupChoose => 'Choose backup file';
+
+  @override
+  String get backupReplaceTitle => 'Replace this collection?';
+
+  @override
+  String get backupReplaceWarning =>
+      'Restoring replaces all plants, care history, journals, photos, saved drafts and preferences on this device with the backup. It does not merge collections. Create a backup first if you want to keep your current collection.';
+
+  @override
+  String get backupReplace => 'Replace collection';
+
+  @override
+  String get backupWorking => 'Preparing and checking your backup…';
+
+  @override
+  String get backupReplacing =>
+      'Restoring your collection. Wait for verification before leaving this screen.';
+
+  @override
+  String get backupPreview => 'Ready to restore';
+
+  @override
+  String backupCounts(
+    String active,
+    String archived,
+    String events,
+    String journals,
+    String photos,
+  ) {
+    return '$active active plants · $archived archived plants\n$events history entries · $journals journal entries · $photos photos';
+  }
+
+  @override
+  String get backupCreated => 'File created';
+
+  @override
+  String get backupHanded => 'Shared with another app';
+
+  @override
+  String get backupKeepOutside =>
+      'Save a copy outside Verdi and this device. Creating a file or opening the share sheet does not verify an external backup.';
+
+  @override
+  String get backupShare => 'Share / Save a copy';
+
+  @override
+  String get backupShareCancelled =>
+      'Sharing was cancelled. The file is still available here.';
+
+  @override
+  String get backupShareFailed =>
+      'Sharing did not finish. Your file is still available; try another destination.';
+
+  @override
+  String get backupRestored =>
+      'Your backup was restored and the collection was reopened.';
+
+  @override
+  String get backupCancelled =>
+      'Cancelled. Your current collection is unchanged.';
+
+  @override
+  String get backupCheckStatus => 'Check restore status';
+
+  @override
+  String get backupReviewAgain => 'Validate and review again';
+
+  @override
+  String get backupStale =>
+      'Your collection or saved drafts changed after this preview. Validate again and review the new preview.';
+
+  @override
+  String get backupBusy =>
+      'Finish any pending save or photo selection and close any share sheet, then try again. Your collection has not been replaced.';
+
+  @override
+  String get backupDiskFull =>
+      'There is not enough free space to create and verify a safe copy. Free some device storage, then try again.';
+
+  @override
+  String get backupMissingPhoto =>
+      'An original photo is missing. Your other content is still available. Resolve the missing photo before creating a complete backup.';
+
+  @override
+  String get backupUnsupported =>
+      'This backup version is not supported by this version of Verdi. Your collection is unchanged.';
+
+  @override
+  String get backupLimit =>
+      'This backup exceeds a supported size or content limit. Nothing was truncated or replaced.';
+
+  @override
+  String get backupInvalid =>
+      'This file is incomplete, damaged or not a supported Verdi backup. Your collection has not been replaced.';
+
+  @override
+  String get backupFailure =>
+      'The operation could not finish. Keep your backup file. Check the status or try again; Verdi retains the previous collection during recovery.';
+
+  @override
+  String get backupLocaleFallback =>
+      'The restored language preference is retained, but is not supported yet. Verdi is using device formatting.';
 }
