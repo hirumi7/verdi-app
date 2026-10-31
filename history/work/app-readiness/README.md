@@ -800,3 +800,26 @@ photo preview and existing plants survive; no broken-image error is rendered.
 Logs `/tmp/verdi-media-ios-build-final.log` and
 `/tmp/verdi-media-integration-final-reopen.log`. App/core analyzers, final format,
 Pigeon reproduction and diff checks pass. Independent scoped review is closed.
+
+## Photos/journal publication and docs pin — 2026-10-31
+
+**Author:** Codex (AI assistant). **Date:** 2026-10-31 (Asia/Jakarta).
+
+Implementation `b337120378aa193704a6c7679558e476dc9e9f3b` is published on
+`codex/flutter-core-2026-10-30`. Independently reviewed delivery evidence/partial
+coverage is published in docs `4e663d548aead98eb70b1029dca2bc11a184db62` on
+`codex/verdi-app-readiness-2026-10-31`; this gitlink adopts that exact revision.
+The implementation contract remains `3bd62013d57bd4f9c10d619cf51937137ad5d4e7`.
+Accepted requirements, original decision/source records and prior work are preserved.
+Docs aggregate passed **8/8**, including **268 tooling tests**, before publication
+(`/tmp/verdi-media-docs-final.log`). Staged consumer and clean gitlink checks pass.
+The final normal development app was launched on the retained iPhone 16 simulator;
+Today, the three-plant collection, cover, journal entry points and both backdated
+notes were inspected through the native accessibility tree. Flutter run was
+cleanly detached, leaving the normal app running. No data reset was used.
+
+Mounted docs aggregate also passed **8/8** with **268 tooling tests**
+(`/tmp/verdi-media-mounted-docs-final.log`). The final pin change contains delivery
+records and a stale core-README scope correction; application code is unchanged
+from the verified implementation. Committed consumer verification accompanies
+this pin update.

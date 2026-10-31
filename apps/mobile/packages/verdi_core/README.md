@@ -86,15 +86,16 @@ receipt. `reminderGeneration` models invalidation only. It neither schedules nor
 acknowledges delivery of any notification. Calculation-only `RoutineCore` methods
 remain available for tests; they do not by themselves enforce save guards.
 
-**Memory only:** recreating the coordinator with the same live store simulates
-reopening a session. Actual process termination loses everything. No SQLite,
-disk durability, async native transaction serialization, Flutter runner/UI,
-production entitlement, media, catalog reader or backup is included.
-Catalog species/apply-suggestion choices, custom care, creation of replacement
-routines, full event label/zone/schema mapping, journal timeline rows, custom-care
-groups and native plan validation remain work. Those unimplemented fields cannot be
-supplied through this typed editor; they are not silently accepted or dropped. Clock, UUID and
-capability adapters are explicitly test inputs. No template source/assets copied.
+**Memory harness:** recreating the coordinator with the same live store simulates
+reopening a session; actual process termination loses that memory. Durable SQLite,
+file work and OS adapters live in the sibling native package and Flutter app.
+This package now owns typed catalog selection/suggestions, journal/photo models,
+combined timeline reads and guarded storage plans, including the v3 row mapping.
+Native code independently validates those plans before committing real storage.
+
+Custom-care groups, production entitlement, backup/generation replacement and
+photo optimization/comparison remain separate work. Clock, UUID and capability
+adapters in this package are explicit test inputs; they do not prove OS behavior.
 
 Requirements and actual coverage are recorded in the
 [current delivery handoff](../../../../history/work/app-readiness/README.md), bound
