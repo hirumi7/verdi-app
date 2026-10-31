@@ -178,3 +178,66 @@ failed in Flutter's executable-path bootstrap before analysis; the documented
 `apps/mobile` invocation succeeded. No failed invocation is counted as a pass.
 The native integration rerun and scoped independent review are both complete;
 no release-readiness claim is made.
+
+
+## Native SQLite foundation — 2026-10-31
+
+**Author:** Codex (AI assistant).
+**Date:** 2026-10-31 (Asia/Jakarta).
+
+Published docs `7f48c37a90cf6a0f3dcb3409a086d3ede44890cc` before app pin commit
+`d4a692f`. Separate AI review cleared the bounded design after preflight ordering,
+atomic bootstrap, uncertain-error lifecycle and queue/session/close corrections.
+App baseline `4c28d0d42f2f7f2ba1e32d31d8faba3fbbe4fe0b` and all accepted decisions
+remain preserved. This infrastructure supports later REQ-006/007/008/009 durable
+behavior; no complete requirement or customer-data repository is delivered here.
+
+Implemented `apps/mobile/packages/verdi_native` using Foundation/Dispatch and OS
+SQLite3, with no remote dependencies: exclusive bootstrap, read-only preflight,
+identity/integrity validation, WAL/FULL/FK readback, typed bound statements, scoped
+sessions, serialized whole transactions, autocommit-aware rollback, poisoned-state
+recovery, safe diagnostics and explicit close. Compiled synthetic schema version
+7001 is test-only. No bridge, product schema, real-data registration or protection
+claim is added to the Flutter app.
+
+Actual corrections during verify → test → review → fix:
+
+- Initial native tests failed `SQLITE_CANTOPEN`: Foundation canonicalization still
+  rewrote the trusted `/private/var` parent to its symlink alias. A standalone
+  SQLite probe confirmed POSIX `realpath` fixes the parent while NOFOLLOW preserves
+  leaf rejection. No database-file symlink is followed.
+- Failed-bootstrap assertions initially masked an unrelated opening failure.
+  Tests now assert exact DDL/validator errors and use separate retained files;
+  deleting only a main file while sidecars remain correctly rejects recreation.
+- Independent reviewer reproduced a partial-write defect after a callback caught
+  SQLite's automatic rollback. Failure-latched sessions and active-transaction
+  guards now prevent continuation and prevent successful finish after swallowed
+  errors. The independent reproduction reopened with only the original row.
+
+Executed on Swift 6.0.3 (package tools/language 5.10/5), macOS 14.6 and Xcode16.2:
+
+- `swift test`: **17 tests pass**, real OS SQLite 3.43.2. Cases cover reopen,
+  preservation, FK/uniqueness and whole-work rollback, actual deferred-FK COMMIT
+  failure, bounded BUSY and retry, concurrent operations, close/session lifetime,
+  caught automatic rollback and deterministic uncertain-outcome faults.
+- `swift build -Xswiftc -warnings-as-errors`: passed, no compiler warnings.
+- `xcodebuild -scheme VerdiNative -destination 'platform=iOS Simulator,id=<local iPhone 16>'
+  -derivedDataPath /tmp/verdi-native-ios-build test`: **17 tests pass** on iOS18.3,
+  with iOS18 deployment target and SDK18.2; OS SQLite3.43.2. Initial failing run
+  used the pre-fix bootstrap test; final corrected run passed. Test logs retain
+  actual library compile options and settings without user data.
+- Independent AI reviewer reran **17 tests**, recompiled the rollback regression
+  and found no remaining blocking issue in the bounded package. Review excludes
+  product schema, bridge, physical device and release readiness.
+- Published docs aggregate and mounted aggregate both pass **8/8**, including
+  **268 tooling tests**. Committed consumer handoff passes at the exact pin above;
+  accepted requirement and decision diffs are empty.
+
+Close fault injection proves lifecycle control flow, not an actual leaked handle
+or disk/power fault. Reopen is not process-death proof. Full product schema,
+registered guarded plans, generated Pigeon/service-isolate wiring, native clocks/
+receipts/Undo, file protection, recovery-generation handling and interruption
+proofs remain before personal data. Flutter retains synthetic temporary state.
+Next: docs-first design/review of the product schema and command bridge, then
+implement and test those exact contracts. Existing UI/core test evidence above
+remains unchanged; no unrelated re-run is counted as new verification.

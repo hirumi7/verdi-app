@@ -1,6 +1,6 @@
 # Verdi application
 
-This repository is the selected home for Verdi application code. Development has started with an independently authored [pure Dart core](apps/mobile/packages/verdi_core/README.md) for the future Flutter customer app. There is no Flutter runner, native integration or admin scaffold yet. Product requirements and human review records live in the independent docs repository, pinned here at [docs/](docs/README.md).
+This repository is the selected home for Verdi application code. Development includes a [pure Dart core](apps/mobile/packages/verdi_core/README.md), a tested Flutter/iOS preview and a [native SQLite foundation](apps/mobile/packages/verdi_native/README.md). The preview still uses synthetic temporary data; production persistence integration and the internal admin remain unfinished. Product requirements and human review records live in the independent docs repository, pinned here at [docs/](docs/README.md).
 
 ## Start with the AI
 
@@ -86,3 +86,12 @@ repository ignores. Generated Dart source and dependency lockfiles are committed
 The [current delivery handoff](history/work/app-readiness/README.md) records exact docs
 identity, scope, executed evidence and remaining criteria. Do not run upstream
 fresh-repository setup over this existing repository or copy unreviewed assets.
+
+## Native SQLite foundation
+
+The [Swift package](apps/mobile/packages/verdi_native/README.md) owns real OS
+SQLite connection/bootstrap/transaction infrastructure. Run `swift test` and
+`swift build -Xswiftc -warnings-as-errors` from `apps/mobile/packages/verdi_native`.
+Its README supplies the iOS simulator package-test command and scope limits.
+The synthetic schema is not the product database, and the Flutter preview is not
+yet connected to it. No personal-data/release readiness is claimed.
