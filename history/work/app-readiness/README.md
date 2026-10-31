@@ -823,3 +823,17 @@ Mounted docs aggregate also passed **8/8** with **268 tooling tests**
 records and a stale core-README scope correction; application code is unchanged
 from the verified implementation. Committed consumer verification accompanies
 this pin update.
+
+## Backup and restore implementation — 2026-10-31
+
+**Author:** Codex (AI assistant)
+
+**Date:** 2026-10-31 (Asia/Jakarta)
+
+User requests REQ-012 backup/restore in the main Flutter UI. Adopted published docs
+`3daec51cdaa912155ceaec36d506a4ecea5ad1b8` after independent scoped design review,
+8/8 documentation checks (268 tooling tests), clean gitlink and consumer checks.
+Accepted requirements and decisions are unchanged. Implementation is starting;
+this entry is not delivery evidence. Preserve existing collections and use a
+separate synthetic simulator for replacement tests. Physical/max-size/release
+verification remains outstanding.
