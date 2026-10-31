@@ -14,7 +14,15 @@ Finder field(String label) => find.byWidgetPredicate(
 );
 
 Future<void> press(WidgetTester tester, String text) async {
-  final target = find.text(text).last;
+  final matches = find.text(text);
+  if (matches.evaluate().isEmpty) {
+    await tester.scrollUntilVisible(
+      matches,
+      250,
+      scrollable: find.byType(Scrollable).first,
+    );
+  }
+  final target = matches.last;
   await Scrollable.ensureVisible(tester.element(target), alignment: .5);
   await tester.pumpAndSettle();
   await tester.tap(target);
@@ -56,6 +64,39 @@ void main() {
     await configureDependencies();
   });
   tearDown(() => getIt.reset());
+
+  testWidgets(
+    'cached illustration keeps first-plant entry reachable by scrolling',
+    (tester) async {
+      tester.view.physicalSize = const Size(800, 600);
+      tester.view.devicePixelRatio = 1;
+      addTearDown(tester.view.resetPhysicalSize);
+      addTearDown(tester.view.resetDevicePixelRatio);
+      late BuildContext imageContext;
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Builder(
+            builder: (context) {
+              imageContext = context;
+              return const SizedBox();
+            },
+          ),
+        ),
+      );
+      await tester.runAsync(
+        () => precacheImage(
+          const AssetImage('assets/illustrations/empty-plants.png'),
+          imageContext,
+        ),
+      );
+      await tester.pumpWidget(const VerdiApp());
+      await tester.pumpAndSettle();
+      expect(find.text('Add a plant'), findsNothing);
+      await press(tester, 'Add a plant');
+      expect(field('Plant name'), findsOneWidget);
+      expect(tester.takeException(), isNull);
+    },
+  );
 
   testWidgets(
     'stale bulk preview returns to selection; failed commit retries without duplicate care',

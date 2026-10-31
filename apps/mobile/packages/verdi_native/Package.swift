@@ -7,6 +7,6 @@ let package = Package(
     products: [.library(name: "VerdiNative", targets: ["VerdiNative"])],
     targets: [
         .target(name: "VerdiNative", linkerSettings: [.linkedLibrary("sqlite3")]),
-        .testTarget(name: "VerdiNativeTests", dependencies: ["VerdiNative"]),
+        .testTarget(name: "VerdiNativeTests", dependencies: ["VerdiNative"], resources: [.copy("Fixtures")]),
     ]
 )

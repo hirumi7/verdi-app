@@ -52,3 +52,22 @@ guards/receipts/Undo, generated Pigeon/service-isolate wiring, file protection a
 generation handling, then execute the runtime owner's interruption/recovery tests.
 Do not register this foundation as the collection repository or remove the
 development entry's release guard to make a preview look complete.
+
+
+## Shared command encoding
+
+The additional codec follows docs pin
+`7821cdff8187363ac3676df09dbb242001ab3ba4` and
+[command canonicalization](../../../../docs/technical/command-canonicalization.md).
+It produces exactly matching bounded JSON/UTF-8/SHA-256 in Swift and Dart, with
+one shared resource at `Tests/VerdiNativeTests/Fixtures/canonical-command-v1.json`.
+Regenerate it with `python3 tools/generate_command_vectors.py`; the independent
+Python standard-library oracle does not import either implementation.
+
+The 20 vectors retain the original SavePlant hash and cover controls, Unicode,
+integer bounds, ordering and raw UTF-16. Native `.utf16` is a logical string,
+not a canonical array. It combines valid pairs and escapes isolated units without
+replacement, preserving acknowledged raw drafts. Final Text validation still
+rejects invalid saved names/notes. Size/depth guards include the command wrapper;
+the separate raw-draft bound is not relaxed. This codec does not implement Pigeon,
+lossless raw-text database decoding, backup or native command authority.

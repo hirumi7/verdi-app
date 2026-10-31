@@ -263,3 +263,74 @@ unknownOutcome. Both read regressions independently pass. Final full suites pass
 **19 tests on macOS and 19 on iPhone16/iOS18.3 simulator**; the warnings-as-errors
 build passes. The runtime contract already required snapshot-consistent reads and
 no new commit outcome for reads; this is a conformance correction, not new scope.
+
+## Shared Dart/Swift command codec — 2026-10-31
+
+**Author:** Codex (AI assistant).
+**Date:** 2026-10-31 (Asia/Jakarta).
+
+Final authoritative docs pin:
+`7821cdff8187363ac3676df09dbb242001ab3ba4`, published before adoption in
+`a22a780`. Store preparation was published/adopted at `3776eea`; the first codec
+review at `714d0a1` is superseded by the raw-draft correction. All 18 accepted
+requirement files and existing decision records remain byte-identical to the
+prior `512bfa8` baseline. Work supports REQ-006/007/008/009 retry/draft integrity;
+configuration preparation preserves REQ-014 and the existing REQ-018 UI checks.
+No full requirement or public-release completion is claimed.
+
+Implemented a module-internal native typed canonical encoder/SHA-256 using OS
+CryptoKit, matching the existing Dart command wrapper. Dart now enforces the
+reviewed 4 MiB encoded-byte and 64-container limits without changing valid hashes.
+One shared JSON resource contains 20 independently computed Python vectors,
+executed by both Dart and Swift; regenerating it is byte-identical with SHA-256
+`8ed0db64906f279c9a80567d6af991731aa251011e278b005b66f31c84ec11d9`.
+Original SavePlant hash remains unchanged. Arrays/order/ASCII keys, Unicode,
+escaping, integer extremes and exact size/depth limits are verified.
+
+The initial full core run caught a real contract regression: 109 passed and the
+existing raw-draft test failed when isolated UTF-16 units were rejected during
+hashing. Feature work paused for docs review. The corrected native `.utf16` case
+represents a logical string, combines valid pairs and escapes isolated units
+losslessly; it never hashes the units as an array. Dart's existing raw JSON
+behavior and original regression remain unchanged. Final Text validation still
+rejects invalid saved content. Future raw bridge, escaped JSON storage and backup
+owners now consistently specify lossless recovery; none is claimed implemented
+by the codec. Independent review also checked the new synthetic backup fixture's
+exact bytes/hash and raw units, preserving original fixtures.
+
+Actual final verification:
+
+- Core analyzer passed and **110 core tests passed**, including unchanged
+  acknowledged-invalid-draft preservation and the independent SavePlant vector.
+- **26 Swift tests passed on macOS**, comprising 19 SQLite and 7 codec tests.
+  Warnings-as-errors build passed. The same **26 tests passed on iPhone16/iOS18.3
+  simulator**, using Xcode16.2/SDK18.2 and iOS18 deployment target.
+- **22 Flutter unit/widget tests passed**. Final Flutter analyzer passed (5.4s);
+  changed Dart source/tests passed format checks. No dependency version or
+  generated router/DI/Freezed output changed.
+- One earlier Flutter run passed 20 and failed the lifecycle helper at its first
+  Add Plant lookup. Independent reproduction proved a cached illustration put
+  the button outside the lazy list's built region (0 matches before scrolling,
+  1 after). The helper now scrolls before selecting `.last`. A deterministic
+  precached-image regression opens the actual form and independently passes;
+  the full corrected Flutter suite passes. No app behavior was weakened.
+- Separate AI reviewer independently passed 8 Dart codec tests plus the unchanged
+  raw-draft test, all 7 Swift codec tests and all 20 regenerated vectors. Scoped
+  codec and test-helper findings are closed; native bridge/full app are excluded.
+- Corrected docs aggregate and final mounted aggregate each passed **8/8**,
+  including **268 tooling tests**. Final committed consumer handoff passed.
+  Final diff review excludes credentials, source imports and generated build data.
+
+User's latest direction remains simulator first, with physical device details
+deferred and access confirmed. Store preparation is available in the pinned
+`technical/store-release-preparation.md` and `technical/release/app-store-candidate.json`:
+proposed `com.plabs.verdi` / `com.plabs.verdi.pro.lifetime`, unregistered and not
+consumed at runtime. Real account IDs, URLs, agreement status, territories and
+live price remain unset; no account/product or public release was created.
+
+Next implementation work is the reviewed product schema/registered command plans,
+typed Pigeon/service-isolate connection and durable native guard/receipt recovery.
+Then connect the Flutter repository and execute restart/interruption tests before
+personal data. Catalog, media/journal/backup, notifications, StoreKit, admin and
+physical/current-toolchain release evidence also remain. The app is a tested
+synthetic preview, not a release-ready personal-data app.

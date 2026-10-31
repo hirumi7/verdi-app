@@ -99,3 +99,12 @@ capability adapters are explicitly test inputs. No template source/assets copied
 Requirements and actual coverage are recorded in the
 [current delivery handoff](../../../../history/work/app-readiness/README.md), bound
 to the application's committed docs gitlink. Full requirements remain incomplete.
+
+
+The canonical command tests also read the shared native package fixture at
+`../verdi_native/Tests/VerdiNativeTests/Fixtures/canonical-command-v1.json`.
+Run these tests from this package in the complete monorepo. Expected bytes/hashes
+come from an independent Python oracle; both Dart and Swift execute the same
+20 cases. Canonical size/depth bounds preserve raw draft UTF-16 through JSON
+escapes; final field validation remains separate. The accepted raw-draft recovery
+regression is retained unchanged.
