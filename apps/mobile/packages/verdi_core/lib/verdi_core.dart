@@ -5,4 +5,5 @@ library;
 export 'src/calendar.dart';
 export 'src/care.dart';
 export 'src/collection.dart';
+export 'src/command_encoding.dart';
 export 'src/errors.dart';

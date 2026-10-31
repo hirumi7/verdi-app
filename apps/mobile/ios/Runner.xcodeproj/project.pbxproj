@@ -18,6 +18,9 @@
 		A5B6A4BBA141DF2DDD309AC8 /* Pods_Runner.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = EB2E0DFC79B230FDE9A6E3A2 /* Pods_Runner.framework */; };
 		C0554B88D8FBED5B97698BA7 /* Pods_RunnerTests.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 727021BEA7D16E6C1B92AECB /* Pods_RunnerTests.framework */; };
 		78A318202AECB46A00862997 /* FlutterGeneratedPluginSwiftPackage in Frameworks */ = {isa = PBXBuildFile; productRef = 78A3181F2AECB46A00862997 /* FlutterGeneratedPluginSwiftPackage */; };
+		AD1000000000000000000001 /* VerdiNative in Frameworks */ = {isa = PBXBuildFile; productRef = AD1000000000000000000002 /* VerdiNative */; };
+		AD1000000000000000000003 /* DraftBridge.g.swift in Sources */ = {isa = PBXBuildFile; fileRef = AD1000000000000000000004 /* DraftBridge.g.swift */; };
+		AD1000000000000000000005 /* DraftRepositoryBridge.swift in Sources */ = {isa = PBXBuildFile; fileRef = AD1000000000000000000006 /* DraftRepositoryBridge.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -69,6 +72,8 @@
 		ADE11E0558B2C2A31566DB70 /* Pods-RunnerTests.profile.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-RunnerTests.profile.xcconfig"; path = "Target Support Files/Pods-RunnerTests/Pods-RunnerTests.profile.xcconfig"; sourceTree = "<group>"; };
 		EB2E0DFC79B230FDE9A6E3A2 /* Pods_Runner.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_Runner.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		78E0A7A72DC9AD7400C4905E /* FlutterGeneratedPluginSwiftPackage */ = {isa = PBXFileReference; lastKnownFileType = wrapper; name = FlutterGeneratedPluginSwiftPackage; path = Flutter/ephemeral/Packages/FlutterGeneratedPluginSwiftPackage; sourceTree = "<group>"; };
+		AD1000000000000000000004 /* DraftBridge.g.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DraftBridge.g.swift; sourceTree = "<group>"; };
+		AD1000000000000000000006 /* DraftRepositoryBridge.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DraftRepositoryBridge.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -77,6 +82,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				78A318202AECB46A00862997 /* FlutterGeneratedPluginSwiftPackage in Frameworks */,
+				AD1000000000000000000001 /* VerdiNative in Frameworks */,
 				A5B6A4BBA141DF2DDD309AC8 /* Pods_Runner.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -157,6 +163,8 @@
 				1498D2321E8E86230040F4C2 /* GeneratedPluginRegistrant.h */,
 				1498D2331E8E89220040F4C2 /* GeneratedPluginRegistrant.m */,
 				74858FAE1ED2DC5600515810 /* AppDelegate.swift */,
+				AD1000000000000000000004 /* DraftBridge.g.swift */,
+				AD1000000000000000000006 /* DraftRepositoryBridge.swift */,
 				7884E8672EC3CC0400C636F2 /* SceneDelegate.swift */,
 				74858FAD1ED2DC5600515810 /* Runner-Bridging-Header.h */,
 			);
@@ -197,6 +205,7 @@
 		97C146ED1CF9000F007C117D /* Runner */ = {
 			packageProductDependencies = (
 				78A3181F2AECB46A00862997 /* FlutterGeneratedPluginSwiftPackage */,
+				AD1000000000000000000002 /* VerdiNative */,
 			);
 			isa = PBXNativeTarget;
 			buildConfigurationList = 97C147051CF9000F007C117D /* Build configuration list for PBXNativeTarget "Runner" */;
@@ -223,6 +232,7 @@
 /* Begin PBXProject section */
 		97C146E61CF9000F007C117D /* Project object */ = {
 			packageReferences = (
+				AD1000000000000000000007 /* VerdiNative */,
 				781AD8BC2B33823900A9FFBB /* XCLocalSwiftPackageReference "Flutter/ephemeral/Packages/FlutterGeneratedPluginSwiftPackage" */,
 			);
 			isa = PBXProject;
@@ -373,6 +383,8 @@
 			buildActionMask = 2147483647;
 			files = (
 				74858FAF1ED2DC5600515810 /* AppDelegate.swift in Sources */,
+				AD1000000000000000000003 /* DraftBridge.g.swift in Sources */,
+				AD1000000000000000000005 /* DraftRepositoryBridge.swift in Sources */,
 				1498D2341E8E89220040F4C2 /* GeneratedPluginRegistrant.m in Sources */,
 				7884E8682EC3CC0700C636F2 /* SceneDelegate.swift in Sources */,
 			);
@@ -659,6 +671,7 @@
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_OBJC_BRIDGING_HEADER = "Runner/Runner-Bridging-Header.h";
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "$(inherited) DEBUG";
 				SWIFT_VERSION = 5.0;
 				VERSIONING_SYSTEM = "apple-generic";
 			};
@@ -724,12 +737,14 @@
 			isa = XCLocalSwiftPackageReference;
 			relativePath = Flutter/ephemeral/Packages/FlutterGeneratedPluginSwiftPackage;
 		};
+		AD1000000000000000000007 /* VerdiNative */ = {isa = XCLocalSwiftPackageReference; relativePath = ../packages/verdi_native; };
 /* End XCLocalSwiftPackageReference section */
 /* Begin XCSwiftPackageProductDependency section */
 		78A3181F2AECB46A00862997 /* FlutterGeneratedPluginSwiftPackage */ = {
 			isa = XCSwiftPackageProductDependency;
 			productName = FlutterGeneratedPluginSwiftPackage;
 		};
+		AD1000000000000000000002 /* VerdiNative */ = {isa = XCSwiftPackageProductDependency; package = AD1000000000000000000007 /* VerdiNative */; productName = VerdiNative; };
 /* End XCSwiftPackageProductDependency section */
 	};
 	rootObject = 97C146E61CF9000F007C117D /* Project object */;

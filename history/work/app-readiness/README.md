@@ -334,3 +334,109 @@ Then connect the Flutter repository and execute restart/interruption tests befor
 personal data. Catalog, media/journal/backup, notifications, StoreKit, admin and
 physical/current-toolchain release evidence also remain. The app is a tested
 synthetic preview, not a release-ready personal-data app.
+
+## Durable draft repository integration — 2026-10-31
+
+**Author:** Codex (AI assistant).
+**Date:** 2026-10-31 (Asia/Jakarta).
+
+Current authoritative docs pin is
+`0bb0ff89df8529b1d7736057e0107b3a76a56d18`. The original boundary was published
+at `89af1c7` and adopted in `999b973`; the simulator protection refinement was
+published at `0bb0ff8` and adopted in `c5f7cfa` before its implementation. Baseline
+app `2d3bfdf` and all existing core/presentation work are preserved. Accepted
+requirement/decision diff from docs `7821cdf` to the current pin is empty.
+REQ-006 raw-input/retry behavior is the bounded supported scope; related
+REQ-007/008/009/014/015/018 behavior is preserved, not newly declared delivered.
+REQ-019 remains proposed. No whole requirement or public-release gate is closed.
+
+Implemented an actual native `DraftRepository` and lossless canonical JSON token
+reader, generated Pigeon 29.0.11 Dart/Swift messages, a DEBUG-only Runner host and
+one serial Dart service isolate. A separate `VDRF` installation-local development
+schema stores add-draft rows, immutable frozen commands, successful receipts and
+command-ID/hash tombstones. Draft+receipt+raw-body cleanup commit atomically;
+replay precedes stale guards. Acknowledged raw NUL/unpaired UTF16, null seed and
+duplicate draft routine rows survive SQLite and generated bridge round trips.
+No Foundation raw-string repair, second Dart database, JSON collection dump or
+silent reset is used. The exact 1 MiB payload boundary includes escaped bytes.
+
+**This is an isolated disposable integration harness, not the full customer
+CollectionRepository.** The existing app UI still uses `MemoryCollectionRepository`.
+Native draft integration does not yet persist plants, care, history, media,
+entitlements or Undo. It must not be partially registered behind that UI. The
+harness's open establishes a session; its caller explicitly lists pending
+metadata, fetches one bounded body, resolves and retries/abandons the original
+operation before new edits. It grants no full runtime-ready capability.
+
+Review/fix evidence:
+
+- Separate reviewer `core_readiness_review` caught unbounded pending-body pages
+  and premature rejection of duplicate raw routine rows in design. Metadata-only
+  pages and single bounded body fetch preserve the domain's raw-draft behavior.
+- Review caught a genuinely missing platform reply hanging a live service. Every
+  call now has a 30-second deadline; terminal transport failure settles pending
+  mutations as unknown and reads unavailable, closes ports and permits reopening
+  for same-ID receipt recovery. A live receiver that never replies is tested.
+- The first iOS run failed eight draft startup cases. A focused diagnostic proved
+  simulator setAttributes succeeds but protectionKey read-back is nil. Scope
+  returned to docs before implementation: simulator/macOS explicitly report
+  fileProtectionVerified=false; compile-time device code still checks the exact
+  class on directory, marker, DB and existing WAL/SHM. Setter errors and wrong
+  non-null classes reject. Physical first-unlock evidence remains absent.
+- The first client build exposed a missing public codec export (fixed without
+  algorithm changes). The subsequent channel failure was independently traced to
+  Runner Debug lacking Swift DEBUG: the C/Objective-C definition was insufficient.
+  Runner Debug now explicitly defines inherited DEBUG; actual Release settings
+  exclude it, and native registration stays guarded. Temporary diagnostics removed.
+- A first separate-launch attempt was invalid because the pinned Flutter test
+  runner uninstalls integration apps by default. Repeated with --no-uninstall.
+  Freeze left the native DB/worker open, then the test runner stopped the app;
+  simctl confirmed no process remained. Read-only inspection showed 0 drafts,
+  1 pending command, 0 receipts. A separately launched recover test discovered
+  that frozen body and committed its original ID once. After exit: 1 draft,
+  0 pending commands, 1 receipt, revision 1. This proves restart after freeze,
+  not process death during an SQLite transaction or physical power-loss behavior.
+
+Actual verification on Flutter 3.47.8/Dart 3.13.7, Xcode16.2/SDK18.2,
+iPhone16 simulator/iOS18.3:
+
+- 110 core tests and core analyzer passed; existing raw-input regression unchanged.
+- 38 native tests passed on macOS and 38 on iOS simulator; Swift build with
+  warnings-as-errors passed. Includes 19 foundation, 7 codec and 12 draft/parser
+  cases: stale/competing writes, rollback, unknown commit/reopen, hash reuse,
+  abandon/body scrub, session invalidation, corrupt/missing initialized storage,
+  metadata paging and exact byte limits.
+- 23 Flutter unit/widget tests passed. Following final transport cleanup, the
+  nonreplying-transport test passed again; Flutter analyzer reports no issues.
+- Actual generated bridge/service-isolate test passed; separate freeze and
+  recover launches each passed. Final `flutter test integration_test --no-uninstall`
+  passed both actual iOS entrypoints (2/2): unchanged synthetic UI add/save/edit/
+  archive and the generated native draft/retry path. The latter also matches its
+  payload hash to the existing core SaveDraft model.
+- Both generated outputs match the pinned Pigeon + Dart formatter pipeline. An
+  isolated negative probe changed a generated output and the check rejected it.
+  Raw Pigeon trailing whitespace was corrected through this reproducible
+  generation pipeline, not hand-edited. Tooling lock is separate
+  from the app's existing Freezed/router/DI dependency solve. The generation
+  check writes only temporary output; ConfigurePigeon annotations override CLI
+  output flags in this pinned generator.
+- Both scoped docs aggregates and the final mounted docs aggregate passed 8/8,
+  each including 268 tooling tests. Final committed consumer/gitlink checks
+  passed. Independent
+  semantic/code rechecks closed the scoped findings. No physical-device, StoreKit,
+  notification, backup, full native collection or release test is claimed.
+
+Logs retained locally outside Git: `/tmp/verdi-draft-native-final.log`,
+`/tmp/verdi-draft-native-ios-final.log`, `/tmp/verdi-draft-native-build.log`,
+`/tmp/verdi-draft-core-test.log`, `/tmp/verdi-draft-flutter-test-final.log`,
+`/tmp/verdi-draft-flutter-analyze-final.log`, `/tmp/verdi-draft-transport-final.log`,
+`/tmp/verdi-draft-process-freeze.log`, `/tmp/verdi-draft-process-recover.log` and
+`/tmp/verdi-draft-all-integration-final.log`.
+
+Next: review the complete custom-core physical schema and registered plans,
+extract the pure planner from memory-store authority, then integrate all currently
+exposed collection reads/mutations together with native clocks/access guards,
+receipts, outbox and Undo. Complete that coherent repository before changing the
+main UI's registration. Full product features, physical/current submission
+host/store configuration and release evidence remain open. Simulator-first and
+prepared-but-unregistered store configuration remain the user's current choices.

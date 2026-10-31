@@ -1,0 +1,6 @@
+name: verdi_pigeon_tooling
+publish_to: none
+environment:
+  sdk: '>=3.13.7 <4.0.0'
+dependencies:
+  pigeon: 29.0.11

@@ -19,3 +19,10 @@ product review even though the template discourages low-value widget tests.
 For native verification build `flutter build ios --simulator --debug -t
 lib/main_development.dart`. Record actual results and unavailable device/store
 checks in the root current handoff.
+
+The native draft bridge is a separate DEBUG-only integration harness, with its
+own development schema/path. It does not replace CollectionRepository. Its
+service caller must resolve pending metadata/bodies before new edits. Follow the
+pinned native-draft-repository owner and `tooling/pigeon/README.md`; regenerate
+Dart and Swift together. Use `--no-uninstall` for integration restart tests,
+because the pinned Flutter test runner otherwise deletes the installation.
