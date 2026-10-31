@@ -938,3 +938,64 @@ from the pre-backup docs pin. Final normal development build/restart also passes
 Create/Choose controls. Only evidence and the published gitlink change in this
 follow-up; implementation remains the verified commit above. Consumer/gitlink
 checks accompany adoption. Physical/max-size/fault-matrix/release gates stay open.
+
+### Backup recovery hardening — bounded verification plan
+
+**Author:** Codex (AI assistant). **Date:** 2026-10-31 (Asia/Jakarta).
+
+Continue REQ-012 AC6–7 using the existing ready recovery contract at docs
+`5a204ec29f29f9e4d18e38c95e7a3b4a15d14697`; accepted requirements and decisions
+remain unchanged. The focused integration owner and shared recoverable-replacement
+matrix already require: prepared retains old, switched verifies new or rolls back
+to valid old, neither valid blocks writes without deleting either, and verified
+storage uses ordinary SQLite recovery without resetting missing content.
+
+Add distinct old/new content and media fixtures, terminate a separate process at
+replacement boundaries, corrupt staged database/media or both databases, verify
+exact pointer/phase and retained files, then repair fixtures and retry. Also test
+missing verified generation storage and preserve post-restore edits on restart.
+Any demonstrated reset is fixed at native startup, not hidden by UI fallback.
+Run native focused/full tests and iOS native integration, review the actual diff,
+then publish evidence and adopt the published docs pin. Physical power loss,
+exhaustive filesystem fault injection and maximum-size performance remain open.
+
+Recovery tests reproduced two defects against the prior implementation: missing
+registered generation storage could be initialized as an empty collection, and
+rollback could select a structurally valid database with the wrong dataset ID.
+Native startup now requires the registered root, marker and database; current and
+v1/v2/v3 compiled schema checks validate the registered identity while read-only,
+before configuration or migration. Missing/corrupt/mismatched storage leaves the
+pointer unchanged and exposes no writable session. Verified restarts still permit
+later edits and the established missing-photo behavior; no obsolete staging hash
+is imposed on live content.
+
+Eight new native tests cover distinct valid old/new plant and photo content,
+separate-process deaths followed by new-DB/new-photo damage, neither valid,
+prepared-old invalid, wrong-old identity, retained files and repair/retry. Both
+synthetic datasets pass real export self-validation before crash injection.
+Registered legacy and verified generations each exercise absent/empty directories,
+missing marker/database, corruption, and wrong identities for schema versions1–4;
+rejected historical database bytes remain unchanged. Test teardown now closes
+workers/SQLite owners before deleting its synthetic sidecars.
+
+Final verification: `swift test --package-path apps/mobile/packages/verdi_native`
+**112 passed**; native iOS `xcodebuild -scheme VerdiNative -destination
+'platform=iOS Simulator,id=993B7FB1-DD39-4922-9DF9-6AB0CE25DEDD'
+-derivedDataPath /tmp/verdi-native-ios-build test` **103 passed** (nine macOS-only
+subprocess/harness tests excluded). `swift build -Xswiftc -warnings-as-errors`
+passes. Main Flutter `flutter test integration_test/backup_restore_test.dart
+-d CD70BD52-1239-4C9E-A998-8D8962DA0354 --no-uninstall
+--dart-define=VERDI_BACKUP_PHASE=rich` passes on the disposable QA iPhone16/iOS18.3,
+including native reopen and real Photos/replacement-draft review. The retained
+user development simulator was not modified. Xcode16.2/Flutter3.47.8/Dart3.13.7;
+macOS14.6. No Dart/UI/Pigeon code changed; earlier Dart/unit/analyzer evidence is
+inherited, not reported as rerun.
+
+Logs: `/tmp/verdi-recovery-native-full.log`, `verdi-recovery-native-ios.log`,
+`verdi-recovery-swift-build.log`, `verdi-recovery-flutter-integration.log`.
+Independent AI reviewer `core_readiness_review` closed source/test findings after
+identity preflight and fixture corrections; no scoped blocker remains. REQ-012
+remains partial. Exhaustive syscall/control faults, physical power loss/protection,
+maximum-size/disk-exhaustion performance, accessibility, notifications, StoreKit
+and public release remain open. The next recovery work is bounded I/O fault
+injection, not another claim that simulator success proves release readiness.

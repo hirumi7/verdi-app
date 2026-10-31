@@ -126,6 +126,7 @@ public final class CoreRepository {
         if BackupControl.exists(installationDirectory) {
             if backupControl == nil {backupControl = try BackupControl(legacy:installationDirectory,fault:backupFault)}
             try backupControl!.recover(at:mediaClock())
+            try backupControl!.requireStorage(backupControl!.activeID())
             directory = try backupControl!.activeURL()
             try backupEngine.recoverInterrupted(backupControl!)
         } else if BackupControl.requiresRecovery(installationDirectory) {throw CoreRepositoryError("STORAGE_UNAVAILABLE")}
@@ -146,7 +147,8 @@ public final class CoreRepository {
         try protect(marker)
         let db: SQLiteDatabase
         if initialized {
-            db = try Self.openDatabase(file,fault:fault)
+            let expected = try backupControl.map {try $0.expectedDataset($0.activeID())}
+            db = try Self.openDatabase(file,fault:fault,expectedDataset:expected)
         } else { db = try SQLiteDatabase.create(at:file,schema:CoreSchema.schema(dataset:UUID().uuidString.lowercased(),instant:CoreClockFrame.capture(now(),zone:zone()).instant),fault:fault) }
         do {
             for suffix in ["", "-wal", "-shm"] {
@@ -167,10 +169,10 @@ public final class CoreRepository {
             return .object(result)
         } catch { try? db.close(); throw error }
     }
-    static func openDatabase(_ file:URL, fault:((SQLiteBoundary)throws->Void)? = nil) throws -> SQLiteDatabase {
+    static func openDatabase(_ file:URL, fault:((SQLiteBoundary)throws->Void)? = nil, expectedDataset:String? = nil) throws -> SQLiteDatabase {
         for version:Int32 in [3,2,1] {
             let migration = (version == 1 ? CoreSchema.catalogDefinitions : []) + (version <= 2 ? CoreSchema.mediaDefinitions : []) + CoreSchema.settingsDefinitions + [CoreSchema.settingsSeed]
-            do {return try SQLiteDatabase.open(at:file,schema:CoreSchema.schema(),upgradeFrom:CoreSchema.schema(version:version),migrationStatements:migration,fault:fault)}
+            do {return try SQLiteDatabase.open(at:file,schema:CoreSchema.schema(expectedDataset:expectedDataset),upgradeFrom:CoreSchema.schema(version:version,expectedDataset:expectedDataset),migrationStatements:migration,fault:fault)}
             catch StorageFailure.schemaMismatch {continue}
         }
         throw StorageFailure.schemaMismatch

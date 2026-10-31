@@ -76,13 +76,15 @@ enum CoreSchema {
     ]
     static var settingsSeed: String { "INSERT INTO user_settings VALUES(1,1,'\(try! BackupSettings.defaults.json())')" }
     static let definitions = legacyDefinitions + catalogDefinitions + mediaDefinitions + settingsDefinitions
-    static func schema(dataset: String? = nil, instant: String = "", version: Int32 = 4) -> CompiledSchema {
+    static func schema(dataset: String? = nil, instant: String = "", version: Int32 = 4, expectedDataset: String? = nil) -> CompiledSchema {
         let expected = version == 1 ? legacyDefinitions : version == 2 ? legacyDefinitions + catalogDefinitions : version == 3 ? legacyDefinitions + catalogDefinitions + mediaDefinitions : definitions
         return CompiledSchema(applicationID: 0x56435231, version: version,
             statements: expected + (version >= 4 ? [settingsSeed] : []) + (dataset.map { ["INSERT INTO metadata VALUES(1,'\($0)','custom_core_v1',1,1,'\(instant)')"] } ?? [])) { sql in
             let metadata = try sql.query("SELECT slot,dataset_id,profile,collection_revision,storage_revision FROM metadata")
             guard metadata.count == 1, metadata[0][0] == .integer(1), metadata[0][2] == .text("custom_core_v1") else { throw StorageFailure.integrityFailure }
             try uuid(text(metadata[0][1]))
+            // SQLiteDatabase validates read-only before configuration or migration.
+            if let expectedDataset, metadata[0][1] != .text(expectedDataset) {throw CoreRepositoryError("STORAGE_UNAVAILABLE")}
             let actual = try sql.query("SELECT sql FROM sqlite_schema WHERE sql IS NOT NULL AND name NOT LIKE 'sqlite_%'")
             guard try Set(actual.map { try text($0[0]) }) == Set(expected) else { throw StorageFailure.schemaMismatch }
         }

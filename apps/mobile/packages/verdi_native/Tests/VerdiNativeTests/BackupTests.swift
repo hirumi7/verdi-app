@@ -31,6 +31,15 @@ extension CoreRepositoryTests {
         return (id,try XCTUnwrap(result.object?["operation"]?.object?["state"]?.object?["preview"]))
     }
     func removeBackupSidecars() {
+        // Test teardown must not unlink SQLite files while workers/handles own them.
+        if let repo {
+            repo.backupEngine.worker.sync{}
+            repo.mediaWorker.sync{}
+            repo.queue.sync {
+                try? repo.database?.close();repo.database=nil
+                try? repo.backupControl?.db.close();repo.backupControl=nil
+            }
+        }
         for suffix in ["-recovery","-generations"] {try? FileManager.default.removeItem(at:URL(fileURLWithPath:directory.path+suffix))}
     }
     func testBackupRoundTripRetainsCareAuditsAndNewDataset() throws {

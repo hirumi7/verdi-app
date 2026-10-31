@@ -90,6 +90,20 @@ final class BackupControl {
     }
     func activeID() throws -> String {try db.read {try CoreSchema.text($0.query("SELECT active FROM pointer")[0][0])}}
     func activeURL() throws -> URL {try generationURL(activeID())}
+    /// Registered content is never a fresh installation, even if its directory vanished.
+    func requireStorage(_ id:String) throws {
+        let root = try generationURL(id)
+        for (url, kind) in [(root, S_IFDIR), (root.appendingPathComponent("initialized"), S_IFREG), (root.appendingPathComponent("core.sqlite"), S_IFREG)] {
+            var info = stat()
+            try BackupIO.require(lstat(url.path, &info) == 0 && (info.st_mode & S_IFMT) == kind,"STORAGE_UNAVAILABLE")
+        }
+    }
+    func expectedDataset(_ generation:String) throws -> String {
+        let expected = try db.read {try $0.query("SELECT dataset FROM generations WHERE id=?",[.text(generation)])}
+        try BackupIO.require(expected.count == 1,"STORAGE_UNAVAILABLE")
+        let dataset = try CoreSchema.text(expected[0][0]);try CoreSchema.uuid(dataset)
+        return dataset
+    }
     func jobRoot(_ id:String) throws -> URL {try CoreSchema.uuid(id);let url = root.appendingPathComponent("jobs").appendingPathComponent(id);try BackupIO.directory(url);return url}
     func registerArtifact(kind:String,key:String,owner:String?,expires:String) throws {
         try CoreSchema.uuid(key);if let owner {try CoreSchema.uuid(owner)}
@@ -144,7 +158,7 @@ final class BackupControl {
         let job = try CoreSchema.text(r[0]), old = try CoreSchema.text(r[1]), new = try CoreSchema.text(r[2])
         if phase == "prepared" {
             try BackupIO.require(try activeID() == old,"STORAGE_UNAVAILABLE")
-            try verifyOrdinary(generationURL(old))
+            try verifyOrdinary(old)
             try db.transaction {sql in
                 try sql.execute("UPDATE replacement SET phase='rolled_back'")
                 try sql.execute("DELETE FROM generations WHERE id=? AND legacy=0",[.text(new)])
@@ -155,8 +169,9 @@ final class BackupControl {
         try BackupIO.require(try activeID() == new,"STORAGE_UNAVAILABLE")
         let root = try generationURL(new)
         do {
+            try requireStorage(new)
             try BackupIO.require(try BackupIO.hash(root.appendingPathComponent("core.sqlite")).0 == CoreSchema.text(r[4]),"BACKUP_HASH_MISMATCH")
-            let opened = try SQLiteDatabase.open(at:root.appendingPathComponent("core.sqlite"),schema:CoreSchema.schema())
+            let opened = try SQLiteDatabase.open(at:root.appendingPathComponent("core.sqlite"),schema:CoreSchema.schema(expectedDataset:expectedDataset(new)))
             let content: (String,CanonicalValue)
             do {
                 try BackupIO.require(try Self.mediaHash(opened,root:root) == CoreSchema.text(r[5]),"BACKUP_HASH_MISMATCH")
@@ -172,7 +187,7 @@ final class BackupControl {
         } catch {
             // A failed verification may only select an independently valid old store.
             if try db.read({try $0.query("SELECT phase FROM replacement")[0][0]}) == .text("verified") {throw error}
-            try verifyOrdinary(generationURL(old))
+            try verifyOrdinary(old)
             try db.transaction {sql in
                 try sql.execute("UPDATE pointer SET active=?",[.text(old)])
                 try sql.execute("UPDATE replacement SET phase='rolled_back'")
@@ -181,8 +196,10 @@ final class BackupControl {
             }
         }
     }
-    func verifyOrdinary(_ root:URL) throws {
-        let opened = try CoreRepository.openDatabase(root.appendingPathComponent("core.sqlite"))
+    func verifyOrdinary(_ generation:String) throws {
+        try requireStorage(generation)
+        let root = try generationURL(generation)
+        let opened = try CoreRepository.openDatabase(root.appendingPathComponent("core.sqlite"),expectedDataset:expectedDataset(generation))
         try opened.close()
     }
     static func failure(code:String,dataset:String?,recovery:String,preserved:Bool) -> CanonicalValue {
