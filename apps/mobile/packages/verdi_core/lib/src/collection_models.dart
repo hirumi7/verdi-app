@@ -15,7 +15,7 @@ final class RoutineInput {
   final StandardCareKind kind;
   final String count;
   final IntervalUnit unit;
-  final SeedKind seedKind;
+  final SeedKind? seedKind;
   final String date;
   const RoutineInput({
     required this.kind,
@@ -25,14 +25,23 @@ final class RoutineInput {
     required this.date,
   });
 
-  Map<String, Object?> _json() => {
-    'kind': kind.name,
-    'count': count,
-    'unit': unit.name,
-    'seed': seedKind == SeedKind.known
-        ? {'kind': 'known', 'careDate': date}
-        : {'kind': 'unknown', 'firstCheckDate': date},
-  };
+  Map<String, Object?> _json() {
+    // seed:null has no date member in the documented wire shape. Reject an
+    // impossible typed representation before hashing or retaining any payload.
+    if (seedKind == null && date.isNotEmpty) {
+      throw CommandRejected('FIELD_INVALID');
+    }
+    return {
+      'kind': kind.name,
+      'count': count,
+      'unit': unit.name,
+      'seed': seedKind == null
+          ? null
+          : seedKind == SeedKind.known
+          ? {'kind': 'known', 'careDate': date}
+          : {'kind': 'unknown', 'firstCheckDate': date},
+    };
+  }
 }
 
 /// The supported editor subset: custom identity, no media, standard new routines.
@@ -373,13 +382,17 @@ final class PreviewRow {
   final String? routineId;
   final LocalDate? oldNextCheck;
   final LocalDate? newNextCheck;
+  final StandardCareKind? careKind;
+  final String? careLabel;
   const PreviewRow._(
     this.plantId,
     this.plantName,
     this.routineId,
     this.oldNextCheck,
-    this.newNextCheck,
-  );
+    this.newNextCheck, {
+    this.careKind,
+    this.careLabel,
+  });
 }
 
 final class CommandEffects {

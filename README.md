@@ -56,6 +56,33 @@ The package uses synthetic, memory-only state, with locked grapheme and hashing
 dependencies. The guarded-save example exercises draft integration and recovery
 from a simulated lost reply without duplicating a plant.
 These commands do not test native persistence, Flutter screens or store/OS behavior.
+
+## Flutter development preview
+
+The adapted Flutter customer app is in `apps/mobile`. Use Flutter **3.47.8** with
+bundled Dart **3.13.7**. Read its `AGENTS.md` and `TEMPLATE_PROVENANCE.md` before
+changing setup. This entry uses a temporary synthetic collection; closing the
+process loses its data. It refuses release mode and is not a public release build.
+
+```sh
+cd apps/mobile
+flutter pub get --enforce-lockfile
+flutter gen-l10n
+dart run build_runner build
+dart format --output=none --set-exit-if-changed lib test integration_test
+flutter analyze
+flutter test
+flutter run -t lib/main_development.dart
+```
+
+For a fresh iOS checkout, run `LANG=en_US.UTF-8 LC_ALL=en_US.UTF-8 pod install`
+from `apps/mobile/ios`. Use `flutter devices` to select an available iOS simulator,
+then run `flutter test integration_test/collection_flow_test.dart -d DEVICE_ID`
+from `apps/mobile`. The native test exercises the actual Flutter/iOS runner with
+synthetic data; it does not prove durable storage, StoreKit or notifications.
+Keep native/generated dependencies and secrets out of commits according to the
+repository ignores. Generated Dart source and dependency lockfiles are committed.
+
 The [current delivery handoff](history/work/app-readiness/README.md) records exact docs
 identity, scope, executed evidence and remaining criteria. Do not run upstream
 fresh-repository setup over this existing repository or copy unreviewed assets.

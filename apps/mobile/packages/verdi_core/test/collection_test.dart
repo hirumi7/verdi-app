@@ -129,6 +129,103 @@ final class Harness {
 }
 
 void main() {
+  test('multi-routine plant preview identifies each routine and date', () {
+    final h = Harness();
+    final preview = h.previewDraft(
+      h.draft(fields(routines: [known(), unknown()])),
+    );
+    expect(preview.effects.rows.map((r) => r.careKind), [
+      StandardCareKind.water,
+      StandardCareKind.mist,
+    ]);
+    expect(
+      preview.effects.rows.every(
+        (r) => r.careLabel != null && r.careLabel!.isNotEmpty,
+      ),
+      isTrue,
+    );
+    expect(preview.effects.rows.map((r) => r.newNextCheck), [
+      date('2026-10-27'),
+      date('2026-11-01'),
+    ]);
+  });
+  test(
+    'unselected seed rejects an unhashable hidden date before persistence',
+    () {
+      final h = Harness();
+      for (final hiddenDate in ['2026-10-25', 'x' * (1024 * 1024 + 1)]) {
+        final before = h.snapshot;
+        expect(
+          () => h.draft(
+            fields(
+              routines: [
+                RoutineInput(
+                  kind: StandardCareKind.water,
+                  count: '7',
+                  unit: IntervalUnit.day,
+                  seedKind: null,
+                  date: hiddenDate,
+                ),
+              ],
+            ),
+          ),
+          rejected('FIELD_INVALID'),
+        );
+        expect(h.snapshot, same(before));
+        expect(h.snapshot.drafts, isEmpty);
+      }
+      final draft = h.draft(
+        fields(
+          routines: [
+            const RoutineInput(
+              kind: StandardCareKind.water,
+              count: '7',
+              unit: IntervalUnit.day,
+              seedKind: null,
+              date: '',
+            ),
+          ],
+        ),
+      );
+      expect(draft.fields.routines.single.date, isEmpty);
+    },
+  );
+  test(
+    'unselected raw seed survives recovery but cannot produce saved care',
+    () {
+      final h = Harness();
+      final draft = h.draft(
+        fields(
+          routines: [
+            const RoutineInput(
+              kind: StandardCareKind.water,
+              count: '7',
+              unit: IntervalUnit.day,
+              seedKind: null,
+              date: '',
+            ),
+          ],
+        ),
+      );
+      h.restart();
+      final recovered = h.core.getPlantEditor(datasetId: id(1)).draft!;
+      expect(recovered.fields.routines.single.seedKind, isNull);
+      final before = h.snapshot;
+      expect(
+        () => h.previewDraft(draft),
+        throwsA(
+          isA<CommandRejected>().having(
+            (e) => e.fields['routineInputs[0].seed'],
+            'exact seed path',
+            'FIELD_INVALID',
+          ),
+        ),
+      );
+      expect(h.snapshot, same(before));
+      expect(h.snapshot.plants, isEmpty);
+      expect(h.snapshot.routines, isEmpty);
+    },
+  );
   test('invalid revision bounds are typed rejections with no state change', () {
     final h = Harness();
     final draft = h.draft(fields());

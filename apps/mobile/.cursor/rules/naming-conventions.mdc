@@ -1,0 +1,34 @@
+---
+description: File and class naming conventions for consistency across the codebase
+alwaysApply: true
+---
+
+# Naming Conventions
+
+## File Names (snake_case)
+
+| Type | Suffix | Example |
+|------|--------|---------|
+| Page | `_page` | `login_page.dart` |
+| Cubit | `_cubit` | `login_cubit.dart` |
+| State | `_state` | `login_state.dart` |
+| Model | `_model` | `user_model.dart` |
+| Repository | `_repository` | `auth_repository.dart` |
+| Service | `_service` | `secure_storage_service.dart` |
+| Implementation | `_impl` | `secure_storage_service_impl.dart` |
+| Interceptor | `_interceptor` | `auth_interceptor.dart` |
+| Guard | `_guard` | `auth_guard.dart` |
+| Global widget | `app_` prefix | `app_button.dart` |
+| Mock | `mock_` prefix | `mock_auth_repository.dart` |
+
+## Class Names (PascalCase)
+
+- Suffix must match file type: `LoginPage`, `LoginCubit`, `LoginState`, `UserModel`
+- Interfaces: plain name (`AuthRepository`). Implementations: add `Impl` (`AuthRepositoryImpl`) or tech prefix (`SharedPrefLocalStorageServiceImpl`)
+- Global widgets: `App` prefix (`AppButton`, `AppTextField`, `AppSnackbar`)
+- Generated route classes: `<PageName>Route` (auto-generated, e.g. `LoginRoute`)
+
+## Never
+
+- Never use abbreviations in file/class names (use `authentication`, not `auth_svc`)
+- Never mix naming patterns within the same layer

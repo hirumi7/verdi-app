@@ -1,0 +1,39 @@
+---
+description: Cubit/BLoC and Freezed state management patterns
+globs: "**/cubits/**"
+alwaysApply: false
+---
+
+# State Management
+
+## Default: Cubit (not BLoC)
+
+Use Cubit for 90% of cases. Only use full BLoC when you need `EventTransformer` (debounce, throttle, sequential).
+
+```dart
+@injectable
+class LoginCubit extends Cubit<LoginState> {
+  final AuthRepository _authRepository;
+  LoginCubit(this._authRepository) : super(const LoginState.initial());
+}
+```
+
+## States with Freezed
+
+```dart
+@freezed
+abstract class LoginState with _$LoginState {
+  const factory LoginState.initial() = _Initial;
+  const factory LoginState.loading() = _Loading;
+  const factory LoginState.success(UserModel user) = _Success;
+  const factory LoginState.error(String message) = _Error;
+}
+```
+
+## Rules
+
+- Register cubits as `@injectable` (factory) so each route gets a fresh instance.
+- Provide via GetIt: `create: (_) => getIt<MyCubit>()`.
+- Catch `AppException` in cubits and emit error state with `e.message`.
+- Keep UI dumb: pages only call cubit methods and react to state via `BlocConsumer`.
+- Do NOT use Cubit + Freezed for trivial UI state (checkbox, dropdown). Use `StatefulWidget` or `ValueNotifier` instead.

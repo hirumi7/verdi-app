@@ -249,6 +249,8 @@ extension on MemoryOperationCoordinator {
               old.id,
               old.nextCheck,
               next.nextCheck,
+              careKind: careKinds[old.id],
+              careLabel: old.careLabel,
             ),
           );
         }
@@ -325,6 +327,9 @@ extension on MemoryOperationCoordinator {
         final kinds = <StandardCareKind>{};
         for (var i = 0; i < fields.routines.length; i++) {
           final raw = fields.routines[i];
+          if (raw.seedKind == null) {
+            errors['routineInputs[$i].seed'] = 'FIELD_INVALID';
+          }
           if (!kinds.add(raw.kind))
             errors['routineInputs[$i].kind'] = 'FIELD_INVALID';
           CareInterval? interval;
@@ -447,7 +452,15 @@ extension on MemoryOperationCoordinator {
             eventCount++;
           }
           rows.add(
-            PreviewRow._(plantId, name, routineId, null, routine.nextCheck),
+            PreviewRow._(
+              plantId,
+              name,
+              routineId,
+              null,
+              routine.nextCheck,
+              careKind: seed.raw.kind,
+              careLabel: routine.careLabel,
+            ),
           );
         }
         if (rows.isEmpty)
@@ -572,6 +585,8 @@ extension on MemoryOperationCoordinator {
                 r.id,
                 r.nextCheck,
                 next.nextCheck,
+                careKind: careKinds[r.id],
+                careLabel: r.careLabel,
               ),
             );
           }
@@ -722,6 +737,8 @@ extension on MemoryOperationCoordinator {
               routine.id,
               routine.nextCheck,
               next.nextCheck,
+              careKind: careKinds[routine.id],
+              careLabel: routine.careLabel,
             ),
           ],
           historyOnly: historyOnly,

@@ -1,0 +1,40 @@
+---
+description: Feature-first folder structure and layer responsibilities for the Flutter template
+alwaysApply: true
+---
+
+# Project Architecture
+
+## Folder Structure
+
+```
+lib/
+├── app/           → MaterialApp, top-level widget
+├── core/          → Shared infrastructure (DI, network, storage, router, theme, widgets, utils, error, config)
+├── features/      → Feature modules, each with data/ and presentation/
+├── mock/          → Mock API implementations (swappable via DI environment)
+└── main.dart      → Bootstrap entry point
+```
+
+## Feature Module Layout
+
+Every feature follows this structure:
+
+```
+features/<name>/
+├── data/
+│   ├── models/        → Freezed data classes (*_model.dart)
+│   └── repositories/  → Abstract interfaces (*_repository.dart)
+└── presentation/
+    ├── cubits/        → Cubit + freezed state (*_cubit.dart, *_state.dart)
+    ├── pages/         → Route pages annotated with @RoutePage() (*_page.dart)
+    └── widgets/       → Feature-specific widgets
+```
+
+## Rules
+
+- New features go in `features/<name>/`, never in `core/`.
+- Shared widgets go in `core/widgets/`, not duplicated per feature.
+- Repositories in `data/repositories/` are abstract interfaces. Implementations live in `mock/` (or a future `data/repositories_impl/`).
+- Pages only call Cubit methods and react to state. No business logic in widgets.
+- `core/` code must never import from `features/`. Features may import from `core/`.

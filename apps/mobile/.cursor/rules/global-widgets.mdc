@@ -1,0 +1,28 @@
+---
+description: Global widget library usage and composition patterns
+globs: lib/core/widgets/**
+alwaysApply: false
+---
+
+# Global Widgets
+
+## Available Components
+
+| Widget | Purpose |
+|--------|---------|
+| `AppButton` | Primary (gradient), secondary (tonal), outlined variants. Supports `isLoading`. |
+| `AppTextField` | Styled input with prefix/suffix icons, validation, obscure toggle. |
+| `AppLoadingOverlay` | Semi-transparent overlay with spinner. Wraps any widget. |
+| `AppDialog` | `AppDialog.confirm(...)` and `AppDialog.error(...)` static helpers. |
+| `AppSnackbar` | `AppSnackbar.success/error/info(context, msg)` color-coded notifications. |
+| `AppEmptyState` | Icon + title + subtitle + optional action button for empty screens. |
+| `AppErrorWidget` | Error icon + message + retry button for failed API calls. |
+| `AppSpacing` | `AppSpacing.h8`, `.h16`, `.h24` (SizedBox gaps) and `.pagePadding`, `.cardPadding` (EdgeInsets). |
+
+## Rules
+
+- Always check if a global widget exists before creating a new one.
+- Feature-specific widgets (e.g. `AuthTextField`) should compose global widgets, not duplicate them.
+- Use `AppSpacing` constants for consistent gaps. Never use magic-number `SizedBox` values.
+- Use `AppSnackbar` for user feedback, not raw `ScaffoldMessenger`.
+- Use `AppDialog.confirm()` for destructive actions (logout, delete).

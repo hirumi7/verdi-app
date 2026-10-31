@@ -1,0 +1,44 @@
+---
+description: AppException hierarchy and error handling patterns
+globs: lib/core/error/**
+alwaysApply: false
+---
+
+# Error Handling
+
+## Exception Hierarchy
+
+All app errors extend `AppException` (sealed class):
+
+| Type | Status | When |
+|------|--------|------|
+| `NetworkException` | varies | General network failures |
+| `UnauthorizedException` | 401 | Token expired or invalid |
+| `ServerException` | 500+ | Backend errors |
+| `ValidationException` | 422 | Field-level validation errors |
+| `CacheException` | — | Local storage failures |
+
+## Error Flow
+
+1. **Interceptor**: `ErrorInterceptor` maps `DioException` → `AppException` subtype.
+2. **Repository**: Throws `AppException` (or lets interceptor-mapped errors propagate).
+3. **Cubit**: Catches `AppException`, emits error state with `e.message`.
+
+```dart
+// In Cubit
+try {
+  final user = await _authRepository.login(email, password);
+  emit(LoginState.success(user));
+} on AppException catch (e) {
+  emit(LoginState.error(e.message));
+} catch (e) {
+  appLogger.e('Unexpected error', error: e);
+  emit(const LoginState.error('An unexpected error occurred.'));
+}
+```
+
+## Rules
+
+- Always catch `AppException` first, then generic `catch` as fallback.
+- Never silently swallow exceptions. Log unexpected errors with `appLogger.e()`.
+- Error messages in `AppException` should be user-facing (clean, no stack traces).

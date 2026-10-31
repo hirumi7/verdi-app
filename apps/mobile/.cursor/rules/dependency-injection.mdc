@@ -1,0 +1,48 @@
+---
+description: GetIt + Injectable dependency injection patterns
+globs: lib/core/di/**
+alwaysApply: false
+---
+
+# Dependency Injection
+
+## Registration Rules
+
+| What | Annotation | Why |
+|------|-----------|-----|
+| Services, Repositories | `@LazySingleton(as: Interface)` | Stateless, one instance shared |
+| Cubits / BLoCs | `@injectable` | Factory: fresh instance per route |
+| Async third-party (SharedPreferences) | `@preResolve` in `@module` | Must be ready before app runs |
+
+## Always Code Against Interfaces
+
+```dart
+// Good
+@LazySingleton(as: AuthRepository)
+class MockAuthRepository implements AuthRepository { ... }
+
+// Bad - no interface
+@lazySingleton
+class AuthRepository { ... }
+```
+
+## Third-Party Module
+
+```dart
+@module
+abstract class RegisterModule {
+  @preResolve
+  Future<SharedPreferences> get prefs => SharedPreferences.getInstance();
+
+  @lazySingleton
+  FlutterSecureStorage get secureStorage => const FlutterSecureStorage();
+}
+```
+
+## Bootstrap
+
+`main.dart` must await init: `await configureDependencies(environment: 'mock');`
+
+## After Changes
+
+Run `dart run build_runner build --delete-conflicting-outputs` to regenerate `injection.config.dart`.

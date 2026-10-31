@@ -1,0 +1,46 @@
+---
+description: AutoRoute routing, guards, and navigation patterns
+globs: lib/core/router/**
+alwaysApply: false
+---
+
+# Routing
+
+## Route Definitions
+
+- All routes defined in `AppRouter` class annotated with `@AutoRouterConfig`.
+- Use nested routes (`children:`) to group related flows. Avoid flat lists of 100+ routes.
+- Protected routes use `guards: [AuthGuard()]`.
+
+## Screen Annotations
+
+Every routable page must have `@RoutePage()`:
+
+```dart
+@RoutePage()
+class LoginPage extends StatelessWidget { ... }
+```
+
+## Navigation
+
+- Use `context.router.push(const ProfileRoute())` for forward navigation.
+- Use `context.router.replaceAll([const HomeRoute()])` to clear stack (e.g., after login).
+- Use `context.router.maybePop()` to go back safely.
+- Pass typed arguments via generated route constructors: `ProfileRoute(userId: '123')`.
+
+## Route Guards
+
+```dart
+class AuthGuard extends AutoRouteGuard {
+  @override
+  void onNavigation(NavigationResolver resolver, StackRouter router) async {
+    final token = await getIt<SecureStorageService>().getToken();
+    if (token != null) { resolver.next(true); }
+    else { router.push(const LoginRoute()); resolver.next(false); }
+  }
+}
+```
+
+## After Changes
+
+Run `dart run build_runner build --delete-conflicting-outputs` to regenerate `app_router.gr.dart`.

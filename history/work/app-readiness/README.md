@@ -35,9 +35,10 @@ Flutter presentation scope. No production persistence or release claim.
 
 ## Next action
 
-Adopt the published UI review pin, then implement the Flutter presentation with
-the selected template structure, typed core adapter and Figma styling. Preserve
-the explicit development-only boundary; native durability remains unimplemented.
+Continue the docs-first native-storage design/review, then implement durable
+persistence and bridge integration. Preserve the verified synthetic UI and all
+accepted requirements. Real-device/store configuration and full release remain
+separate gates; no new permission to keep building is needed.
 
 ## Core loop evidence — 2026-10-31
 
@@ -74,3 +75,106 @@ verified against official archive SHA-256. The selected template checkout at
 after exactly four SDK-required lock updates (recorded in the docs review).
 Figma foundations, Today, Plants, Add details and empty Today were inspected.
 The iPhone 16 / iOS 18.3 simulator booted; no app build or device test is claimed.
+
+## Presentation implementation in progress
+
+The app pin was committed in `f77b32e`; committed consumer verification passed,
+and mounted docs aggregate passed 8/8 with 268 tooling tests (112.638 seconds).
+The Flutter template iOS runner and relevant local rules were adapted in
+`apps/mobile`, alongside theme/localizations, generated DI/router/Freezed state,
+temporary collection adapter, draft/confirmation controllers and initial screens.
+The development entry refuses release mode. Public native/storage/store readiness
+is not implied by these files.
+
+Actual code generation exposed analyzer 7.7.1 incompatibility with the SDK despite
+the old template dependency/analyzer passes. Functional UI work paused for the
+docs-first correction. Candidate generator versions are recorded in the separate
+docs working branch. Actual generation and a fresh-cache comparison of six
+generated Dart files passed; analyzer now includes generated files and passes.
+The generated-wiring custom draft → preview → save test passes. Generator
+correction docs checks/publication/adoption remain pending before feature work.
+
+Known UI follow-up work (not a completion claim): robust pending draft recovery
+when raw fields change during an uncertain save; truthful debounce/acknowledgement
+status; unselected seed-branch draft preservation; explicit preview dates/counts;
+remaining schedule/history controls and pagination; lifecycle destinations;
+layout/contrast/locale/motion tests, simulator visual review and failure-path tests.
+Native production adapters and excluded full-product features remain outstanding.
+
+## Synthetic Flutter milestone and correction closure — 2026-10-31
+
+Current docs pin: `512bfa816085c9c211b7054229f150cf4a4d2725`, published before
+adoption in app commit `12ec9d6`. Requirements affected: REQ-006/007/008/009 and
+applicable REQ-018. All accepted docs bytes remain unchanged. The app remains
+explicitly development-only, temporary synthetic state with UTC test dates.
+
+Implemented template-derived DI/router/Cubits, Figma light/dark tokens and generic
+art, Today/Plants/detail/history, all five standard routine seeds, interval and
+state controls, raw draft recovery, guarded confirmation, bulk/Undo, archive/
+restore/delete and paginated collection/Today/history. Full product coverage is
+not inferred; excluded catalog/media/backup/store/OS/native/admin work remains.
+
+Independent AI reviewer `core_readiness_review` found and rechecked fixes for:
+exact unresolved draft payload/version reuse; read-back binding to its receipt;
+explicit conflict re-review; consumed/replaced draft local discard; persistent
+discard failures and lost-reply recovery; successful-edit/discard navigation;
+stale/missing preview return to review; routine identity/count in previews; and
+unselected seed canonicalization. The null seed cannot hide an unhashable date or
+bypass the draft size bound. The reviewer independently ran **12 recovery tests**
+and closed the scoped findings. This is not full-product certification.
+
+Executed verification on Flutter 3.47.8 / Dart 3.13.7 and Xcode 16.2:
+
+- App locked dependency resolution, localization generation and actual
+  build_runner generation passed. The earlier fresh-cache comparison of all six
+  generated outputs remains recorded in the correction review. Later SDK
+  integration_test tooling adds seven test dependencies with no overrides.
+- Final Flutter analyzer passed, and **21 unit/widget tests passed**, including
+  full lifecycle routing, explicit seed, stale confirmation and failed-save retry,
+  bulk Undo, revision races, pagination, en-US/en-GB dates and measured light/dark
+  text/control contrast. Format checks passed. The final save-review identity
+  caption was added after that run; its focused UI recheck is recorded below.
+- Large-text verification uses 375×667 logical pixels, 320% text, Reduce Motion,
+  and an actual 300-pixel keyboard inset. It initially exposed a 29-pixel overflow;
+  letting nested page scaffolds own keyboard avoidance fixed both themes.
+- Core locked dependencies, analyzer, **105 tests** and both walkthroughs passed.
+- iPhone 16 / iOS 18.3 simulator: native build passed; native integration exercised
+  actual add → draft → save → edit → archive and repository reads. Final native
+  rerun passed (Xcode build 54.3 seconds; one test plus teardown, 13 seconds).
+  The native runner still uses the synthetic repository, not SQLite durability.
+- Mounted docs aggregate passed **8/8** with **268 tooling tests**; committed
+  consumer/pin verification passed. Accepted requirement files match prior pin.
+
+Failures were corrected, not suppressed: SDK generator AST incompatibility;
+missing inherited CocoaPods file lists; CocoaPods non-UTF-8 process locale;
+router missing Key import; form element identity after inserting save status;
+focus/keyboard layout; and a context-lifetime lint. Flutter generated Swift
+Package Manager integration for its test plugin; its warning about the retained
+CocoaPods Flutter dependency is not a failed build. Native UI automation through
+the desktop connector timed out, so native verification used the integration-test
+runner and a separately inspected simulator screenshot instead.
+
+Remaining release gates include actual durable native database/receipt/bridge and
+process-death proofs; real catalog/content validation; photos/journal/backup;
+StoreKit/reminders/settings; production branding/signing/store setup; physical
+iPhone/VoiceOver and compatibility tests; current submission SDK/host; admin
+implementation within accepted scope. User-confirmed rights and device/account
+access stay confirmed. Exact device model/OS and existing app/product identifiers
+are still pending questions. No public release, payment setup or hardware/host
+purchase has occurred.
+
+Final focused recheck: **9 generated-wiring/presentation tests passed** after the
+save-review identity caption and generator-format option. Staged diff checking
+caught whitespace emitted by Freezed's default format-off output; enabled its
+supported `format: true` build option and regenerated the files, rather than
+hand-editing generated source or weakening the check. No business behavior or
+dependency version changed. The final analyzer/format/diff recheck follows this
+pure formatting correction.
+
+Final staged diff check passed. Flutter analyzer passed again (14.8 seconds),
+with 30 app/test/integration Dart files unchanged by the format check. The first
+final analyzer invocation was accidentally issued from the repository root and
+failed in Flutter's executable-path bootstrap before analysis; the documented
+`apps/mobile` invocation succeeded. No failed invocation is counted as a pass.
+The native integration rerun and scoped independent review are both complete;
+no release-readiness claim is made.

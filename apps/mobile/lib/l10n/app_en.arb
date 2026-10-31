@@ -1,0 +1,255 @@
+{
+  "@@locale": "en",
+  "appTitle": "Verdi",
+  "today": "Today",
+  "plants": "Plants",
+  "settings": "Settings",
+  "developmentNotice": "Development preview · temporary data",
+  "developmentDetails": "This preview uses a temporary collection. Use sample information only. Closing the process loses its plants and drafts. Purchases, photos, backups and notifications are not connected yet.",
+  "noPlants": "No plants yet",
+  "noPlantsBody": "Give your first plant a place here, then choose when to check on it.",
+  "addPlant": "Add a plant",
+  "editPlant": "Edit plant",
+  "active": "Active",
+  "archived": "Archived",
+  "searchPlants": "Search plants",
+  "noMatches": "No plants match your search.",
+  "noChecksDue": "No checks due today",
+  "noRoutines": "No checks scheduled. Add a routine when you add your next sample plant.",
+  "overdue": "Overdue checks",
+  "dueToday": "Due today",
+  "upcoming": "Next seven days",
+  "doneToday": "Done today",
+  "checkWatering": "Check watering",
+  "water": "Water",
+  "fertilize": "Fertilize",
+  "mist": "Mist",
+  "repot": "Repot",
+  "rotate": "Rotate",
+  "watered": "Watered",
+  "fertilized": "Fertilized",
+  "misted": "Misted",
+  "repotted": "Repotted",
+  "rotated": "Rotated",
+  "checkedNotNeeded": "Checked — not needed",
+  "moveCheck": "Move check",
+  "skipCheck": "Skip check",
+  "moreActions": "More actions",
+  "selectCare": "Select care",
+  "markSelectedWatered": "Mark selected as watered",
+  "confirmCare": "Confirm care",
+  "cancel": "Cancel",
+  "continueLabel": "Continue",
+  "save": "Save",
+  "reviewSave": "Review and save",
+  "confirm": "Confirm",
+  "retry": "Retry",
+  "close": "Close",
+  "undo": "Undo",
+  "history": "Care history",
+  "audit": "Include removed entries",
+  "historyEmpty": "No care history yet",
+  "scheduleChange": "Schedule change",
+  "removed": "Removed from care counts",
+  "corrected": "Corrected",
+  "historyOnly": "History only — the next check will not change.",
+  "actualCareDate": "Date care happened",
+  "checkDate": "Date checked",
+  "nextCheckDate": "Next check",
+  "chooseDate": "Choose a date",
+  "knownCare": "I know the last care date",
+  "unknownCare": "Not sure",
+  "lastCare": "Last care",
+  "firstCheck": "First check",
+  "nickname": "Plant name",
+  "species": "Custom species name",
+  "location": "Location (optional)",
+  "notes": "Notes (optional)",
+  "light": "Light — user supplied",
+  "toxicity": "Toxicity — user supplied",
+  "unknown": "Unknown",
+  "lowLight": "Low light",
+  "mediumLight": "Medium light",
+  "brightIndirect": "Bright indirect light",
+  "directLight": "Direct light",
+  "toxic": "Toxic",
+  "nonToxic": "Non-toxic",
+  "waterRoutine": "Watering routine",
+  "interval": "Interval",
+  "days": "Days",
+  "weeks": "Weeks",
+  "months": "Months",
+  "years": "Years",
+  "draftSaved": "Draft saved for this session",
+  "savingDraft": "Saving draft…",
+  "saveFailed": "Could not save. Your entries are still here.",
+  "keepEditing": "Keep editing",
+  "discard": "Discard changes",
+  "discardQuestion": "Discard your changes?",
+  "discardBody": "This removes this editor’s draft. Your saved plant and care history stay as they are.",
+  "archive": "Archive plant",
+  "restore": "Restore plant",
+  "deleteForever": "Delete forever",
+  "archiveBody": "This plant will leave active lists and reminders. Its routines and history are kept.",
+  "restoreBody": "Restore this plant to the active collection. Review the resulting check dates below.",
+  "deleteBody": "Permanently remove this archived plant, routines and history? External exports and shared copies are unaffected.",
+  "pause": "Pause routine",
+  "resume": "Resume routine",
+  "retire": "Remove routine",
+  "editInterval": "Edit interval",
+  "clearOverride": "Clear moved date",
+  "addPastCare": "Add past care",
+  "correctCare": "Correct care",
+  "removeCare": "Remove mistaken entry",
+  "restoreCare": "Restore entry",
+  "careSaved": "Care recorded. Review it in Done today or history.",
+  "undoUnavailable": "Undo is no longer available. You can correct the entry in history.",
+  "staleSelection": "Something changed. Review the current plants and choose again.",
+  "storageFailure": "Could not finish this operation. Keep your entries and retry.",
+  "unknownSave": "The save result is uncertain. Resolve it before trying another save.",
+  "activeLimit": "The development Free limit is reached. Archive a plant to free a place; existing history stays available.",
+  "fieldInvalid": "Review the highlighted fields and date choices.",
+  "futureCare": "Completed care cannot be dated in the future.",
+  "earlierCare": "This date is earlier than the latest recorded care. Use Add past care for a history-only entry.",
+  "firstCheckRequired": "Choose a first-check date; no care history will be invented.",
+  "notAvailable": "That action is no longer available. Refresh the current plant.",
+  "saved": "Saved",
+  "removedEntry": "Entry removed; the next check is unchanged.",
+  "allActions": "Care actions",
+  "noSelection": "Select at least one compatible care check.",
+  "previewHeading": "Review your changes",
+  "aboutPreview": "About this preview",
+  "appearance": "Appearance",
+  "systemTheme": "Use device appearance",
+  "lightTheme": "Light",
+  "darkTheme": "Dark",
+  "plantCount": "{count, plural, =0{No active plants} =1{1 active plant} other{{count} active plants}}",
+  "selectionCount": "{count, plural, =1{1 check selected} other{{count} checks selected}}",
+  "dueOn": "Check on {date}",
+  "lateDays": "{count, plural, =1{Check is 1 day overdue} other{Check is {count} days overdue}}",
+  "nextForPlant": "Next: {name} · {date}",
+  "nextAfter": "Next check: {date}",
+  "routineEvery": "Every {count} {unit}",
+  "plantNamed": "{name} · {species}",
+  "@plantCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "@selectionCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "@dueOn": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "@lateDays": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "@nextForPlant": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      },
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "@nextAfter": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "@routineEvery": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "unit": {
+        "type": "String"
+      }
+    }
+  },
+  "@plantNamed": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      },
+      "species": {
+        "type": "String"
+      }
+    }
+  },
+  "routineNamed": "{name} routine",
+  "@routineNamed": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "intervalUnit": "Interval unit",
+  "positiveInterval": "Enter a whole number from 1 to 9,999.",
+  "chooseCareBranch": "Choose a known last-care date or Not sure.",
+  "keepCurrentSchedules": "Existing care schedules and original suggestions will be kept. You can edit each routine from the plant details.",
+  "loadMore": "Load more",
+  "paused": "Paused — no checks scheduled",
+  "retired": "Removed routine — history retained",
+  "deletionCounts": "This removes {routines} routines, {events} care entries, {corrections} corrections, {changes} schedule changes and {drafts} drafts.",
+  "@deletionCounts": {
+    "placeholders": {
+      "routines": {
+        "type": "int"
+      },
+      "events": {
+        "type": "int"
+      },
+      "corrections": {
+        "type": "int"
+      },
+      "changes": {
+        "type": "int"
+      },
+      "drafts": {
+        "type": "int"
+      }
+    }
+  },
+  "recordedOn": "Recorded: {date}",
+  "@recordedOn": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "careOutcome": "Care outcome",
+  "reviewLatest": "Review current version",
+  "keepMyFields": "Keep my entered fields",
+  "conflictReview": "Another action changed this plant or draft. Review the current values below. Keeping your entered fields replaces this draft version; final saving still needs a new review. Current care schedules are kept.",
+  "returnToReview": "Return to review",
+  "affectedPlant": "Changed selection: {name}",
+  "@affectedPlant": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  }
+}

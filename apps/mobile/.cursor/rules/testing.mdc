@@ -1,0 +1,43 @@
+---
+description: High-ROI testing strategy with bloc_test and mocktail
+globs: test/**
+alwaysApply: false
+---
+
+# Testing
+
+## High-ROI Strategy
+
+Only test code that is complex, critical, or prone to breaking.
+
+## What TO Test
+
+- Complex Cubits/BLoCs with multi-step logic, data transformations, or conditional flows.
+- Core business logic classes with validation or calculation.
+
+## What NOT to Test
+
+- UI / widget tests (brittle, low ROI unless mission-critical reusable widget).
+- Generated code (freezed, retrofit, injectable guarantee correctness).
+- Simple passthrough repositories (`api.getUser(id)` → return).
+
+## Tools
+
+- `bloc_test` for Cubit state emission assertions.
+- `mocktail` for mocking dependencies.
+
+## Pattern
+
+```dart
+class MockAuthService extends Mock implements AuthService {}
+
+blocTest<AuthCubit, AuthState>(
+  'emits [loading, success] on login',
+  build: () {
+    when(() => mockAuth.login(any(), any())).thenAnswer((_) async => fakeUser);
+    return AuthCubit(mockAuth);
+  },
+  act: (cubit) => cubit.login('test@email.com', 'pass'),
+  expect: () => [const AuthState.loading(), AuthState.success(fakeUser)],
+);
+```
