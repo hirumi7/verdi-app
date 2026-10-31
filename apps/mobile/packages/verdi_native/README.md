@@ -19,7 +19,9 @@ normalize Apple's `/private/var` back to its symlink alias; the leaf is never
 resolved and NOFOLLOW rejects a substituted file. New files are exclusive, mode
 0600; stale sidecars reject creation. This is not iOS file-protection integration.
 
-`read` and `transaction` callbacks are synchronous and scoped. Do not block on
+`read` and `transaction` callbacks are synchronous and scoped. A read callback
+uses one deferred transaction snapshot across all of its SELECTs. Failed read
+cleanup can require reopen but never claims an ambiguous new mutation. Do not block on
 another connection, call UI/network code, or dispatch reentrant work back to this
 connection. A statement error latches failure even if the callback catches it;
 later statements cannot write after an automatic rollback. Known rollback leaves

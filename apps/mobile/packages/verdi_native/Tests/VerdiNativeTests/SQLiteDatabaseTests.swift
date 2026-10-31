@@ -280,6 +280,23 @@ final class SQLiteDatabaseTests: XCTestCase {
         try reopened.close()
     }
 
+    func testReadRollbackFailureNeedsReopenWithoutAmbiguousMutation() throws {
+        let database = try SQLiteDatabase.create(at: url, schema: schema()) { boundary in
+            if boundary == .beforeRollback { throw StorageFailure.sqlite(SQLITE_IOERR) }
+        }
+        try database.transaction { try $0.execute("INSERT INTO parents(id) VALUES (1)") }
+        XCTAssertThrowsError(try database.read { session in
+            _ = try session.query("SELECT id FROM parents")
+            throw StorageFailure.invalidBindings
+        }) { XCTAssertEqual($0 as? StorageFailure, .unavailable) }
+        XCTAssertThrowsError(try database.read { try $0.query("SELECT 1") })
+        try database.close()
+        let reopened = try SQLiteDatabase.open(at: url, schema: schema())
+        XCTAssertEqual(try count(reopened), 1)
+        XCTAssertEqual(try count(reopened, table: "receipts"), 0)
+        try reopened.close()
+    }
+
     func testCloseFailureRetainsHandleAndRejectsWorkUntilRetry() throws {
         var busy = true
         let database = try SQLiteDatabase.create(at: url, schema: schema()) { boundary in
@@ -365,5 +382,18 @@ final class SQLiteDatabaseTests: XCTestCase {
         XCTAssertEqual(try count(first), 2)
         try first.close()
         try second.close()
+    }
+
+    func testReadCallbackKeepsOneSnapshotWhileOtherConnectionCommits() throws {
+        let reader = try SQLiteDatabase.create(at: url, schema: schema())
+        let writer = try SQLiteDatabase.open(at: url, schema: schema())
+        try reader.read { session in
+            XCTAssertEqual(try session.query("SELECT COUNT(*) FROM parents"), [[.integer(0)]])
+            try writer.transaction { try $0.execute("INSERT INTO parents(id) VALUES (1)") }
+            XCTAssertEqual(try session.query("SELECT COUNT(*) FROM parents"), [[.integer(0)]])
+        }
+        XCTAssertEqual(try count(reader), 1)
+        try reader.close()
+        try writer.close()
     }
 }

@@ -241,3 +241,25 @@ proofs remain before personal data. Flutter retains synthetic temporary state.
 Next: docs-first design/review of the product schema and command bridge, then
 implement and test those exact contracts. Existing UI/core test evidence above
 remains unchanged; no unrelated re-run is counted as new verification.
+
+### Consistent read snapshots and simulator/store follow-up
+
+**Author:** Codex (AI assistant).
+**Date:** 2026-10-31 (Asia/Jakarta).
+
+The user directs simulator-first development and says store records are not yet
+configured; configuration preparation is authorized. Do not repeat the physical
+model question during core work. Available development targets remain iPhone16
+and compact SE3/iOS18.3. Physical access stays confirmed, actual release testing
+remains outstanding. The docs checkout prepares candidate store identifiers and
+metadata without adopting them into runtime or creating account records.
+
+Under the same docs pin, native read callbacks now use a deferred transaction so
+all SELECTs share one consistent snapshot, including if another connection
+commits meanwhile. An independent reviewer found and rechecked a read-cleanup
+error classification issue: uncertain read cleanup now returns unavailable and
+requires reopen, never claims an ambiguous new mutation. Writable operations keep
+unknownOutcome. Both read regressions independently pass. Final full suites pass
+**19 tests on macOS and 19 on iPhone16/iOS18.3 simulator**; the warnings-as-errors
+build passes. The runtime contract already required snapshot-consistent reads and
+no new commit outcome for reads; this is a conformance correction, not new scope.

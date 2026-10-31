@@ -79,7 +79,7 @@ final class SQLiteDatabase {
     func read<T>(_ work: (SQLiteSession) throws -> T) throws -> T {
         try scheduled {
             try requireUsable()
-            return try scoped(writable: false, work)
+            return try atomic(writable: false, work)
         }
     }
 
@@ -218,36 +218,37 @@ final class SQLiteDatabase {
 
     private func control(_ sql: String) throws { _ = try raw(sql) }
 
-    private func atomic<T>(_ work: (SQLiteSession) throws -> T) throws -> T {
+    private func atomic<T>(writable: Bool = true, _ work: (SQLiteSession) throws -> T) throws -> T {
         guard let handle else { throw StorageFailure.unavailable }
+        let uncertainFailure: StorageFailure = writable ? .unknownOutcome : .unavailable
         guard sqlite3_get_autocommit(handle) != 0 else {
             usable = false
-            throw StorageFailure.unknownOutcome
+            throw uncertainFailure
         }
-        try control("BEGIN IMMEDIATE")
+        try control(writable ? "BEGIN IMMEDIATE" : "BEGIN DEFERRED")
         var committing = false
         do {
-            let result = try scoped(writable: true, work)
+            let result = try scoped(writable: writable, work)
             committing = true
-            try fault?(.beforeCommit)
+            if writable { try fault?(.beforeCommit) }
             try control("COMMIT")
-            try fault?(.afterCommit)
-            guard sqlite3_get_autocommit(handle) != 0 else { throw StorageFailure.unknownOutcome }
+            if writable { try fault?(.afterCommit) }
+            guard sqlite3_get_autocommit(handle) != 0 else { throw uncertainFailure }
             return result
         } catch {
             let original = error
             if sqlite3_get_autocommit(handle) != 0 {
                 if !committing { throw original } // SQLite automatically rolled back pre-commit work.
                 usable = false
-                throw StorageFailure.unknownOutcome
+                throw uncertainFailure
             }
             do {
                 try fault?(.beforeRollback)
                 try control("ROLLBACK")
-                guard sqlite3_get_autocommit(handle) != 0 else { throw StorageFailure.unknownOutcome }
+                guard sqlite3_get_autocommit(handle) != 0 else { throw uncertainFailure }
             } catch {
                 usable = false
-                throw StorageFailure.unknownOutcome
+                throw uncertainFailure
             }
             throw original
         }
