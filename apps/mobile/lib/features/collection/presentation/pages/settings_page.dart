@@ -1,3 +1,4 @@
+import '../../../help/presentation/help_pages.dart';
 import 'custom_care_page.dart';
 import '../../../pro/presentation/pro_page.dart';
 
@@ -57,6 +58,33 @@ class SettingsPage extends StatelessWidget {
                 ),
               ),
             ),
+          Card(
+            child: ListTile(
+              leading: const Icon(Icons.privacy_tip_outlined),
+              title: Text(s.privacyTitle),
+              trailing: const Icon(Icons.chevron_right),
+              onTap: () => openPrivacy(context),
+            ),
+          ),
+          Card(
+            child: ListTile(
+              leading: const Icon(Icons.help_outline),
+              title: Text(s.helpTitle),
+              trailing: const Icon(Icons.chevron_right),
+              onTap: () => openHelp(context),
+            ),
+          ),
+          Card(
+            child: ListTile(
+              leading: const Icon(Icons.description_outlined),
+              title: Text(s.licensesTitle),
+              trailing: const Icon(Icons.chevron_right),
+              onTap: () => showLicensePage(
+                context: context,
+                applicationName: s.appTitle,
+              ),
+            ),
+          ),
           Card(
             child: Padding(
               padding: const EdgeInsets.all(20),

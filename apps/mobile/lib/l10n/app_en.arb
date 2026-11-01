@@ -536,5 +536,59 @@
   "cardFailed": "The card could not be prepared or handed off. Your originals are unchanged. Please try again.",
   "cardSaved": "Image saved.",
   "cardHandedToOS": "Image handed to the selected app. Verdi cannot confirm publication or delivery.",
-  "cardCancelled": "Sharing cancelled. Your preview is still available."
+  "cardCancelled": "Sharing cancelled. Your preview is still available.",
+  "privacyTitle": "Privacy & local data",
+  "helpTitle": "Help & feedback",
+  "licensesTitle": "Open-source licenses",
+  "privacyLocalTitle": "Your collection on this device",
+  "privacyLocalBody": "Verdi keeps plants, care history, journals, photos and drafts in local app storage. Core care needs no account. This preview has no app-operated sync, analytics SDK, automatic crash-report upload or remote AI. Photos are not used to infer species, health or pet safety.",
+  "privacyExternalTitle": "Actions that can involve other services",
+  "privacyExternalBody": "Purchases and Restore use the platform store and may need a connection. Sharing a photo, card or backup opens an operating-system destination chooser. Feedback is reviewed before you copy it; clipboard content can be read or shared according to your OS settings. These actions do not happen just because you open a plant or preview.",
+  "privacyBackupTitle": "Keep a recoverable copy",
+  "privacyBackupBody": "Device backup or transfer may include app data according to your OS settings; Verdi cannot guarantee its coverage or success. Before uninstalling, replacing or losing a device, keep an independently recoverable backup. Verdi portable backups are unencrypted and may contain photos, notes and drafts. Choose where you store or share them carefully. A share callback does not prove another device can restore the backup.",
+  "privacyDeleteTitle": "Deletion and copies",
+  "privacyDeleteBody": "Archiving keeps a plant and its history while hiding active care and reminders. Permanent deletion requires separate confirmation. Deleting local content cannot delete copies you already exported, shared or saved through Photos, device backup or another service.",
+  "privacyReviewTitle": "Development preview",
+  "privacyReviewBody": "This local-data guide describes the current preview. Public privacy-policy links, support contact details and platform data disclosures are still being prepared and reviewed against the release build. This is not a “Data Not Collected” declaration.",
+  "helpCareTitle": "Check first, then record care",
+  "helpCareBody": "A due or late check is a reminder to inspect your plant, not a diagnosis or proof it needs water. Choose the care you actually performed, or “Checked — not needed” and a new check date. Unknown last care creates no invented history.",
+  "helpHistoryTitle": "Correct history without moving a reminder",
+  "helpHistoryBody": "Adding past care or correcting a history entry updates the record while leaving the current next check unchanged. Edit the next-check date separately when needed. Archiving keeps existing records; permanent deletion is a separate confirmed action.",
+  "helpCatalogTitle": "Species and safety",
+  "helpCatalogBody": "If species content is unavailable, you can still add a custom plant. “Unknown” toxicity does not mean safe to ingest. Photos do not generate care, health or pet-safety advice.",
+  "helpReminderTitle": "Reminder delivery",
+  "helpReminderBody": "Reminders depend on notification permission and the operating system, including Focus, summaries and device settings. A queue check confirms scheduling work, not delivery. Paused and archived plants keep their records without active reminders.",
+  "helpBackupTitle": "Restore replaces the collection",
+  "helpBackupBody": "Review a backup before confirming restore. Restore replaces rather than merges this device’s collection, including valid saved drafts; it does not import a Pro entitlement. A failed or uncertain restore needs recovery, not a new empty collection.",
+  "helpMediaTitle": "Photos, sharing and one-time Pro",
+  "helpMediaBody": "Original photos and journal history remain available on Free. A plant card is free; dated photo comparison is Pro. Save image asks only for permission to add to Photos. If a save result is uncertain, check Photos before explicitly retrying. An OS handoff is not proof a post or message reached someone.",
+  "feedbackTitle": "Prepare feedback",
+  "feedbackNoDestination": "Direct support contact is not configured in this preview. You can edit and copy a message to use in a channel you choose. Nothing is sent here.",
+  "feedbackPrivacy": "The initial message includes only app, build and OS versions. No plant, photo, history, log, device identifier or purchase evidence is attached. Review anything you add before copying. This draft is kept only while this page is open. Clipboard content may be read or shared according to your OS settings.",
+  "feedbackDefaultSubject": "Verdi feedback",
+  "feedbackDefaultBody": "Verdi Preview {version} (build {build})\niOS {os}\n\nDescribe your feedback:\n",
+  "@feedbackDefaultBody": {
+    "placeholders": {
+      "version": {
+        "type": "String"
+      },
+      "build": {
+        "type": "String"
+      },
+      "os": {
+        "type": "String"
+      }
+    }
+  },
+  "feedbackUnavailable": "unavailable",
+  "feedbackSubject": "Subject",
+  "feedbackMessage": "Message",
+  "feedbackSubjectError": "Enter 1–200 characters of valid text.",
+  "feedbackBodyError": "Use up to 4,000 characters of valid text.",
+  "feedbackCopy": "Copy feedback",
+  "feedbackCopied": "Feedback copied. Nothing was sent.",
+  "feedbackCopyUnknown": "Copying was not confirmed. Your edits are still here; check the clipboard or choose Copy feedback again.",
+  "feedbackLoadFailed": "App details could not be loaded. Help and your collection are still available. Retry to prepare feedback.",
+  "feedbackDiscardTitle": "Discard this feedback draft?",
+  "feedbackDiscardBody": "Your edited message is kept only on this page. A copy you already made will remain on the clipboard."
 }

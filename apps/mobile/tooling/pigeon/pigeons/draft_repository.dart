@@ -234,3 +234,9 @@ abstract class CardPlatformHostApi {
   @async
   void releaseCard(String token);
 }
+
+@HostApi()
+abstract class HelpPlatformHostApi {
+  @async
+  String getFeedbackMetadata();
+}

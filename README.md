@@ -259,3 +259,20 @@ add-only access denied. The test retains collection data; successful Save create
 one synthetic card in that simulator's Photos library. Restore the test permission
 after a denial run. Physical recipient/save/protection and production Pro checks
 remain release evidence, separately from these development checks.
+
+## Local privacy, help and feedback
+
+Settings now includes bundled Privacy & local data, Help & feedback and
+Open-source licenses. Feedback initially contains only app/build/iOS versions;
+it can be edited and explicitly copied. Direct support contact is unconfigured,
+so there is no Send action or invented address. Copy errors/timeouts preserve
+edits; leaving a changed draft asks before discarding it. No collection content
+is automatically attached. The Flutter license registry retains the bundled
+ZIPFoundation notice alongside package notices.
+
+Run `flutter test test/help_test.dart` for boundaries, recovery and large-text
+checks. Run `flutter test integration_test/help_test.dart -d DEVICE_ID
+--no-uninstall` against the retained QA simulator for native metadata, exact
+clipboard content and unchanged collection evidence. It copies a synthetic QA
+message to the simulator clipboard without sending it. Public support/policy,
+network observation and platform privacy disclosures remain release work.

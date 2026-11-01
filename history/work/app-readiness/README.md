@@ -1504,3 +1504,45 @@ cosmetics, privacy/help and complete accessibility, internal TanStack catalog to
 production profile/store registration, submission host, physical checks and
 full-limit backup/performance. The user has no compatible submission host and
 requests simulator testing for now; those release gates remain open.
+
+## Local privacy/help and feedback — 2026-11-01
+
+**Author:** Codex (AI assistant), independently reviewed by core_readiness_review.
+
+**Date:** 2026-11-01 (Asia/Jakarta).
+
+Implemented against published docs pin
+`e671709bb0b8862dc07e8d23957e321aa4ebb9ac`, covering bounded REQ-015/018
+help, privacy and reviewable feedback. Settings exposes bundled privacy/help and
+open-source licenses. The native metadata bridge reads only Bundle versions and
+UIDevice OS version; it has no repository, photo, log, entitlement or network
+reference. Flutter constructs localized defaults with unknown-version fallback.
+No direct support destination is configured, and no address or Send action is
+invented. Source dependency inspection found no added analytics/crash/model SDK,
+CloudKit or network client; this is not executed network-observation evidence.
+
+Copy validates Unicode/NUL and 200/4,000-grapheme limits, then copies the exact
+edited subject + two newlines + message after a tap. It never silently attaches
+content. Ten-second metadata/copy deadlines restore a retry path; unknown copies
+are not called definite failures or successful sends. Late replies do not replace
+edits or touch closed pages. Changed drafts ask before leaving; a rapid-back check
+reads current edits directly rather than waiting for the next widget frame.
+
+Executed: 8 focused widget/service tests passed, independently rerun by reviewer;
+full Flutter86 tests passed; analyzer has no issues; localization/build_runner and
+Pigeon reproducibility passed;88-file format check passed. Actual retained main
+simulator integration passed: bundled disclosures, real0.1.0/build1/iOS18.3.x
+metadata, exact edited clipboard text, discard cancellation and final confirmed
+exit. Collection revision and all plant/photo/cover/draft identities remained.
+Ordinary development build/launch passed after testing; Settings and native
+Flutter license page were visually checked. No message was sent. No core/native
+package schema or data mutation changed, so earlier card/storage tests remain
+inherited evidence, not a newly claimed full native rerun for this UI slice.
+
+Independent review found no remaining material blocker. Initial test failures
+exposed rapid-back timing and a test's wrong existing discard label; both were
+corrected and affected checks rerun. The release guard, accepted requirements,
+prior code and decisions remain preserved. Public support identity, public policy,
+privacy manifest/disclosure audit, actual traffic observation, physical accessibility,
+photo optimization, personality/cosmetics, internal admin, production store/profile,
+submission host and physical/full-limit tests remain open release work.

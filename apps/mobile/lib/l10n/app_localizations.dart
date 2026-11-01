@@ -2337,6 +2337,252 @@ abstract class AppStrings {
   /// In en, this message translates to:
   /// **'Sharing cancelled. Your preview is still available.'**
   String get cardCancelled;
+
+  /// No description provided for @privacyTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Privacy & local data'**
+  String get privacyTitle;
+
+  /// No description provided for @helpTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Help & feedback'**
+  String get helpTitle;
+
+  /// No description provided for @licensesTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Open-source licenses'**
+  String get licensesTitle;
+
+  /// No description provided for @privacyLocalTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Your collection on this device'**
+  String get privacyLocalTitle;
+
+  /// No description provided for @privacyLocalBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Verdi keeps plants, care history, journals, photos and drafts in local app storage. Core care needs no account. This preview has no app-operated sync, analytics SDK, automatic crash-report upload or remote AI. Photos are not used to infer species, health or pet safety.'**
+  String get privacyLocalBody;
+
+  /// No description provided for @privacyExternalTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Actions that can involve other services'**
+  String get privacyExternalTitle;
+
+  /// No description provided for @privacyExternalBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Purchases and Restore use the platform store and may need a connection. Sharing a photo, card or backup opens an operating-system destination chooser. Feedback is reviewed before you copy it; clipboard content can be read or shared according to your OS settings. These actions do not happen just because you open a plant or preview.'**
+  String get privacyExternalBody;
+
+  /// No description provided for @privacyBackupTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Keep a recoverable copy'**
+  String get privacyBackupTitle;
+
+  /// No description provided for @privacyBackupBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Device backup or transfer may include app data according to your OS settings; Verdi cannot guarantee its coverage or success. Before uninstalling, replacing or losing a device, keep an independently recoverable backup. Verdi portable backups are unencrypted and may contain photos, notes and drafts. Choose where you store or share them carefully. A share callback does not prove another device can restore the backup.'**
+  String get privacyBackupBody;
+
+  /// No description provided for @privacyDeleteTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Deletion and copies'**
+  String get privacyDeleteTitle;
+
+  /// No description provided for @privacyDeleteBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Archiving keeps a plant and its history while hiding active care and reminders. Permanent deletion requires separate confirmation. Deleting local content cannot delete copies you already exported, shared or saved through Photos, device backup or another service.'**
+  String get privacyDeleteBody;
+
+  /// No description provided for @privacyReviewTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Development preview'**
+  String get privacyReviewTitle;
+
+  /// No description provided for @privacyReviewBody.
+  ///
+  /// In en, this message translates to:
+  /// **'This local-data guide describes the current preview. Public privacy-policy links, support contact details and platform data disclosures are still being prepared and reviewed against the release build. This is not a “Data Not Collected” declaration.'**
+  String get privacyReviewBody;
+
+  /// No description provided for @helpCareTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Check first, then record care'**
+  String get helpCareTitle;
+
+  /// No description provided for @helpCareBody.
+  ///
+  /// In en, this message translates to:
+  /// **'A due or late check is a reminder to inspect your plant, not a diagnosis or proof it needs water. Choose the care you actually performed, or “Checked — not needed” and a new check date. Unknown last care creates no invented history.'**
+  String get helpCareBody;
+
+  /// No description provided for @helpHistoryTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Correct history without moving a reminder'**
+  String get helpHistoryTitle;
+
+  /// No description provided for @helpHistoryBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Adding past care or correcting a history entry updates the record while leaving the current next check unchanged. Edit the next-check date separately when needed. Archiving keeps existing records; permanent deletion is a separate confirmed action.'**
+  String get helpHistoryBody;
+
+  /// No description provided for @helpCatalogTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Species and safety'**
+  String get helpCatalogTitle;
+
+  /// No description provided for @helpCatalogBody.
+  ///
+  /// In en, this message translates to:
+  /// **'If species content is unavailable, you can still add a custom plant. “Unknown” toxicity does not mean safe to ingest. Photos do not generate care, health or pet-safety advice.'**
+  String get helpCatalogBody;
+
+  /// No description provided for @helpReminderTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Reminder delivery'**
+  String get helpReminderTitle;
+
+  /// No description provided for @helpReminderBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Reminders depend on notification permission and the operating system, including Focus, summaries and device settings. A queue check confirms scheduling work, not delivery. Paused and archived plants keep their records without active reminders.'**
+  String get helpReminderBody;
+
+  /// No description provided for @helpBackupTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Restore replaces the collection'**
+  String get helpBackupTitle;
+
+  /// No description provided for @helpBackupBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Review a backup before confirming restore. Restore replaces rather than merges this device’s collection, including valid saved drafts; it does not import a Pro entitlement. A failed or uncertain restore needs recovery, not a new empty collection.'**
+  String get helpBackupBody;
+
+  /// No description provided for @helpMediaTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Photos, sharing and one-time Pro'**
+  String get helpMediaTitle;
+
+  /// No description provided for @helpMediaBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Original photos and journal history remain available on Free. A plant card is free; dated photo comparison is Pro. Save image asks only for permission to add to Photos. If a save result is uncertain, check Photos before explicitly retrying. An OS handoff is not proof a post or message reached someone.'**
+  String get helpMediaBody;
+
+  /// No description provided for @feedbackTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Prepare feedback'**
+  String get feedbackTitle;
+
+  /// No description provided for @feedbackNoDestination.
+  ///
+  /// In en, this message translates to:
+  /// **'Direct support contact is not configured in this preview. You can edit and copy a message to use in a channel you choose. Nothing is sent here.'**
+  String get feedbackNoDestination;
+
+  /// No description provided for @feedbackPrivacy.
+  ///
+  /// In en, this message translates to:
+  /// **'The initial message includes only app, build and OS versions. No plant, photo, history, log, device identifier or purchase evidence is attached. Review anything you add before copying. This draft is kept only while this page is open. Clipboard content may be read or shared according to your OS settings.'**
+  String get feedbackPrivacy;
+
+  /// No description provided for @feedbackDefaultSubject.
+  ///
+  /// In en, this message translates to:
+  /// **'Verdi feedback'**
+  String get feedbackDefaultSubject;
+
+  /// No description provided for @feedbackDefaultBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Verdi Preview {version} (build {build})\niOS {os}\n\nDescribe your feedback:\n'**
+  String feedbackDefaultBody(String version, String build, String os);
+
+  /// No description provided for @feedbackUnavailable.
+  ///
+  /// In en, this message translates to:
+  /// **'unavailable'**
+  String get feedbackUnavailable;
+
+  /// No description provided for @feedbackSubject.
+  ///
+  /// In en, this message translates to:
+  /// **'Subject'**
+  String get feedbackSubject;
+
+  /// No description provided for @feedbackMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Message'**
+  String get feedbackMessage;
+
+  /// No description provided for @feedbackSubjectError.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter 1–200 characters of valid text.'**
+  String get feedbackSubjectError;
+
+  /// No description provided for @feedbackBodyError.
+  ///
+  /// In en, this message translates to:
+  /// **'Use up to 4,000 characters of valid text.'**
+  String get feedbackBodyError;
+
+  /// No description provided for @feedbackCopy.
+  ///
+  /// In en, this message translates to:
+  /// **'Copy feedback'**
+  String get feedbackCopy;
+
+  /// No description provided for @feedbackCopied.
+  ///
+  /// In en, this message translates to:
+  /// **'Feedback copied. Nothing was sent.'**
+  String get feedbackCopied;
+
+  /// No description provided for @feedbackCopyUnknown.
+  ///
+  /// In en, this message translates to:
+  /// **'Copying was not confirmed. Your edits are still here; check the clipboard or choose Copy feedback again.'**
+  String get feedbackCopyUnknown;
+
+  /// No description provided for @feedbackLoadFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'App details could not be loaded. Help and your collection are still available. Retry to prepare feedback.'**
+  String get feedbackLoadFailed;
+
+  /// No description provided for @feedbackDiscardTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Discard this feedback draft?'**
+  String get feedbackDiscardTitle;
+
+  /// No description provided for @feedbackDiscardBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Your edited message is kept only on this page. A copy you already made will remain on the clipboard.'**
+  String get feedbackDiscardBody;
 }
 
 class _AppStringsDelegate extends LocalizationsDelegate<AppStrings> {

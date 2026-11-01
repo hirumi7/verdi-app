@@ -6,6 +6,7 @@ import UIKit
   #if DEBUG
   private var draftBridge: DraftRepositoryBridge?
   private var coreBridge: CoreRepositoryBridge?
+  private var helpBridge: HelpPlatformBridge?
   private var cardBridge: CardPlatformBridge?
   private var mediaBridge: MediaPlatformBridge?
   private var backupBridge: BackupPlatformBridge?
@@ -50,6 +51,9 @@ import UIKit
         }
         reminders.attach(registrar.messenger())
         ReminderPlatformHostApiSetup.setUp(binaryMessenger:registrar.messenger(),api:reminders)
+        let help = HelpPlatformBridge()
+        helpBridge = help
+        HelpPlatformHostApiSetup.setUp(binaryMessenger:registrar.messenger(),api:help)
         let cards = CardPlatformBridge(repository:bridge.repository)
         cardBridge = cards
         CardPlatformHostApiSetup.setUp(binaryMessenger:registrar.messenger(),api:cards)

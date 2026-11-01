@@ -1299,4 +1299,145 @@ class AppStringsEn extends AppStrings {
   @override
   String get cardCancelled =>
       'Sharing cancelled. Your preview is still available.';
+
+  @override
+  String get privacyTitle => 'Privacy & local data';
+
+  @override
+  String get helpTitle => 'Help & feedback';
+
+  @override
+  String get licensesTitle => 'Open-source licenses';
+
+  @override
+  String get privacyLocalTitle => 'Your collection on this device';
+
+  @override
+  String get privacyLocalBody =>
+      'Verdi keeps plants, care history, journals, photos and drafts in local app storage. Core care needs no account. This preview has no app-operated sync, analytics SDK, automatic crash-report upload or remote AI. Photos are not used to infer species, health or pet safety.';
+
+  @override
+  String get privacyExternalTitle => 'Actions that can involve other services';
+
+  @override
+  String get privacyExternalBody =>
+      'Purchases and Restore use the platform store and may need a connection. Sharing a photo, card or backup opens an operating-system destination chooser. Feedback is reviewed before you copy it; clipboard content can be read or shared according to your OS settings. These actions do not happen just because you open a plant or preview.';
+
+  @override
+  String get privacyBackupTitle => 'Keep a recoverable copy';
+
+  @override
+  String get privacyBackupBody =>
+      'Device backup or transfer may include app data according to your OS settings; Verdi cannot guarantee its coverage or success. Before uninstalling, replacing or losing a device, keep an independently recoverable backup. Verdi portable backups are unencrypted and may contain photos, notes and drafts. Choose where you store or share them carefully. A share callback does not prove another device can restore the backup.';
+
+  @override
+  String get privacyDeleteTitle => 'Deletion and copies';
+
+  @override
+  String get privacyDeleteBody =>
+      'Archiving keeps a plant and its history while hiding active care and reminders. Permanent deletion requires separate confirmation. Deleting local content cannot delete copies you already exported, shared or saved through Photos, device backup or another service.';
+
+  @override
+  String get privacyReviewTitle => 'Development preview';
+
+  @override
+  String get privacyReviewBody =>
+      'This local-data guide describes the current preview. Public privacy-policy links, support contact details and platform data disclosures are still being prepared and reviewed against the release build. This is not a “Data Not Collected” declaration.';
+
+  @override
+  String get helpCareTitle => 'Check first, then record care';
+
+  @override
+  String get helpCareBody =>
+      'A due or late check is a reminder to inspect your plant, not a diagnosis or proof it needs water. Choose the care you actually performed, or “Checked — not needed” and a new check date. Unknown last care creates no invented history.';
+
+  @override
+  String get helpHistoryTitle => 'Correct history without moving a reminder';
+
+  @override
+  String get helpHistoryBody =>
+      'Adding past care or correcting a history entry updates the record while leaving the current next check unchanged. Edit the next-check date separately when needed. Archiving keeps existing records; permanent deletion is a separate confirmed action.';
+
+  @override
+  String get helpCatalogTitle => 'Species and safety';
+
+  @override
+  String get helpCatalogBody =>
+      'If species content is unavailable, you can still add a custom plant. “Unknown” toxicity does not mean safe to ingest. Photos do not generate care, health or pet-safety advice.';
+
+  @override
+  String get helpReminderTitle => 'Reminder delivery';
+
+  @override
+  String get helpReminderBody =>
+      'Reminders depend on notification permission and the operating system, including Focus, summaries and device settings. A queue check confirms scheduling work, not delivery. Paused and archived plants keep their records without active reminders.';
+
+  @override
+  String get helpBackupTitle => 'Restore replaces the collection';
+
+  @override
+  String get helpBackupBody =>
+      'Review a backup before confirming restore. Restore replaces rather than merges this device’s collection, including valid saved drafts; it does not import a Pro entitlement. A failed or uncertain restore needs recovery, not a new empty collection.';
+
+  @override
+  String get helpMediaTitle => 'Photos, sharing and one-time Pro';
+
+  @override
+  String get helpMediaBody =>
+      'Original photos and journal history remain available on Free. A plant card is free; dated photo comparison is Pro. Save image asks only for permission to add to Photos. If a save result is uncertain, check Photos before explicitly retrying. An OS handoff is not proof a post or message reached someone.';
+
+  @override
+  String get feedbackTitle => 'Prepare feedback';
+
+  @override
+  String get feedbackNoDestination =>
+      'Direct support contact is not configured in this preview. You can edit and copy a message to use in a channel you choose. Nothing is sent here.';
+
+  @override
+  String get feedbackPrivacy =>
+      'The initial message includes only app, build and OS versions. No plant, photo, history, log, device identifier or purchase evidence is attached. Review anything you add before copying. This draft is kept only while this page is open. Clipboard content may be read or shared according to your OS settings.';
+
+  @override
+  String get feedbackDefaultSubject => 'Verdi feedback';
+
+  @override
+  String feedbackDefaultBody(String version, String build, String os) {
+    return 'Verdi Preview $version (build $build)\niOS $os\n\nDescribe your feedback:\n';
+  }
+
+  @override
+  String get feedbackUnavailable => 'unavailable';
+
+  @override
+  String get feedbackSubject => 'Subject';
+
+  @override
+  String get feedbackMessage => 'Message';
+
+  @override
+  String get feedbackSubjectError => 'Enter 1–200 characters of valid text.';
+
+  @override
+  String get feedbackBodyError => 'Use up to 4,000 characters of valid text.';
+
+  @override
+  String get feedbackCopy => 'Copy feedback';
+
+  @override
+  String get feedbackCopied => 'Feedback copied. Nothing was sent.';
+
+  @override
+  String get feedbackCopyUnknown =>
+      'Copying was not confirmed. Your edits are still here; check the clipboard or choose Copy feedback again.';
+
+  @override
+  String get feedbackLoadFailed =>
+      'App details could not be loaded. Help and your collection are still available. Retry to prepare feedback.';
+
+  @override
+  String get feedbackDiscardTitle => 'Discard this feedback draft?';
+
+  @override
+  String get feedbackDiscardBody =>
+      'Your edited message is kept only on this page. A copy you already made will remain on the clipboard.';
 }

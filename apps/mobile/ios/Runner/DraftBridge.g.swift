@@ -1518,3 +1518,31 @@ class CardPlatformHostApiSetup {
     }
   }
 }
+/// Generated protocol from Pigeon that represents a handler of messages from Flutter.
+protocol HelpPlatformHostApi {
+  func getFeedbackMetadata() async throws -> String
+}
+
+/// Generated setup class from Pigeon to handle messages through the `binaryMessenger`.
+class HelpPlatformHostApiSetup {
+  static var codec: FlutterStandardMessageCodec { DraftBridgePigeonCodec.shared }
+  /// Sets up an instance of `HelpPlatformHostApi` to handle messages through the `binaryMessenger`.
+  static func setUp(binaryMessenger: FlutterBinaryMessenger, api: HelpPlatformHostApi?, messageChannelSuffix: String = "") {
+    let channelSuffix = messageChannelSuffix.count > 0 ? ".\(messageChannelSuffix)" : ""
+    let getFeedbackMetadataChannel = FlutterBasicMessageChannel(name: "dev.flutter.pigeon.verdi_mobile.HelpPlatformHostApi.getFeedbackMetadata\(channelSuffix)", binaryMessenger: binaryMessenger, codec: codec)
+    if let api = api {
+      getFeedbackMetadataChannel.setMessageHandler { _, reply in
+        Task { @MainActor in
+          do {
+            let result = try await api.getFeedbackMetadata()
+            reply(wrapResult(result))
+          } catch {
+            reply(wrapError(error))
+          }
+        }
+      }
+    } else {
+      getFeedbackMetadataChannel.setMessageHandler(nil)
+    }
+  }
+}
