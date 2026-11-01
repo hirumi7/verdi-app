@@ -63,7 +63,17 @@ class _VerdiAppState extends State<VerdiApp> with WidgetsBindingObserver {
         }
       }
       final top = _router.topMostRouter();
+      final todayStack = _router
+          .innerRouterOf<TabsRouter>(RootShellRoute.name)
+          ?.innerRouterOf<StackRouter>(TodayTabRoute.name);
+      final retainedTodayRoute =
+          todayStack != null &&
+          (todayStack.hasPagelessTopRoute ||
+              todayStack.stack.any(
+                (page) => page.routeData.name != TodayRoute.name,
+              ));
       if (_workspace.state.busy ||
+          retainedTodayRoute ||
           ![
             TodayRoute.name,
             PlantsRoute.name,

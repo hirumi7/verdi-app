@@ -1665,4 +1665,95 @@ class AppStringsEn extends AppStrings {
     );
     return 'Every $_temp0';
   }
+
+  @override
+  String get clearSearch => 'Clear search';
+
+  @override
+  String get noArchivedPlants => 'No archived plants';
+
+  @override
+  String get noArchivedPlantsBody =>
+      'Archived plants stay here with their history and photos.';
+
+  @override
+  String get auditBefore => 'Before';
+
+  @override
+  String get auditAfter => 'After';
+
+  @override
+  String get auditInterval => 'Interval';
+
+  @override
+  String get auditNext => 'Next check';
+
+  @override
+  String get auditAnchor => 'Recurrence anchor';
+
+  @override
+  String get auditFirstAnchor => 'First-check anchor (no completed care)';
+
+  @override
+  String get auditCareAnchor => 'Completed-care anchor';
+
+  @override
+  String get auditFirstDate => 'Chosen first check';
+
+  @override
+  String get auditOverride => 'Date override';
+
+  @override
+  String get auditNone => 'None';
+
+  @override
+  String get auditActive => 'Active';
+
+  @override
+  String get auditPaused => 'Paused';
+
+  @override
+  String get auditRetired => 'Retired';
+
+  @override
+  String get auditStatus => 'Routine status';
+
+  @override
+  String get auditArchived => 'Plant archived';
+
+  @override
+  String get auditYes => 'Yes';
+
+  @override
+  String get auditNo => 'No';
+
+  @override
+  String get auditRecorded => 'Recorded at (UTC)';
+
+  @override
+  String get auditIntervalChange => 'Interval changed';
+
+  @override
+  String get auditSpeciesChange => 'Species suggestions applied';
+
+  @override
+  String get auditOverrideChange => 'Check date changed';
+
+  @override
+  String get auditPause => 'Routine paused';
+
+  @override
+  String get auditResume => 'Routine resumed';
+
+  @override
+  String get auditRetire => 'Routine removed';
+
+  @override
+  String get auditArchive => 'Plant archived';
+
+  @override
+  String get auditRestore => 'Plant restored';
+
+  @override
+  String get auditUndo => 'Action undone';
 }

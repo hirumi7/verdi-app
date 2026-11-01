@@ -360,8 +360,10 @@ class FigmaFormSection extends StatelessWidget {
     super.key,
     this.title,
     this.footer,
+    this.fieldGroup = false,
     required this.children,
   });
+  final bool fieldGroup;
   final String? title, footer;
   final List<Widget> children;
   @override
@@ -371,7 +373,11 @@ class FigmaFormSection extends StatelessWidget {
     child: FigmaGroup(
       children: [
         Padding(
-          padding: const EdgeInsets.all(16),
+          // Outlined floating labels paint above the field's bounds. Keep their
+          // scaled inset inside the clipped group without doubling side padding.
+          padding: fieldGroup
+              ? EdgeInsets.only(top: MediaQuery.textScalerOf(context).scale(12))
+              : const EdgeInsets.all(16),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: children,
@@ -411,5 +417,34 @@ class FigmaPhotoAction extends StatelessWidget {
         children: [icon, const SizedBox(height: 6), label],
       ),
     ),
+  );
+}
+
+/// Source photo/action composition, reflowing without constraining scaled labels.
+class FigmaMediaRow extends StatelessWidget {
+  const FigmaMediaRow({
+    super.key,
+    required this.preview,
+    required this.actions,
+  });
+  final Widget preview, actions;
+  @override
+  Widget build(BuildContext context) => LayoutBuilder(
+    builder: (context, constraints) {
+      if (constraints.maxWidth < 320 || AppLayout.largeText(context)) {
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [preview, const SizedBox(height: 12), actions],
+        );
+      }
+      return Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          SizedBox(width: 150, child: preview),
+          const SizedBox(width: 12),
+          Expanded(child: actions),
+        ],
+      );
+    },
   );
 }

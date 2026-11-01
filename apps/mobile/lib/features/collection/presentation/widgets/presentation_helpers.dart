@@ -1,3 +1,4 @@
+import '../../../../core/theme/app_layout.dart';
 export '../../../../core/theme/figma_components.dart';
 export '../../../../core/theme/app_layout.dart';
 
@@ -71,7 +72,7 @@ Future<CareInterval?> chooseInterval(
     builder: (context) => StatefulBuilder(
       builder: (context, update) {
         final s = strings(context);
-        return AlertDialog(
+        return AppAlertDialog(
           title: Text(s.editInterval),
           scrollable: true,
           content: Column(
@@ -298,7 +299,7 @@ class _CommandReviewState extends State<_CommandReview> {
     };
     return PopScope(
       canPop: false,
-      child: AlertDialog(
+      child: AppAlertDialog(
         title: Text(widget.title ?? s.previewHeading),
         scrollable: true,
         content: Column(

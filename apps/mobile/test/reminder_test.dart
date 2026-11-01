@@ -229,6 +229,52 @@ void main() {
       await getIt.reset();
     },
   );
+  testWidgets(
+    'hidden Today editor survives notification while Settings is active',
+    (tester) async {
+      await getIt.reset();
+      await configureDependencies(environment: 'memory');
+      final repository = getIt<CollectionRepository>(),
+          service = FakeReminders();
+      await tester.pumpWidget(
+        VerdiApp(reminderService: service, reminderNewId: repository.newId),
+      );
+      await tester.pumpAndSettle();
+      final router = AutoRouter.of(tester.element(find.byType(TodayPage)));
+      unawaited(router.push(PlantEditorRoute()));
+      await tester.pumpAndSettle();
+      final custom = find.text('Add a custom plant');
+      if (custom.evaluate().isNotEmpty) {
+        await tester.tap(custom);
+        await tester.pumpAndSettle();
+      }
+      final name = find.byWidgetPredicate(
+        (w) => w is TextField && w.decoration?.labelText == 'Plant name',
+      );
+      await tester.enterText(name, 'Unflushed reminder draft');
+      final tabs = AutoTabsRouter.of(tester.element(name));
+      tabs.setActiveIndex(2);
+      await tester.pump();
+      service.tap = {'eventId': 'editor-tap', 'current': true};
+      service.events.add(null);
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 20));
+      expect(name, findsNothing);
+      expect(service.acknowledgements, 0);
+      tabs.setActiveIndex(0);
+      await tester.pump();
+      expect(name, findsOneWidget);
+      expect(
+        tester.widget<TextField>(name).controller!.text,
+        'Unflushed reminder draft',
+      );
+      expect(service.acknowledgements, 0);
+      expect(tester.takeException(), isNull);
+      await tester.pumpAndSettle();
+      await tester.pumpWidget(const SizedBox());
+      await getIt.reset();
+    },
+  );
   testWidgets('notification preserves unflushed journal note', (tester) async {
     await getIt.reset();
     await configureDependencies(environment: 'memory');

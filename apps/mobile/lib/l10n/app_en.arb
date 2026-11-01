@@ -699,5 +699,35 @@
         "type": "int"
       }
     }
-  }
+  },
+  "clearSearch": "Clear search",
+  "noArchivedPlants": "No archived plants",
+  "noArchivedPlantsBody": "Archived plants stay here with their history and photos.",
+  "auditBefore": "Before",
+  "auditAfter": "After",
+  "auditInterval": "Interval",
+  "auditNext": "Next check",
+  "auditAnchor": "Recurrence anchor",
+  "auditFirstAnchor": "First-check anchor (no completed care)",
+  "auditCareAnchor": "Completed-care anchor",
+  "auditFirstDate": "Chosen first check",
+  "auditOverride": "Date override",
+  "auditNone": "None",
+  "auditActive": "Active",
+  "auditPaused": "Paused",
+  "auditRetired": "Retired",
+  "auditStatus": "Routine status",
+  "auditArchived": "Plant archived",
+  "auditYes": "Yes",
+  "auditNo": "No",
+  "auditRecorded": "Recorded at (UTC)",
+  "auditIntervalChange": "Interval changed",
+  "auditSpeciesChange": "Species suggestions applied",
+  "auditOverrideChange": "Check date changed",
+  "auditPause": "Routine paused",
+  "auditResume": "Routine resumed",
+  "auditRetire": "Routine removed",
+  "auditArchive": "Plant archived",
+  "auditRestore": "Plant restored",
+  "auditUndo": "Action undone"
 }

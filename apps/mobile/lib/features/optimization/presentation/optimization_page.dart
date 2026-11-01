@@ -36,6 +36,7 @@ class _OptimizationPageState extends State<OptimizationPage> {
     widget.plantId,
   );
   bool leaving = false;
+  final scroll = ScrollController();
   @override
   void initState() {
     super.initState();
@@ -44,6 +45,7 @@ class _OptimizationPageState extends State<OptimizationPage> {
 
   @override
   void dispose() {
+    scroll.dispose();
     cubit.close();
     super.dispose();
   }
@@ -95,6 +97,7 @@ class _OptimizationPageState extends State<OptimizationPage> {
   }
 
   Future<void> review() async {
+    if (scroll.hasClients) scroll.jumpTo(0);
     if (!await cubit.preview() || !mounted) return;
     final s = strings(context), preview = cubit.state.preview!;
     final confirmed = await showDialog<bool>(
@@ -229,21 +232,22 @@ class _OptimizationPageState extends State<OptimizationPage> {
           ),
           body: SafeArea(
             child: ListView(
+              controller: scroll,
               padding: AppLayout.pagePadding,
               children: [
-                AppScrollTitle(title: Text(s.optimizePhotos)),
-                FigmaFormSection(
-                  children: [
-                    Text(s.optimizationIntro),
-                    Text(s.optimizationWarning),
-                  ],
+                SizedBox(
+                  height: 4,
+                  child: state.busy || state.running
+                      ? const LinearProgressIndicator()
+                      : null,
                 ),
-                if (state.busy || state.running)
-                  const LinearProgressIndicator(),
                 if (error != null)
                   Padding(
                     padding: const EdgeInsets.symmetric(vertical: 12),
-                    child: Text(error, semanticsLabel: error),
+                    child: Semantics(
+                      liveRegion: true,
+                      child: Text(error, semanticsLabel: error),
+                    ),
                   ),
                 if (state.recoveryRequired) ...[
                   Text(s.optimizationRecoveryNeeded),
@@ -258,6 +262,13 @@ class _OptimizationPageState extends State<OptimizationPage> {
                     child: Text(s.optimizationCancel),
                   ),
                 ],
+                AppScrollTitle(title: Text(s.optimizePhotos)),
+                FigmaFormSection(
+                  children: [
+                    Text(s.optimizationIntro),
+                    Text(s.optimizationWarning),
+                  ],
+                ),
                 if (job != null) ...[
                   const SizedBox(height: 16),
                   Text(

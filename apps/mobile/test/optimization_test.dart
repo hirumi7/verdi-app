@@ -41,6 +41,7 @@ class Jobs implements OptimizationService {
   Completer<void>? draftWait;
   String kind = 'failed', failure = 'MEDIA_UNSUPPORTED';
   bool lostStart = false, stopFails = false;
+  bool failPreview = false;
   int stopCalls = 0;
   Map<String, Object?>? latest;
   @override
@@ -56,6 +57,7 @@ class Jobs implements OptimizationService {
   ) async {
     if (op == 'latestOptimizationJob') return latest;
     if (op == 'previewOptimization') {
+      if (failPreview) throw PlatformException(code: 'IO_FAILURE');
       return {
         'previewToken': 'preview',
         'targets': (args['targets'] as List)
@@ -319,6 +321,87 @@ void main() {
       expect(t.takeException(), isNull);
       await press(t, 'Review selected photos (1)');
       await press(t, 'Cancel');
+      expect(service.jobs, isEmpty);
+      expect(t.takeException(), isNull);
+    },
+  );
+  testWidgets(
+    'large text failed optimization preview returns visible feedback before long gallery',
+    (t) async {
+      const channel = BasicMessageChannel<Object?>(
+        'dev.flutter.pigeon.verdi_mobile.MediaPlatformHostApi.previewPhoto',
+        StandardMessageCodec(),
+      );
+      TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
+          .setMockDecodedMessageHandler<Object?>(
+            channel,
+            (_) async => [
+              File('assets/illustrations/empty-plants.png').readAsBytesSync(),
+            ],
+          );
+      addTearDown(
+        () => TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
+            .setMockDecodedMessageHandler<Object?>(channel, null),
+      );
+      t.view.physicalSize = const Size(320, 640);
+      t.view.devicePixelRatio = 1;
+      addTearDown(t.view.resetPhysicalSize);
+      addTearDown(t.view.resetDevicePixelRatio);
+      for (var i = 0; i < 20; i++) {
+        final row = [...data.rows['photos']!.first];
+        row[0] = fixtureId(900 + i);
+        data.rows['photos']!.add(row);
+      }
+      data.projection.hydrate(
+        data.rows,
+        data.projection.snapshot.revision,
+        data.projection.storageRevision + 1,
+      );
+      repo = Repo(data.projection.snapshot);
+      service.failPreview = true;
+      await t.pumpWidget(
+        MaterialApp(
+          theme: AppTheme.build(Brightness.light),
+          localizationsDelegates: AppStrings.localizationsDelegates,
+          supportedLocales: AppStrings.supportedLocales,
+          builder: (context, child) => MediaQuery(
+            data: MediaQuery.of(context)
+                .copyWith(textScaler: const TextScaler.linear(3.2)),
+            child: child!,
+          ),
+          home: OptimizationPage(
+            plantId: plant,
+            repository: repo,
+            service: service,
+          ),
+        ),
+      );
+      await t.pumpAndSettle();
+      expect(service.jobs, isEmpty);
+      expect(t.takeException(), isNull);
+      await t.scrollUntilVisible(
+        find.byType(CheckboxListTile),
+        400,
+        scrollable: find.byType(Scrollable).first,
+      );
+      await Scrollable.ensureVisible(
+        t.element(find.byType(Checkbox).first),
+        alignment: .5,
+      );
+      await t.pump();
+      await t.tap(find.byType(Checkbox).first);
+      await t.pumpAndSettle();
+      // Preview fake supplies the same native metadata used in the confirmation.
+      expect(find.byType(CheckboxListTile), findsWidgets);
+      expect(t.takeException(), isNull);
+      await t.scrollUntilVisible(
+        find.text('Review selected photos (1)'),
+        600,
+        maxScrolls: 150,
+        scrollable: find.byType(Scrollable).first,
+      );
+      await press(t, 'Review selected photos (1)');
+      expect(find.textContaining('could not').hitTestable(), findsWidgets);
       expect(service.jobs, isEmpty);
       expect(t.takeException(), isNull);
     },

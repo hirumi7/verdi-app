@@ -93,4 +93,36 @@ void main() {
       },
     );
   }
+  testWidgets('dirty plant discard stays safe at 320 percent with keyboard', (
+    t,
+  ) async {
+    await getIt.reset();
+    await configureDependencies(environment: 'memory');
+    addTearDown(getIt.reset);
+    t.view.physicalSize = const Size(320, 640);
+    t.view.devicePixelRatio = 1;
+    t.platformDispatcher.textScaleFactorTestValue = 3.2;
+    addTearDown(() {
+      t.view.reset();
+      t.platformDispatcher.clearAllTestValues();
+    });
+    await t.pumpWidget(const VerdiApp());
+    await t.pumpAndSettle();
+    await press(t, 'Add a plant');
+    await press(t, 'Add a custom plant');
+    final name = find.byWidgetPredicate(
+      (w) => w is TextField && w.decoration?.labelText == 'Plant name',
+    );
+    await t.ensureVisible(name);
+    await t.enterText(name, 'Keep this draft');
+    t.view.viewInsets = const FakeViewPadding(bottom: 260);
+    await t.pump();
+    await t.tap(find.byTooltip('Cancel'));
+    await t.pumpAndSettle();
+    expect(find.text('Keep editing'), findsOneWidget);
+    expect(t.takeException(), isNull);
+    await press(t, 'Keep editing');
+    expect(t.widget<TextField>(name).controller!.text, 'Keep this draft');
+    await t.pumpWidget(const SizedBox());
+  });
 }

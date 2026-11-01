@@ -16,3 +16,6 @@ Species-specific art has separate reviewed manifest records under
 Permission evidence: user-confirmed commercial rights to the imported artwork,
 recorded in docs SRC-011. Attribution: **Verdi design import**, visible locally in
 Settings → Artwork credits. This record does not infer rights to unrelated assets.
+
+Camera/library icons: original 22px exports from journal editor `11:7325`,
+children `11:7391` and `11:7396`, reviewed 2026-11-01.

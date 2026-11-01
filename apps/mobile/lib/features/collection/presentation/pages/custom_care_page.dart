@@ -31,7 +31,8 @@ Future<bool> discardCareForm(BuildContext context) async =>
       context: context,
       builder: (context) {
         final s = strings(context);
-        return AlertDialog(
+        return AppAlertDialog(
+          scrollable: true,
           title: Text(s.careFormDiscard),
           actions: [
             TextButton(
@@ -138,7 +139,7 @@ class _CarePreparationRecoveryState extends State<_CarePreparationRecovery> {
     final s = strings(context);
     return PopScope(
       canPop: false,
-      child: AlertDialog(
+      child: AppAlertDialog(
         title: Text(widget.title),
         scrollable: true,
         content: Column(

@@ -147,7 +147,8 @@ class _FeedbackPageState extends State<FeedbackPage> {
     final s = strings(context);
     final yes = await showDialog<bool>(
       context: context,
-      builder: (context) => AlertDialog(
+      builder: (context) => AppAlertDialog(
+        scrollable: true,
         title: Text(s.feedbackDiscardTitle),
         content: Text(s.feedbackDiscardBody),
         actions: [

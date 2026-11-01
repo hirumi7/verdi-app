@@ -104,7 +104,7 @@ void main() {
   testWidgets(
     'large text preview requires confirmation; cancellation preserves old collection',
     (tester) async {
-      tester.view.physicalSize = const Size(750, 1334);
+      tester.view.physicalSize = const Size(640, 1280);
       tester.view.devicePixelRatio = 2;
       addTearDown(tester.view.resetPhysicalSize);
       addTearDown(tester.view.resetDevicePixelRatio);
@@ -136,7 +136,7 @@ void main() {
             supportedLocales: const [Locale('en')],
             builder: (context, child) => MediaQuery(
               data: MediaQuery.of(context)
-                  .copyWith(textScaler: const TextScaler.linear(2)),
+                  .copyWith(textScaler: const TextScaler.linear(3.2)),
               child: child!,
             ),
             home: BackupPage(service: service),
@@ -153,11 +153,19 @@ void main() {
       await tester.tap(replace);
       await tester.pumpAndSettle();
       expect(find.text('Replace this collection?'), findsOneWidget);
+      await tester.ensureVisible(
+        find.widgetWithText(TextButton, 'Cancel').last,
+      );
+      await tester.pumpAndSettle();
       await tester.tap(find.widgetWithText(TextButton, 'Cancel').last);
       await tester.pumpAndSettle();
       expect(service.calls.contains('confirmImport'), isFalse);
       expect(reopened, 0);
       await tester.tap(replace);
+      await tester.pumpAndSettle();
+      await tester.ensureVisible(
+        find.widgetWithText(FilledButton, 'Replace collection').last,
+      );
       await tester.pumpAndSettle();
       await tester.tap(
         find.widgetWithText(FilledButton, 'Replace collection').last,

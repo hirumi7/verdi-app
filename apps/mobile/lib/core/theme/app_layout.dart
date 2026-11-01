@@ -120,3 +120,40 @@ class AppScrollTitle extends StatelessWidget {
           ),
         );
 }
+
+/// One stable scrollable hierarchy keeps message, inputs and actions reachable
+/// as keyboard insets and text scaling change, without remounting form fields.
+class AppAlertDialog extends StatelessWidget {
+  const AppAlertDialog({
+    super.key,
+    this.title,
+    this.content,
+    this.actions,
+    this.scrollable = true,
+  });
+  final Widget? title, content;
+  final List<Widget>? actions;
+  final bool scrollable;
+  @override
+  Widget build(BuildContext context) => AlertDialog(
+    scrollable: scrollable,
+    title: title,
+    content: Column(
+      mainAxisSize: MainAxisSize.min,
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        ?content,
+        if (actions != null) ...[
+          const SizedBox(height: 24),
+          OverflowBar(
+            alignment: MainAxisAlignment.end,
+            overflowAlignment: OverflowBarAlignment.end,
+            spacing: 8,
+            overflowSpacing: 8,
+            children: actions!,
+          ),
+        ],
+      ],
+    ),
+  );
+}

@@ -119,7 +119,10 @@ class _CardPageState extends State<CardPage> {
                   widget.comparison ? s.comparePhotos : s.sharePlantCard,
                 ),
               ),
-              if (state.busy) const LinearProgressIndicator(),
+              SizedBox(
+                height: 4,
+                child: state.busy ? const LinearProgressIndicator() : null,
+              ),
               if (state.bytes == null) ...feedback,
               if (state.bytes != null)
                 FigmaFormSection(
@@ -213,9 +216,7 @@ class _CardPageState extends State<CardPage> {
                     ? null
                     : () async {
                         await cubit.prepare();
-                        if (mounted &&
-                            cubit.state.bytes != null &&
-                            scroll.hasClients) {
+                        if (mounted && scroll.hasClients) {
                           scroll.jumpTo(0);
                         }
                       },

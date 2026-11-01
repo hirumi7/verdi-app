@@ -16,6 +16,15 @@ class PlantsPage extends StatefulWidget {
 
 class _PlantsPageState extends State<PlantsPage> {
   bool grid = true;
+  late final search = TextEditingController(
+    text: context.read<WorkspaceCubit>().state.query,
+  );
+  @override
+  void dispose() {
+    search.dispose();
+    super.dispose();
+  }
+
   Widget plant(PlantRow row, {required bool portrait}) {
     final s = strings(context), theme = Theme.of(context);
     final date = row.nextCheckDate;
@@ -94,7 +103,16 @@ class _PlantsPageState extends State<PlantsPage> {
 
   @override
   Widget build(BuildContext context) =>
-      BlocBuilder<WorkspaceCubit, WorkspaceState>(
+      BlocConsumer<WorkspaceCubit, WorkspaceState>(
+        listenWhen: (before, after) => before.query != after.query,
+        listener: (context, state) {
+          if (search.text != state.query) {
+            search.value = TextEditingValue(
+              text: state.query,
+              selection: TextSelection.collapsed(offset: state.query.length),
+            );
+          }
+        },
         builder: (context, state) {
           final s = strings(context),
               cubit = context.read<WorkspaceCubit>(),
@@ -125,8 +143,16 @@ class _PlantsPageState extends State<PlantsPage> {
                     ),
                   ),
                   TextField(
+                    controller: search,
                     decoration: InputDecoration(
                       hintText: s.searchPlants,
+                      suffixIcon: state.query.isEmpty
+                          ? null
+                          : IconButton(
+                              tooltip: s.clearSearch,
+                              onPressed: () => cubit.refresh(query: ''),
+                              icon: const Icon(Icons.cancel),
+                            ),
                       prefixIcon: const Icon(Icons.search),
                       fillColor: Theme.of(context)
                           .colorScheme
@@ -164,10 +190,38 @@ class _PlantsPageState extends State<PlantsPage> {
                   if (state.loading) const LinearProgressIndicator(),
                   if (state.errorCode != null) ErrorNotice(state.errorCode!),
                   const SizedBox(height: 24),
-                  if (page != null && rows.isEmpty && !state.loading)
+                  if (page != null &&
+                      rows.isEmpty &&
+                      !state.loading &&
+                      state.errorCode == null)
                     Padding(
                       padding: const EdgeInsets.symmetric(vertical: 40),
-                      child: Text(s.noMatches, textAlign: TextAlign.center),
+                      child: Column(
+                        children: [
+                          Text(
+                            state.query.trim().isNotEmpty
+                                ? s.noMatches
+                                : state.archived
+                                ? s.noArchivedPlants
+                                : s.noPlants,
+                            style: Theme.of(context).textTheme.titleLarge,
+                            textAlign: TextAlign.center,
+                          ),
+                          const SizedBox(height: 8),
+                          if (state.query.trim().isNotEmpty)
+                            TextButton(
+                              onPressed: () => cubit.refresh(query: ''),
+                              child: Text(s.clearSearch),
+                            )
+                          else
+                            Text(
+                              state.archived
+                                  ? s.noArchivedPlantsBody
+                                  : s.noPlantsBody,
+                              textAlign: TextAlign.center,
+                            ),
+                        ],
+                      ),
                     ),
                   if (!two)
                     for (final row in rows)

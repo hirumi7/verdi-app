@@ -133,7 +133,8 @@ class _ProPageState extends State<ProPage> with WidgetsBindingObserver {
         context: context,
         builder: (context) {
           pendingDialogContext = context;
-          return AlertDialog(
+          return AppAlertDialog(
+            scrollable: true,
             title: Text(s.proRetryPending),
             content: Text(s.proRetryPendingBody),
             actions: [

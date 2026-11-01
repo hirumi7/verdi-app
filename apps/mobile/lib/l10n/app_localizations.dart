@@ -2907,6 +2907,186 @@ abstract class AppStrings {
   /// In en, this message translates to:
   /// **'Every {count, plural, =1 {1 year} other {{count} years}}'**
   String intervalYear(int count);
+
+  /// No description provided for @clearSearch.
+  ///
+  /// In en, this message translates to:
+  /// **'Clear search'**
+  String get clearSearch;
+
+  /// No description provided for @noArchivedPlants.
+  ///
+  /// In en, this message translates to:
+  /// **'No archived plants'**
+  String get noArchivedPlants;
+
+  /// No description provided for @noArchivedPlantsBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Archived plants stay here with their history and photos.'**
+  String get noArchivedPlantsBody;
+
+  /// No description provided for @auditBefore.
+  ///
+  /// In en, this message translates to:
+  /// **'Before'**
+  String get auditBefore;
+
+  /// No description provided for @auditAfter.
+  ///
+  /// In en, this message translates to:
+  /// **'After'**
+  String get auditAfter;
+
+  /// No description provided for @auditInterval.
+  ///
+  /// In en, this message translates to:
+  /// **'Interval'**
+  String get auditInterval;
+
+  /// No description provided for @auditNext.
+  ///
+  /// In en, this message translates to:
+  /// **'Next check'**
+  String get auditNext;
+
+  /// No description provided for @auditAnchor.
+  ///
+  /// In en, this message translates to:
+  /// **'Recurrence anchor'**
+  String get auditAnchor;
+
+  /// No description provided for @auditFirstAnchor.
+  ///
+  /// In en, this message translates to:
+  /// **'First-check anchor (no completed care)'**
+  String get auditFirstAnchor;
+
+  /// No description provided for @auditCareAnchor.
+  ///
+  /// In en, this message translates to:
+  /// **'Completed-care anchor'**
+  String get auditCareAnchor;
+
+  /// No description provided for @auditFirstDate.
+  ///
+  /// In en, this message translates to:
+  /// **'Chosen first check'**
+  String get auditFirstDate;
+
+  /// No description provided for @auditOverride.
+  ///
+  /// In en, this message translates to:
+  /// **'Date override'**
+  String get auditOverride;
+
+  /// No description provided for @auditNone.
+  ///
+  /// In en, this message translates to:
+  /// **'None'**
+  String get auditNone;
+
+  /// No description provided for @auditActive.
+  ///
+  /// In en, this message translates to:
+  /// **'Active'**
+  String get auditActive;
+
+  /// No description provided for @auditPaused.
+  ///
+  /// In en, this message translates to:
+  /// **'Paused'**
+  String get auditPaused;
+
+  /// No description provided for @auditRetired.
+  ///
+  /// In en, this message translates to:
+  /// **'Retired'**
+  String get auditRetired;
+
+  /// No description provided for @auditStatus.
+  ///
+  /// In en, this message translates to:
+  /// **'Routine status'**
+  String get auditStatus;
+
+  /// No description provided for @auditArchived.
+  ///
+  /// In en, this message translates to:
+  /// **'Plant archived'**
+  String get auditArchived;
+
+  /// No description provided for @auditYes.
+  ///
+  /// In en, this message translates to:
+  /// **'Yes'**
+  String get auditYes;
+
+  /// No description provided for @auditNo.
+  ///
+  /// In en, this message translates to:
+  /// **'No'**
+  String get auditNo;
+
+  /// No description provided for @auditRecorded.
+  ///
+  /// In en, this message translates to:
+  /// **'Recorded at (UTC)'**
+  String get auditRecorded;
+
+  /// No description provided for @auditIntervalChange.
+  ///
+  /// In en, this message translates to:
+  /// **'Interval changed'**
+  String get auditIntervalChange;
+
+  /// No description provided for @auditSpeciesChange.
+  ///
+  /// In en, this message translates to:
+  /// **'Species suggestions applied'**
+  String get auditSpeciesChange;
+
+  /// No description provided for @auditOverrideChange.
+  ///
+  /// In en, this message translates to:
+  /// **'Check date changed'**
+  String get auditOverrideChange;
+
+  /// No description provided for @auditPause.
+  ///
+  /// In en, this message translates to:
+  /// **'Routine paused'**
+  String get auditPause;
+
+  /// No description provided for @auditResume.
+  ///
+  /// In en, this message translates to:
+  /// **'Routine resumed'**
+  String get auditResume;
+
+  /// No description provided for @auditRetire.
+  ///
+  /// In en, this message translates to:
+  /// **'Routine removed'**
+  String get auditRetire;
+
+  /// No description provided for @auditArchive.
+  ///
+  /// In en, this message translates to:
+  /// **'Plant archived'**
+  String get auditArchive;
+
+  /// No description provided for @auditRestore.
+  ///
+  /// In en, this message translates to:
+  /// **'Plant restored'**
+  String get auditRestore;
+
+  /// No description provided for @auditUndo.
+  ///
+  /// In en, this message translates to:
+  /// **'Action undone'**
+  String get auditUndo;
 }
 
 class _AppStringsDelegate extends LocalizationsDelegate<AppStrings> {

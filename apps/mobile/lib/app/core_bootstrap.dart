@@ -135,7 +135,8 @@ class _CoreBootstrapState extends State<CoreBootstrap>
           setState(() => busy = false);
           final confirm = await showDialog<bool>(
             context: context,
-            builder: (context) => AlertDialog(
+            builder: (context) => AppAlertDialog(
+              scrollable: true,
               title: Text(strings(context).cancelPendingTitle),
               content: Text(strings(context).retainDraftExplanation),
               actions: [

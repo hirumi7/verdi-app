@@ -106,7 +106,7 @@ class _PhotosPageState extends State<PhotosPage> {
     try {
       final yes = await showDialog<bool>(
         context: context,
-        builder: (context) => AlertDialog(
+        builder: (context) => AppAlertDialog(
           scrollable: true,
           title: Text(s.exportOriginal),
           content: Text(s.originalMetadataWarning),
@@ -396,7 +396,8 @@ class _PhotosPageState extends State<PhotosPage> {
                             : () async {
                                 final yes = await showDialog<bool>(
                                   context: context,
-                                  builder: (context) => AlertDialog(
+                                  builder: (context) => AppAlertDialog(
+                                    scrollable: true,
                                     title: Text(s.discardReplacement),
                                     content: Text(
                                       s.discardReplacementExplanation,

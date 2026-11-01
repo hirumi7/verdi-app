@@ -56,7 +56,8 @@ class _BackupPageState extends State<BackupPage> {
     final s = strings(context);
     final accepted = await showDialog<bool>(
       context: context,
-      builder: (context) => AlertDialog(
+      builder: (context) => AppAlertDialog(
+        scrollable: true,
         title: Text(s.backupReplaceTitle),
         content: Text(s.backupReplaceWarning),
         actions: [

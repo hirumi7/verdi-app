@@ -50,7 +50,8 @@ class _JournalEditorPageState extends State<JournalEditorPage> {
     if (cubit.state.changed) {
       final yes = await showDialog<bool>(
         context: context,
-        builder: (context) => AlertDialog(
+        builder: (context) => AppAlertDialog(
+          scrollable: true,
           title: Text(s.discardJournal),
           content: Text(s.discardJournalExplanation),
           actions: [
@@ -250,40 +251,63 @@ class _JournalEditorPageState extends State<JournalEditorPage> {
                     ),
                 ],
                 if (fields != null) ...[
-                  if (fields.selectedPhotoIds.isNotEmpty) ...[
-                    for (final id in fields.selectedPhotoIds)
-                      FigmaFormSection(
-                        children: [
-                          PhotoPreview(photoId: id),
+                  FigmaMediaRow(
+                    preview: Column(
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: [
+                        if (fields.selectedPhotoIds.isEmpty)
+                          const PlantVisual(height: 150)
+                        else ...[
+                          PhotoPreview(
+                            photoId: fields.selectedPhotoIds.first,
+                            height: 150,
+                          ),
                           TextButton.icon(
                             onPressed: busy
                                 ? null
-                                : () => cubit.removeAttachment(id),
+                                : () => cubit.removeAttachment(
+                                    fields.selectedPhotoIds.first,
+                                  ),
                             icon: const Icon(Icons.close),
                             label: Text(s.removeAttachment),
                           ),
                         ],
-                      ),
-                  ],
-                  Wrap(
-                    spacing: 12,
-                    runSpacing: 8,
-                    children: [
-                      OutlinedButton.icon(
-                        onPressed: busy ? null : () => pick('camera'),
-                        icon: const Icon(Icons.photo_camera_outlined),
-                        label: Text(s.camera),
-                      ),
-                      OutlinedButton.icon(
-                        onPressed: busy ? null : () => pick('library'),
-                        icon: const Icon(Icons.photo_library_outlined),
-                        label: Text(s.library),
-                      ),
-                    ],
+                      ],
+                    ),
+                    actions: Column(
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: [
+                        OutlinedButton.icon(
+                          onPressed: busy ? null : () => pick('camera'),
+                          icon: const FigmaIcon('camera', size: 22),
+                          label: Text(s.camera),
+                        ),
+                        const SizedBox(height: 10),
+                        OutlinedButton.icon(
+                          onPressed: busy ? null : () => pick('library'),
+                          icon: const FigmaIcon('library', size: 22),
+                          label: Text(s.library),
+                        ),
+                      ],
+                    ),
                   ),
+                  for (final id in fields.selectedPhotoIds.skip(1))
+                    FigmaFormSection(
+                      children: [
+                        PhotoPreview(photoId: id),
+                        TextButton.icon(
+                          onPressed: busy
+                              ? null
+                              : () => cubit.removeAttachment(id),
+                          icon: const Icon(Icons.close),
+                          label: Text(s.removeAttachment),
+                        ),
+                      ],
+                    ),
                   const SizedBox(height: 16),
                   FigmaFormSection(
                     title: s.notes,
+                    fieldGroup: true,
                     children: [
                       TextField(
                         key: const ValueKey('journal-note'),
@@ -300,7 +324,11 @@ class _JournalEditorPageState extends State<JournalEditorPage> {
                         ),
                         onChanged: (v) => cubit.update(text: v),
                       ),
-                      const SizedBox(height: 16),
+                    ],
+                  ),
+                  FigmaFormSection(
+                    fieldGroup: true,
+                    children: [
                       TextField(
                         key: const ValueKey('journal-date'),
                         controller: date,
@@ -332,16 +360,16 @@ class _JournalEditorPageState extends State<JournalEditorPage> {
                         ),
                         onChanged: (v) => cubit.update(date: v),
                       ),
-                      const SizedBox(height: 16),
-                      Text(s.journalHint),
                     ],
                   ),
+                  Text(s.journalHint),
                   if (state.attachmentFailed && fields.text.trim().isNotEmpty)
                     OutlinedButton(
                       onPressed: () async {
                         final yes = await showDialog<bool>(
                           context: context,
-                          builder: (context) => AlertDialog(
+                          builder: (context) => AppAlertDialog(
+                            scrollable: true,
                             title: Text(s.saveNoteOnly),
                             content: Text(s.saveNoteOnlyExplanation),
                             actions: [
@@ -373,7 +401,8 @@ class _JournalEditorPageState extends State<JournalEditorPage> {
                           }
                           final keep = await showDialog<bool>(
                             context: context,
-                            builder: (context) => AlertDialog(
+                            builder: (context) => AppAlertDialog(
+                              scrollable: true,
                               title: Text(s.reviewJournalConflict),
                               content: Text(s.journalDraftConflictExplanation),
                               actions: [

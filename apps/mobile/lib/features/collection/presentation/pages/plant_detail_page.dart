@@ -1,5 +1,6 @@
 import '../../../cards/presentation/card_page.dart';
 import 'custom_care_page.dart';
+import '../widgets/schedule_audit.dart';
 import '../../../../core/di/injection.dart';
 import '../../data/repositories/collection_repository.dart';
 import '../../../catalog/presentation/widgets/species_picker.dart';
@@ -143,7 +144,6 @@ class _PlantDetailPageState extends State<PlantDetailPage> {
         final tabs = AutoTabsRouter.of(context);
         await context.read<WorkspaceCubit>().refresh(
           archived: command is DeletePlant,
-          query: '',
         );
         if (!mounted) return;
         context.router.popUntilRoot();
@@ -270,7 +270,51 @@ class _PlantDetailPageState extends State<PlantDetailPage> {
                 selected: detailSection,
                 onSelected: (value) => setState(() => detailSection = value),
               ),
-              const SizedBox(height: 12),
+              const SizedBox(height: 16),
+              Wrap(
+                spacing: 8,
+                runSpacing: 8,
+                children: [
+                  OutlinedButton.icon(
+                    onPressed: () => openCard(context, widget.plantId),
+                    icon: const Icon(Icons.ios_share),
+                    label: Text(s.sharePlantCard),
+                  ),
+                  if (!d.plant.archived)
+                    OutlinedButton.icon(
+                      onPressed: () async {
+                        await openAddCare(context, widget.plantId);
+                        if (mounted) await load();
+                      },
+                      icon: const Icon(Icons.add_task),
+                      label: Text(s.addCare),
+                    ),
+                  FilledButton.icon(
+                    onPressed: () async {
+                      await context.router.push(
+                        JournalEditorRoute(plantId: widget.plantId),
+                      );
+                      if (mounted) {
+                        setState(() => detailSection = 1);
+                        load();
+                      }
+                    },
+                    icon: const Icon(Icons.add),
+                    label: Text(s.newJournalEntry),
+                  ),
+                  OutlinedButton.icon(
+                    onPressed: () async {
+                      await context.router.push(
+                        PhotosRoute(plantId: widget.plantId),
+                      );
+                      if (mounted) load();
+                    },
+                    icon: const Icon(Icons.photo_library_outlined),
+                    label: Text(s.photos),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 16),
               if (detailSection == 2) ...[
                 Text(
                   s.statsCareCount,
@@ -574,6 +618,7 @@ class _PlantDetailPageState extends State<PlantDetailPage> {
                       ),
                     ),
                   Card(
+                    margin: const EdgeInsets.only(bottom: 12),
                     child: Padding(
                       padding: const EdgeInsets.all(12),
                       child: entry is JournalTimelineEntry
@@ -744,28 +789,40 @@ class _PlantDetailPageState extends State<PlantDetailPage> {
                                 ),
                               ],
                             )
-                          : Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  s.scheduleChange,
-                                  style: Theme.of(context)
-                                      .textTheme
-                                      .titleMedium,
-                                ),
-                                Text(dateLabel(context, entry.date)),
-                                Text(
-                                  s.nextAfter(
-                                    dateLabel(
-                                      context,
-                                      (entry as ScheduleTimelineEntry)
-                                          .change
-                                          .after
-                                          .nextCheck,
+                          : TextButton(
+                              style: TextButton.styleFrom(
+                                alignment: Alignment.centerLeft,
+                              ),
+                              onPressed: () => showScheduleAudit(
+                                context,
+                                repository: getIt<CollectionRepository>(),
+                                datasetId: timeline!.datasetId,
+                                plantId: widget.plantId,
+                                changeId: entry.id,
+                              ),
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    s.scheduleChange,
+                                    style: Theme.of(context)
+                                        .textTheme
+                                        .titleMedium,
+                                  ),
+                                  Text(dateLabel(context, entry.date)),
+                                  Text(
+                                    s.nextAfter(
+                                      dateLabel(
+                                        context,
+                                        (entry as ScheduleTimelineEntry)
+                                            .change
+                                            .after
+                                            .nextCheck,
+                                      ),
                                     ),
                                   ),
-                                ),
-                              ],
+                                ],
+                              ),
                             ),
                     ),
                   ),
@@ -776,50 +833,6 @@ class _PlantDetailPageState extends State<PlantDetailPage> {
                     child: Text(s.loadMore),
                   ),
               ],
-              const SizedBox(height: 16),
-              Wrap(
-                spacing: 8,
-                runSpacing: 8,
-                children: [
-                  OutlinedButton.icon(
-                    onPressed: () => openCard(context, widget.plantId),
-                    icon: const Icon(Icons.ios_share),
-                    label: Text(s.sharePlantCard),
-                  ),
-                  if (!d.plant.archived)
-                    OutlinedButton.icon(
-                      onPressed: () async {
-                        await openAddCare(context, widget.plantId);
-                        if (mounted) await load();
-                      },
-                      icon: const Icon(Icons.add_task),
-                      label: Text(s.addCare),
-                    ),
-                  FilledButton.icon(
-                    onPressed: () async {
-                      await context.router.push(
-                        JournalEditorRoute(plantId: widget.plantId),
-                      );
-                      if (mounted) {
-                        setState(() => detailSection = 1);
-                        load();
-                      }
-                    },
-                    icon: const Icon(Icons.add),
-                    label: Text(s.newJournalEntry),
-                  ),
-                  OutlinedButton.icon(
-                    onPressed: () async {
-                      await context.router.push(
-                        PhotosRoute(plantId: widget.plantId),
-                      );
-                      if (mounted) load();
-                    },
-                    icon: const Icon(Icons.photo_library_outlined),
-                    label: Text(s.photos),
-                  ),
-                ],
-              ),
               const SizedBox(height: 24),
               if (!d.plant.archived)
                 OutlinedButton(

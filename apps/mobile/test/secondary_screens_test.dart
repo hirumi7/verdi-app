@@ -111,6 +111,10 @@ void main() {
         invoke(); // Same-turn taps must not create two confirmation routes.
         await t.pumpAndSettle();
         expect(find.byType(AlertDialog), findsOneWidget);
+        await t.ensureVisible(
+          find.widgetWithText(FilledButton, 'Share original'),
+        );
+        await t.pumpAndSettle();
         await t.tap(find.widgetWithText(FilledButton, 'Share original'));
         await t.pump();
         await t.pump(const Duration(milliseconds: 400));
@@ -243,6 +247,52 @@ void main() {
       await t.pumpWidget(const SizedBox());
     },
   );
+
+  testWidgets('failed preparation is visible above a long photo inventory', (
+    t,
+  ) async {
+    final rows = repository.scenario.rows;
+    for (var i = 0; i < 30; i++) {
+      final row = [...rows['photos']!.first];
+      row[0] = '00000000-0000-4000-8000-${i.toString().padLeft(12, '0')}';
+      rows['photos']!.add(row);
+    }
+    final projection = repository.scenario.projection;
+    projection.hydrate(
+      rows,
+      projection.snapshot.revision,
+      projection.storageRevision + 1,
+    );
+    final api = FakeCards()..failure = 'MEDIA_MISSING';
+    await t.pumpWidget(
+      app(
+        CardPage(
+          plantId: repository.plant,
+          repository: repository,
+          service: api,
+          comparison: true,
+        ),
+      ),
+    );
+    await t.pumpAndSettle();
+    final builder = t.widget<BlocBuilder<CardCubit, CardState>>(
+      find.byType(BlocBuilder<CardCubit, CardState>),
+    );
+    final cubit = builder.bloc!;
+    cubit.select(cubit.state.photos[0].id);
+    cubit.select(cubit.state.photos[1].id);
+    await t.pumpAndSettle();
+    await press(t, 'Preview card');
+    expect(api.prepared, 1);
+    expect(cubit.state.error, 'MEDIA_MISSING');
+    expect(
+      find.textContaining('A selected photo is unavailable.').hitTestable(),
+      findsWidgets,
+    );
+    expect(api.handoffs, 0);
+    expect(t.takeException(), isNull);
+    await t.pumpWidget(const SizedBox());
+  });
 
   for (final brightness in Brightness.values) {
     testWidgets(

@@ -3,7 +3,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
 import '../../../../core/native/draft_bridge.g.dart';
-import '../../../media/presentation/widgets/photo_preview.dart';
 
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:verdi_core/verdi_core.dart';
@@ -114,7 +113,8 @@ class _PlantEditorPageState extends State<PlantEditorPage>
     }
     final discard = await showDialog<bool>(
       context: context,
-      builder: (context) => AlertDialog(
+      builder: (context) => AppAlertDialog(
+        scrollable: true,
         title: Text(s.discardQuestion),
         content: Text(s.discardBody),
         actions: [
@@ -208,9 +208,10 @@ class _PlantEditorPageState extends State<PlantEditorPage>
       final f = review.editor.initialFields;
       final keep = await showDialog<bool>(
         context: context,
-        builder: (context) => AlertDialog(
-          title: Text(s.reviewLatest),
+        builder: (context) => AppAlertDialog(
           scrollable: true,
+          title: Text(s.reviewLatest),
+
           content: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -284,6 +285,9 @@ class _PlantEditorPageState extends State<PlantEditorPage>
         final s = strings(context);
         final f = state.fields;
         final photoLocked = photoBusy || state.photoPending;
+        final headerSave =
+            !AppLayout.largeText(context) &&
+            MediaQuery.sizeOf(context).width >= 360;
         return PopScope(
           canPop:
               leaving ||
@@ -299,6 +303,19 @@ class _PlantEditorPageState extends State<PlantEditorPage>
                 tooltip: s.cancel,
                 icon: const Icon(Icons.arrow_back),
               ),
+              actions: [
+                if (headerSave && !state.picking && f != null)
+                  TextButton(
+                    onPressed:
+                        reviewing ||
+                            photoLocked ||
+                            state.photoFailed ||
+                            photoError != null
+                        ? null
+                        : save,
+                    child: Text(s.reviewSave),
+                  ),
+              ],
               title: Text(
                 state.picking
                     ? s.chooseSpecies
@@ -337,41 +354,6 @@ class _PlantEditorPageState extends State<PlantEditorPage>
                             widget.plantId == null ? s.addPlant : s.editPlant,
                           ),
                         ),
-                        if (f.catalogSelection != null &&
-                            f.coverPhotoId == null) ...[
-                          FigmaGroup(
-                            children: [
-                              Padding(
-                                padding: const EdgeInsets.all(12),
-                                child: Row(
-                                  children: [
-                                    SizedBox(
-                                      width: 64,
-                                      height: 80,
-                                      child: CatalogArtwork(
-                                        speciesId:
-                                            f.catalogSelection!.speciesId,
-                                      ),
-                                    ),
-                                    const SizedBox(width: 12),
-                                    Expanded(
-                                      child: Text(
-                                        f.speciesName,
-                                        style: Theme.of(context)
-                                            .textTheme
-                                            .titleMedium!
-                                            .copyWith(
-                                              fontStyle: FontStyle.italic,
-                                            ),
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              ),
-                            ],
-                          ),
-                          const SizedBox(height: 24),
-                        ],
                         if (photoLocked) const LinearProgressIndicator(),
                         if (photoError != null ||
                             state.photoFailed ||
@@ -422,34 +404,43 @@ class _PlantEditorPageState extends State<PlantEditorPage>
                               child: Text(s.photoContinueWithout),
                             ),
                         ],
-                        if (f.coverPhotoId != null) ...[
-                          PhotoPreview(photoId: f.coverPhotoId!),
-                          TextButton(
-                            onPressed: photoLocked
-                                ? null
-                                : () => editor.update(removeCover: true),
-                            child: Text(s.removeCover),
+                        FigmaMediaRow(
+                          preview: Column(
+                            children: [
+                              PlantVisual(
+                                speciesId: f.catalogSelection?.speciesId,
+                                photoId: f.coverPhotoId,
+                                height: 150,
+                              ),
+                              if (f.coverPhotoId != null)
+                                TextButton(
+                                  onPressed: photoLocked
+                                      ? null
+                                      : () => editor.update(removeCover: true),
+                                  child: Text(s.removeCover),
+                                ),
+                            ],
                           ),
-                        ],
-                        Wrap(
-                          spacing: 8,
-                          runSpacing: 8,
-                          children: [
-                            OutlinedButton.icon(
-                              onPressed: photoLocked
-                                  ? null
-                                  : () => pickPhoto('camera'),
-                              icon: const Icon(Icons.photo_camera_outlined),
-                              label: Text(s.camera),
-                            ),
-                            OutlinedButton.icon(
-                              onPressed: photoLocked
-                                  ? null
-                                  : () => pickPhoto('library'),
-                              icon: const Icon(Icons.photo_library_outlined),
-                              label: Text(s.library),
-                            ),
-                          ],
+                          actions: Column(
+                            crossAxisAlignment: CrossAxisAlignment.stretch,
+                            children: [
+                              OutlinedButton.icon(
+                                onPressed: photoLocked
+                                    ? null
+                                    : () => pickPhoto('camera'),
+                                icon: const FigmaIcon('camera', size: 22),
+                                label: Text(s.camera),
+                              ),
+                              const SizedBox(height: 10),
+                              OutlinedButton.icon(
+                                onPressed: photoLocked
+                                    ? null
+                                    : () => pickPhoto('library'),
+                                icon: const FigmaIcon('library', size: 22),
+                                label: Text(s.library),
+                              ),
+                            ],
+                          ),
                         ),
                         if (state.errorCode != null)
                           ErrorNotice(state.errorCode!),
@@ -478,6 +469,7 @@ class _PlantEditorPageState extends State<PlantEditorPage>
                             crossAxisAlignment: CrossAxisAlignment.stretch,
                             children: [
                               FigmaFormSection(
+                                fieldGroup: true,
                                 children: [
                                   TextFormField(
                                     enabled: !photoLocked,
@@ -526,6 +518,7 @@ class _PlantEditorPageState extends State<PlantEditorPage>
                                 ],
                               ),
                               FigmaFormSection(
+                                fieldGroup: true,
                                 children: [
                                   TextFormField(
                                     enabled: !photoLocked,
@@ -547,6 +540,7 @@ class _PlantEditorPageState extends State<PlantEditorPage>
                                 ],
                               ),
                               FigmaFormSection(
+                                fieldGroup: true,
                                 children: [
                                   TextFormField(
                                     enabled: !photoLocked,
@@ -732,16 +726,17 @@ class _PlantEditorPageState extends State<PlantEditorPage>
                                   ),
                               ],
                               const SizedBox(height: 24),
-                              FilledButton(
-                                onPressed:
-                                    reviewing ||
-                                        photoLocked ||
-                                        state.photoFailed ||
-                                        photoError != null
-                                    ? null
-                                    : save,
-                                child: Text(s.reviewSave),
-                              ),
+                              if (!headerSave)
+                                FilledButton(
+                                  onPressed:
+                                      reviewing ||
+                                          photoLocked ||
+                                          state.photoFailed ||
+                                          photoError != null
+                                      ? null
+                                      : save,
+                                  child: Text(s.reviewSave),
+                                ),
                             ],
                           ),
                         ),

@@ -68,5 +68,17 @@
     "name": "water",
     "source": "verdi-figma-13-1419.txt",
     "asset": "3c82f.svg"
+  },
+  {
+    "name": "camera",
+    "source": "Figma 11:7325",
+    "node": "11:7391",
+    "asset": "8644e.svg"
+  },
+  {
+    "name": "library",
+    "source": "Figma 11:7325",
+    "node": "11:7396",
+    "asset": "8a884.svg"
   }
 ]
