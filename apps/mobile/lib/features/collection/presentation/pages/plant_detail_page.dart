@@ -1,3 +1,4 @@
+import 'custom_care_page.dart';
 import '../../../../core/di/injection.dart';
 import '../../data/repositories/collection_repository.dart';
 import '../../../catalog/presentation/widgets/species_picker.dart';
@@ -207,6 +208,15 @@ class _PlantDetailPageState extends State<PlantDetailPage> {
               Wrap(
                 spacing: 8,
                 children: [
+                  if (!d.plant.archived)
+                    OutlinedButton.icon(
+                      onPressed: () async {
+                        await openAddCare(context, widget.plantId);
+                        if (mounted) await load();
+                      },
+                      icon: const Icon(Icons.add_task),
+                      label: Text(s.addCare),
+                    ),
                   FilledButton.icon(
                     onPressed: () async {
                       await context.router.push(
@@ -290,7 +300,11 @@ class _PlantDetailPageState extends State<PlantDetailPage> {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
-                            kindLabel(s, r.careKind),
+                            kindLabel(
+                              s,
+                              r.careKind,
+                              customLabel: r.routine.careLabel,
+                            ),
                             style: Theme.of(context).textTheme.titleLarge,
                           ),
                           Text(
@@ -383,12 +397,22 @@ class _PlantDetailPageState extends State<PlantDetailPage> {
                                     if (date != null && mounted) {
                                       await perform(
                                         CompleteCurrent(r.target, date),
-                                        kindLabel(s, r.careKind, actual: true),
+                                        kindLabel(
+                                          s,
+                                          r.careKind,
+                                          actual: true,
+                                          customLabel: r.routine.careLabel,
+                                        ),
                                       );
                                     }
                                   },
                                   child: Text(
-                                    kindLabel(s, r.careKind, actual: true),
+                                    kindLabel(
+                                      s,
+                                      r.careKind,
+                                      actual: true,
+                                      customLabel: r.routine.careLabel,
+                                    ),
                                   ),
                                 ),
                               if (r.canComplete)
@@ -534,7 +558,12 @@ class _PlantDetailPageState extends State<PlantDetailPage> {
                               Text(
                                 entry.event.effective.outcome ==
                                         CareOutcome.actualCare
-                                    ? kindLabel(s, entry.careKind, actual: true)
+                                    ? kindLabel(
+                                        s,
+                                        entry.careKind,
+                                        actual: true,
+                                        customLabel: entry.careLabel,
+                                      )
                                     : entry.event.effective.outcome ==
                                           CareOutcome.checkedNotNeeded
                                     ? s.checkedNotNeeded

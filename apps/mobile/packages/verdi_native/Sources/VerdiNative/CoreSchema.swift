@@ -8,9 +8,11 @@ public struct CoreRepositoryError: Error {
 // All identifiers and SQL are compiled here. The channel never supplies SQL.
 enum CoreSchema {
     static let maxRevision: Int64 = 9_007_199_254_740_991
-    static let tables = ["plants", "routines", "heads", "care_events", "event_corrections", "routine_changes", "plant_drafts", "plant_catalog", "suggestion_snapshots", "routine_suggestions","journal_entries","journal_drafts","media_drafts","photos","plant_covers"]
-    static let linkedTables: Set<String> = ["plant_catalog","routine_suggestions","plant_covers"]
+    static let tables = ["plants", "routines", "heads", "care_events", "event_corrections", "routine_changes", "plant_drafts", "plant_catalog", "suggestion_snapshots", "routine_suggestions","journal_entries","journal_drafts","media_drafts","photos","plant_covers","custom_care_types","routine_custom_types"]
+    static let linkedTables: Set<String> = ["plant_catalog","routine_suggestions","plant_covers","routine_custom_types"]
     static let columns: [String: [String]] = [
+        "custom_care_types":["id","revision","label","retired"],
+        "routine_custom_types":["id","custom_type_id"],
         "journal_entries":["id","plant_id","revision","entry_date","text","photo_ids_json","created_at","updated_at"],
         "journal_drafts":["id","revision","plant_id","entry_id","base_entry_revision","raw_fields_json","ready_photo_ids_json","created_at","updated_at"],
         "media_drafts":["id","revision","plant_id","photo_id","base_photo_revision","ready_photo_ids_json","created_at","updated_at"],
@@ -27,12 +29,12 @@ enum CoreSchema {
         "routine_changes": ["id","plant_id","routine_id","command_id","kind","change_date","changed_at","recorded_zone","before_json","after_json"],
         "plant_drafts": ["id","revision","mode","plant_id","base_plant_revision","raw_fields_json","created_at","updated_at"],
     ]
-    static let integerColumns: [String: Set<Int>] = ["journal_entries":[2],"journal_drafts":[1,4],"media_drafts":[1,4],"photos":[3,6,8,9],"suggestion_snapshots":[6],"plant_catalog":[],"routine_suggestions":[],"plants":[1,8],"routines":[2,6,9],"heads":[2],"care_events":[3],"event_corrections":[2,5,8],"routine_changes":[],"plant_drafts":[1,4]]
+    static let integerColumns: [String: Set<Int>] = ["custom_care_types":[1,3],"journal_entries":[2],"journal_drafts":[1,4],"media_drafts":[1,4],"photos":[3,6,8,9],"suggestion_snapshots":[6],"plant_catalog":[],"routine_suggestions":[],"plants":[1,8],"routines":[2,6,9],"heads":[2],"care_events":[3],"event_corrections":[2,5,8],"routine_changes":[],"plant_drafts":[1,4]]
     static let nullableColumns: [String: Set<Int>] = ["journal_drafts":[3,4],"photos":[1,2,12],"routine_suggestions":[1],"routines":[10],"heads":[4],"plant_drafts":[3,4]]
     static let instantColumns: [String: Set<Int>] = ["journal_entries":[6,7],"journal_drafts":[7,8],"media_drafts":[6,7],"photos":[13],"suggestion_snapshots":[10],"plants":[9,10],"routines":[11,12],"care_events":[8],"event_corrections":[9],"routine_changes":[6],"plant_drafts":[6,7]]
-    static let revisions = ["journal_entries":2,"journal_drafts":1,"media_drafts":1,"photos":3,"plants":1,"routines":2,"heads":2,"care_events":3,"plant_drafts":1]
+    static let revisions = ["custom_care_types":1,"journal_entries":2,"journal_drafts":1,"media_drafts":1,"photos":3,"plants":1,"routines":2,"heads":2,"care_events":3,"plant_drafts":1]
     // The only fields a row update can change. Recording history is immutable.
-    static let mutable: [String: Set<Int>] = ["journal_entries":[2,3,4,5,7],"journal_drafts":[1,4,5,6,8],"media_drafts":[1,4,5,7],"photos":[1,2,3,4,5,6,7,8,9,10,11,12],"plant_covers":[1],"plant_catalog":[1,2,3],"routine_suggestions":[2],"plants":[1,2,3,4,5,6,7,8,10],"routines":[2,5,6,7,8,9,10,12],"heads":[2,3,4],"care_events":[3],"plant_drafts":[1,4,5,7]]
+    static let mutable: [String: Set<Int>] = ["custom_care_types":[1,2,3],"journal_entries":[2,3,4,5,7],"journal_drafts":[1,4,5,6,8],"media_drafts":[1,4,5,7],"photos":[1,2,3,4,5,6,7,8,9,10,11,12],"plant_covers":[1],"plant_catalog":[1,2,3],"routine_suggestions":[2],"plants":[1,2,3,4,5,6,7,8,10],"routines":[2,4,5,6,7,8,9,10,12],"heads":[2,3,4],"care_events":[3],"plant_drafts":[1,4,5,7]]
     static let legacyDefinitions = [
         "CREATE TABLE metadata(slot INTEGER PRIMARY KEY CHECK(slot=1),dataset_id TEXT NOT NULL UNIQUE,profile TEXT NOT NULL CHECK(profile='custom_core_v1'),collection_revision INTEGER NOT NULL CHECK(collection_revision BETWEEN 1 AND 9007199254740991),storage_revision INTEGER NOT NULL CHECK(storage_revision BETWEEN 1 AND 9007199254740991),created_at TEXT NOT NULL)",
         "CREATE TABLE plants(id TEXT PRIMARY KEY NOT NULL,revision INTEGER NOT NULL CHECK(revision BETWEEN 1 AND 9007199254740991),name TEXT NOT NULL,location TEXT NOT NULL,notes TEXT NOT NULL,custom_species TEXT NOT NULL,light TEXT NOT NULL CHECK(light IN ('unknown','low','medium','brightIndirect','direct')),toxicity TEXT NOT NULL CHECK(toxicity IN ('unknown','toxic','nonToxic')),archived INTEGER NOT NULL CHECK(archived IN (0,1)),created_at TEXT NOT NULL,updated_at TEXT NOT NULL)",
@@ -75,9 +77,27 @@ enum CoreSchema {
         "CREATE TABLE user_settings(slot INTEGER PRIMARY KEY CHECK(slot=1),revision INTEGER NOT NULL CHECK(revision BETWEEN 1 AND 9007199254740991),payload_json TEXT NOT NULL)",
     ]
     static var settingsSeed: String { "INSERT INTO user_settings VALUES(1,1,'\(try! BackupSettings.defaults.json())')" }
-    static let definitions = legacyDefinitions + catalogDefinitions + mediaDefinitions + settingsDefinitions
-    static func schema(dataset: String? = nil, instant: String = "", version: Int32 = 4, expectedDataset: String? = nil) -> CompiledSchema {
-        let expected = version == 1 ? legacyDefinitions : version == 2 ? legacyDefinitions + catalogDefinitions : version == 3 ? legacyDefinitions + catalogDefinitions + mediaDefinitions : definitions
+    static let version4Definitions = legacyDefinitions + catalogDefinitions + mediaDefinitions + settingsDefinitions
+    static let customRoutineDefinition = legacyDefinitions.first{$0.hasPrefix("CREATE TABLE routines(")}!
+        .replacingOccurrences(of:"CREATE TABLE routines(",with:"CREATE TABLE \"routines\"(")
+        .replacingOccurrences(of:"'repot','rotate'",with:"'repot','rotate','custom'")
+    static let customIndexDefinition = "CREATE UNIQUE INDEX current_kind ON routines(plant_id,care_kind) WHERE state!='retired' AND care_kind!='custom'"
+    static let customDefinitions = [
+        "CREATE TABLE custom_care_types(id TEXT PRIMARY KEY NOT NULL,revision INTEGER NOT NULL CHECK(revision BETWEEN 1 AND 9007199254740991),label TEXT NOT NULL,retired INTEGER NOT NULL CHECK(retired IN (0,1)))",
+        "CREATE TABLE routine_custom_types(id TEXT PRIMARY KEY NOT NULL REFERENCES routines(id),custom_type_id TEXT NOT NULL REFERENCES custom_care_types(id))",
+    ]
+    static let customMigration = [
+        customRoutineDefinition.replacingOccurrences(of:"\"routines\"",with:"routines_v5"),
+        "INSERT INTO routines_v5 SELECT * FROM routines",
+        "DROP TABLE routines",
+        "ALTER TABLE routines_v5 RENAME TO routines",
+        customIndexDefinition,
+    ] + customDefinitions
+    static let definitions = version4Definitions.map { statement in
+        statement.hasPrefix("CREATE TABLE routines(") ? customRoutineDefinition : statement.hasPrefix("CREATE UNIQUE INDEX current_kind ") ? customIndexDefinition : statement
+    } + customDefinitions
+    static func schema(dataset: String? = nil, instant: String = "", version: Int32 = 5, expectedDataset: String? = nil) -> CompiledSchema {
+        let expected = version == 1 ? legacyDefinitions : version == 2 ? legacyDefinitions + catalogDefinitions : version == 3 ? legacyDefinitions + catalogDefinitions + mediaDefinitions : version == 4 ? version4Definitions : definitions
         return CompiledSchema(applicationID: 0x56435231, version: version,
             statements: expected + (version >= 4 ? [settingsSeed] : []) + (dataset.map { ["INSERT INTO metadata VALUES(1,'\($0)','custom_core_v1',1,1,'\(instant)')"] } ?? [])) { sql in
             let metadata = try sql.query("SELECT slot,dataset_id,profile,collection_revision,storage_revision FROM metadata")

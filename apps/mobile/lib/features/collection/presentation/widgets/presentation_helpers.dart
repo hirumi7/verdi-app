@@ -125,14 +125,19 @@ Future<CareInterval?> chooseInterval(
   return result;
 }
 
-String kindLabel(AppStrings s, StandardCareKind kind, {bool actual = false}) =>
-    switch (kind) {
-      StandardCareKind.water => actual ? s.watered : s.checkWatering,
-      StandardCareKind.fertilize => actual ? s.fertilized : s.fertilize,
-      StandardCareKind.mist => actual ? s.misted : s.mist,
-      StandardCareKind.repot => actual ? s.repotted : s.repot,
-      StandardCareKind.rotate => actual ? s.rotated : s.rotate,
-    };
+String kindLabel(
+  AppStrings s,
+  StandardCareKind kind, {
+  bool actual = false,
+  String? customLabel,
+}) => switch (kind) {
+  StandardCareKind.water => actual ? s.watered : s.checkWatering,
+  StandardCareKind.fertilize => actual ? s.fertilized : s.fertilize,
+  StandardCareKind.mist => actual ? s.misted : s.mist,
+  StandardCareKind.repot => actual ? s.repotted : s.repot,
+  StandardCareKind.rotate => actual ? s.rotated : s.rotate,
+  StandardCareKind.custom => customLabel ?? s.customCare,
+};
 
 String errorLabel(AppStrings s, String code) => switch (code) {
   'CAMERA_DENIED' => s.cameraDenied,
@@ -151,6 +156,7 @@ String errorLabel(AppStrings s, String code) => switch (code) {
   'READ_STALE' ||
   'DRAFT_CONFLICT' => s.staleSelection,
   'ACTIVE_LIMIT' => s.activeLimit,
+  'PRO_REQUIRED' => s.customCarePro,
   'FUTURE_CARE_DATE' => s.futureCare,
   'CARE_PRECEDES_LATEST' => s.earlierCare,
   'FIRST_CHECK_REQUIRED' => s.firstCheckRequired,
@@ -297,6 +303,21 @@ class _CommandReviewState extends State<_CommandReview> {
           mainAxisSize: MainAxisSize.min,
           children: [
             if (widget.explanation != null) Text(widget.explanation!),
+            if (command is CreateCustomCareType) Text(command.label.trim()),
+            if (command is RenameCustomCareType) Text(command.label.trim()),
+            if (command is CustomCareCommand && command is! CreateRoutine)
+              Text(s.careTypeEffects(preview.effects.routines)),
+            if (command is CreateRoutine) ...[
+              Text(
+                s.routineEvery(
+                  command.interval.count,
+                  unitLabel(s, command.interval.unit),
+                ),
+              ),
+              Text(
+                '${command.seedKind == SeedKind.known ? s.actualCareDate : s.firstCheck}: ${dateLabel(context, command.seedDate)}',
+              ),
+            ],
             if (preview.effects.historyOnly) Text(s.historyOnly),
             if (command is BulkComplete)
               Text(s.selectionCount(command.targets.length)),
@@ -331,7 +352,10 @@ class _CommandReviewState extends State<_CommandReview> {
                       row.plantName,
                       style: Theme.of(context).textTheme.titleMedium,
                     ),
-                    if (row.careKind != null) Text(kindLabel(s, row.careKind!)),
+                    if (row.careKind != null)
+                      Text(
+                        kindLabel(s, row.careKind!, customLabel: row.careLabel),
+                      ),
                     if (affected.contains(row.routineId))
                       Text(
                         s.affectedPlant(row.plantName),
@@ -346,12 +370,14 @@ class _CommandReviewState extends State<_CommandReview> {
               ),
             if (preview.effects.gate == PreviewGate.activeLimit)
               Text(s.activeLimit),
+            if (preview.effects.gate == PreviewGate.proRequired)
+              Text(s.customCarePro),
             if (error != null) ErrorNotice(error!),
             if (busy) const LinearProgressIndicator(),
           ],
         ),
         actions: [
-          if (preview.effects.gate == PreviewGate.activeLimit &&
+          if (preview.effects.gate != PreviewGate.allowed &&
               ProHost.maybeOf(context) != null)
             FilledButton(
               onPressed: busy ? null : upgrade,

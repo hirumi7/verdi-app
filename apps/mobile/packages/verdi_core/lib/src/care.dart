@@ -63,6 +63,7 @@ final class EventCorrection {
 }
 
 final class CareEvent {
+  final String careLabel;
   final String id;
   final String commandId;
   final EventValues original;
@@ -79,6 +80,7 @@ final class CareEvent {
     this.recordedZone,
     this.revision,
     Iterable<EventCorrection> corrections,
+    this.careLabel,
   ) : corrections = List.unmodifiable(corrections);
 
   EventValues get effective =>
@@ -92,6 +94,7 @@ final class CareEvent {
     recordedZone,
     _increment(revision),
     [...corrections, correction],
+    careLabel,
   );
 }
 
@@ -323,10 +326,14 @@ final class RoutineCore {
       clock.zone,
       1,
       [],
+      careLabel,
     );
   }
 
+  RoutineCore renamed(String label) => _next(careLabel: label);
+
   RoutineCore _next({
+    String? careLabel,
     CareInterval? interval,
     LocalDate? anchor,
     bool? firstCheckAnchor,
@@ -342,7 +349,7 @@ final class RoutineCore {
     id: id,
     plantId: plantId,
     headId: headId,
-    careLabel: careLabel,
+    careLabel: careLabel ?? this.careLabel,
     revision: _increment(revision),
     headRevision: headChanged ? _increment(headRevision) : headRevision,
     interval: interval ?? this.interval,

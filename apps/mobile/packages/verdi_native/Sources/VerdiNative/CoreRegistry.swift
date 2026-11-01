@@ -18,7 +18,7 @@ struct CoreDelta {
 }
 
 enum CoreRegistry {
-    static let commands: Set<String> = Set(["SaveDraft","SavePlant","DiscardDraft","CompleteCurrent","BulkComplete","CheckNotNeeded","Snooze","Skip","SetInterval","ClearOverride","PauseRoutine","ResumeRoutine","RetireRoutine","AddPastCare","CorrectEvent","RestoreEvent","VoidEvent","ArchivePlant","RestorePlant","DeletePlant","Undo"]).union(mediaCommands)
+    static let commands: Set<String> = Set(["SaveDraft","SavePlant","DiscardDraft","CompleteCurrent","BulkComplete","CheckNotNeeded","Snooze","Skip","SetInterval","ClearOverride","PauseRoutine","ResumeRoutine","RetireRoutine","AddPastCare","CorrectEvent","RestoreEvent","VoidEvent","ArchivePlant","RestorePlant","DeletePlant","Undo"]).union(mediaCommands).union(customCommands)
     static let history: Set<String> = ["AddPastCare","CorrectEvent","RestoreEvent","VoidEvent"]
     static let schedule: Set<String> = ["Snooze","SetInterval","ClearOverride","PauseRoutine","ResumeRoutine","RetireRoutine"]
     static let eligibleUndo: Set<String> = ["CompleteCurrent","BulkComplete","CheckNotNeeded","Skip","Snooze"]
@@ -70,7 +70,7 @@ enum CoreRegistry {
             if action == "insert" { try require(before == nil && statement["beforeHash"]?.isNull == true, "STALE_TARGET") }
             else { try require(before != nil, "STALE_TARGET"); try require(try CoreSchema.rowHash(before!) == CoreSchema.string(statement["beforeHash"]), "STALE_TARGET") }
             if action == "deleteTree" {
-                try require(table == "plants" && p.type == "DeletePlant" && [10,14].contains(raw.count))
+                try require(table == "plants" && p.type == "DeletePlant" && [10,14,15].contains(raw.count))
                 changes.append(CoreDelta(table:table,action:action,id:id,before:before,values:[],raw:raw)); continue
             }
             if action == "delete" {
@@ -98,6 +98,7 @@ enum CoreRegistry {
                 values.append(scalar)
             }
             if let before {
+                if table=="routines" && p.type != "RenameCustomCareType" {try require(values[4]==before[4])}
                 guard let mutable = CoreSchema.mutable[table] else { throw CoreRepositoryError("PLAN_INVALID") }
                 for i in values.indices where !mutable.contains(i) { try require(values[i] == before[i]) }
                 if let revision = CoreSchema.revisions[table] { try require(try CoreSchema.integer(values[revision]) == CoreSchema.integer(before[revision]) + 1) }
@@ -130,6 +131,7 @@ enum CoreRegistry {
         func guardDraft(_ id: String, _ revision: CanonicalValue?) throws {
             try require(guards.count == 1 && guards[0].object?["draftId"]?.text == id && (try CoreSchema.same(guards[0].object?["revision"],revision)))
         }
+        if customCommands.contains(p.type) {try customScope(sql,p,d,allocated:allocated,guards:guards,clock:clock,access:access);return}
         if mediaCommands.contains(p.type) {try mediaScope(sql,p,d,allocated:allocated,guards:guards,clock:clock);return}
         var requiresAccess = p.type == "RestorePlant"
         if p.type == "SaveDraft" {
@@ -302,7 +304,11 @@ enum CoreRegistry {
                 } else if p.type == "ResumeRoutine" { try require(plant[8] == .integer(0) && old[5] == .text("paused"), "NOT_ELIGIBLE") }
                 else { try require(old[5] != .text("retired"), "NOT_ELIGIBLE") }
                 try transition(p, routine:r, head:h, storedHead:head, clock:clock)
-                if p.type == "BulkComplete" { try require(old[3] == .text(try CoreSchema.string(p.payload["careKind"]))) }
+                if p.type == "BulkComplete" {
+                    try require(old[3] == .text(try CoreSchema.string(p.payload["careKind"])))
+                    let link=try CoreSchema.row(sql,"routine_custom_types",CoreSchema.text(old[0]))
+                    try require(try CoreSchema.same(p.payload["customTypeId"],link.map{CoreSchema.canonical($0[1])} ?? .null))
+                }
                 if schedule.contains(p.type) {
                     expectedAudits += 1
                     guard let audit = of("routine_changes").first(where:{$0.id == allocatedID}) else { throw CoreRepositoryError("PLAN_INVALID") }
@@ -469,8 +475,9 @@ enum CoreRegistry {
         }
         let missingHeads = try sql.query("SELECT r.id FROM routines r LEFT JOIN heads h ON h.routine_id=r.id WHERE h.id IS NULL LIMIT 1")
         try require(missingHeads.isEmpty)
-        let badEvents = try sql.query("SELECT e.id FROM care_events e JOIN routines r ON r.id=e.routine_id WHERE e.plant_id!=r.plant_id OR e.care_kind!=r.care_kind OR e.care_label!=r.label LIMIT 1")
+        let badEvents = try sql.query("SELECT e.id FROM care_events e JOIN routines r ON r.id=e.routine_id WHERE e.plant_id!=r.plant_id OR e.care_kind!=r.care_kind OR (r.care_kind!='custom' AND e.care_label!=r.label) LIMIT 1")
         try require(badEvents.isEmpty)
+        try require(try sql.query("SELECT r.id FROM routines r LEFT JOIN routine_custom_types l ON l.id=r.id LEFT JOIN custom_care_types t ON t.id=l.custom_type_id WHERE (r.care_kind='custom' AND (l.id IS NULL OR (r.state!='retired' AND r.label!=t.label))) OR (r.care_kind!='custom' AND l.id IS NOT NULL) LIMIT 1").isEmpty)
         try validateMediaGraph(sql)
     }
     static func deleteTree(_ sql: SQLiteSession, _ plant: String, _ command: String) throws {
@@ -513,6 +520,7 @@ enum CoreRegistry {
         try sql.execute("DELETE FROM journal_entries WHERE plant_id=?",[.text(plant)])
         for row in photoIDs {try sql.execute("DELETE FROM photos WHERE id=?",[row[0]])}
         for query in [
+            "DELETE FROM routine_custom_types WHERE id IN (SELECT id FROM routines WHERE plant_id=?)",
             "DELETE FROM routine_suggestions WHERE id IN (SELECT id FROM routines WHERE plant_id=?)",
             "DELETE FROM suggestion_snapshots WHERE plant_id=?", "DELETE FROM plant_catalog WHERE id=?",
             "DELETE FROM event_corrections WHERE event_id IN (SELECT id FROM care_events WHERE plant_id=?)",
@@ -548,6 +556,8 @@ enum CoreRegistry {
             else if ["DeletePhoto","ReplacePhoto","UpdatePhotoObservation"].contains(p.type) {primary=p.payload["photoId"]!;primaryType = .string("photo")}
             else {primary=p.payload["draftId"]!;primaryType = .string(p.type.contains("Journal") ? "journalDraft":"mediaDraft")}
         }
+        else if p.type == "CreateRoutine" {primary = .string(d.first{$0.table=="routines"}!.id);primaryType = .string("routine")}
+        else if customCommands.contains(p.type) {primary = .string(d.first{$0.table=="custom_care_types"}!.id);primaryType = .string("customCareType")}
         else if p.type == "SavePlant" { primary = .string(d.first{$0.table == "plants"}!.id); primaryType = .string("plant") }
         else if ["ArchivePlant","RestorePlant","DeletePlant"].contains(p.type) { primary = p.payload["plantId"]!; primaryType = .string("plant") }
         else if ["CorrectEvent","RestoreEvent","VoidEvent"].contains(p.type) { primary = p.payload["eventId"]!; primaryType = .string("event") }

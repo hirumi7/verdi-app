@@ -27,6 +27,7 @@ Map<String, Object?> _map(Object? v) => (v as Map).cast<String, Object?>();
 /// channel that can choose a database, corrupt rows or grant entitlement.
 enum CoreVerificationFault {
   beforeFreeze,
+  afterFreezeReply,
   beforeCommit,
   afterCommitReply,
   receiptRead,
@@ -315,8 +316,13 @@ final class NativeCollectionRepository implements CollectionRepository {
   Future<CommandResolution> resolve(String commandId) =>
       _call('resolve', null, commandId);
   @override
-  Future<CommandResolution> abandon(String commandId) =>
-      _call('abandon', null, commandId);
+  Future<CommandResolution> abandon(String commandId) async {
+    final result = await _call<CommandResolution>('abandon', null, commandId);
+    _preparationIds.removeWhere((_, id) => id == commandId);
+    _retryIds.removeWhere((_, id) => id == commandId);
+    return result;
+  }
+
   @override
   void invalidateUndo() {
     if (_commands != null) {
@@ -358,6 +364,11 @@ final class _Worker {
           ...args,
         }),
       );
+      if (nextFault == CoreVerificationFault.afterFreezeReply &&
+          operation == 'freeze') {
+        nextFault = null;
+        throw const RecoveryUnavailable();
+      }
       if (nextFault == CoreVerificationFault.afterCommitReply &&
           operation == 'commit') {
         nextFault = null;
@@ -769,10 +780,19 @@ final class _Worker {
         return commit(plan);
       case 'resolve':
       case 'abandon':
-        final id = request.commandId!,
-            result = await native(request.operation, {
-              'commandId': request.commandId,
-            });
+        final id = request.commandId!;
+        Object? result;
+        try {
+          result = await native(request.operation, {'commandId': id});
+        } on CommandRejected catch (error) {
+          if (request.operation != 'abandon' || error.code != 'NOT_FOUND') {
+            rethrow;
+          }
+          // An interrupted freeze may have recorded no intent. Native absence,
+          // followed by a successful receipt read on this owner, permits cancel.
+          // Unavailable reads still throw and preserve the unresolved command.
+          result = await native('resolve', {'commandId': id});
+        }
         if (result != null || request.operation == 'abandon') {
           pending.remove(id);
           projection.forget(id);

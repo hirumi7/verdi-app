@@ -24,7 +24,7 @@ class RoutineFieldsEditor extends StatelessWidget {
 
   void replace(StandardCareKind kind, RoutineInput? value) {
     onChanged([
-      for (final current in StandardCareKind.values)
+      for (final current in standardCareKinds)
         if (current == kind && value != null)
           value
         else if (current != kind)
@@ -37,7 +37,7 @@ class RoutineFieldsEditor extends StatelessWidget {
     final s = strings(context);
     return Column(
       children: [
-        for (final kind in StandardCareKind.values)
+        for (final kind in standardCareKinds)
           Builder(
             builder: (context) {
               final proposal = suggestions

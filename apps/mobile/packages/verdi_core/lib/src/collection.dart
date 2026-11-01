@@ -9,6 +9,7 @@ import 'command_encoding.dart';
 import 'errors.dart';
 
 part 'collection_models.dart';
+part 'collection_custom_care.dart';
 part 'collection_media.dart';
 part 'collection_media_planner.dart';
 part 'collection_media_storage.dart';
@@ -232,7 +233,16 @@ final class MemoryOperationCoordinator {
     }
     final id = _store._allocate();
     var count = 0;
-    if (command is SavePlant) {
+    if (command is CreateCustomCareType) {
+      count = 1;
+    } else if (command is CreateRoutine) {
+      count =
+          2 +
+          (command.seedKind == SeedKind.known ? 1 : 0) +
+          (command.catalogSelection?.suggestion(command.careKind) == null
+              ? 0
+              : 1);
+    } else if (command is SavePlant) {
       final draft = _draft(command.draftId, command.draftRevision);
       if (draft.mode == DraftMode.add) {
         count =
@@ -351,7 +361,11 @@ final class MemoryOperationCoordinator {
       throw CommandRejected('PREVIEW_STALE');
     }
     if (plan.effects.gate != PreviewGate.allowed)
-      throw CommandRejected('ACTIVE_LIMIT');
+      throw CommandRejected(
+        plan.effects.gate == PreviewGate.proRequired
+            ? 'PRO_REQUIRED'
+            : 'ACTIVE_LIMIT',
+      );
     final success = CommandSuccess._(
       commandId,
       datasetId,
@@ -395,6 +409,8 @@ final class MemoryOperationCoordinator {
         if (pending.commandId == commandId || pending.datasetId != datasetId)
           continue;
         final related = switch (pending.command) {
+          CreateRoutine c => c.plantId == command.plantId,
+          CustomCareCommand() => false,
           MediaCommand c =>
             c.guardedDraftId != null && ownedIds.contains(c.guardedDraftId),
           SaveDraft c =>

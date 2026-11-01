@@ -112,10 +112,12 @@ sealed class RoutineCommand extends CoreCommand {
 
 /// Explicit selection, normalized once so selection order cannot change retries.
 final class BulkComplete extends CoreCommand {
+  final String? customTypeId;
   final StandardCareKind careKind;
   final LocalDate careDate;
   final List<CareTarget> targets;
   BulkComplete({
+    this.customTypeId,
     required this.careKind,
     required this.careDate,
     required Iterable<CareTarget> targets,
@@ -127,7 +129,7 @@ final class BulkComplete extends CoreCommand {
   @override
   Map<String, Object?> get _payload => {
     'careKind': careKind.name,
-    'customTypeId': null,
+    'customTypeId': customTypeId,
     'careDate': careDate.toString(),
     'targets': targets.map((t) => t._json()).toList(),
   };

@@ -1,3 +1,4 @@
+import 'custom_care_page.dart';
 import '../../../pro/presentation/pro_page.dart';
 
 import 'package:auto_route/auto_route.dart';
@@ -28,6 +29,14 @@ class SettingsPage extends StatelessWidget {
                 onTap: () => openPro(context),
               ),
             ),
+          Card(
+            child: ListTile(
+              leading: const Icon(Icons.checklist),
+              title: Text(s.careTypes),
+              trailing: const Icon(Icons.chevron_right),
+              onTap: () => openCareTypes(context),
+            ),
+          ),
           if (ReminderHost.maybeOf(context) != null)
             Card(
               child: ListTile(

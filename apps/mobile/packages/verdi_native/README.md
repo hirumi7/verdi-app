@@ -2,11 +2,11 @@
 
 The main Flutter development UI uses `CoreRepository`, the permanent normalized
 `custom_core_v1` profile reviewed in docs contract
-`63b6062da0d1d868617f0b90aa26054ca2e0adcd` and
+`b11772d9cf1f7dcd1df6ffd0f82fce3c60469b7c` and
 [native core owner](../../../../docs/technical/native-core-repository.md).
-Schema v2 additively upgrades the same v1 installation and preserves its rows,
+Schema v5 upgrades exact v1–v4 installations and preserves their rows,
 dataset, pending bodies and receipts. It persists custom/catalog plants, versioned
-selections and original/applied suggestion snapshots, standard routines/heads, original care events,
+selections and original/applied suggestion snapshots, standard/custom routines and heads, original care events,
 corrections, schedule audit and raw drafts. Frozen intent/reservation/receipt and
 outbox updates share each guarded transaction. Native owns previews, clock,
 Free-cap checks and acknowledgement/Undo deadlines. The generated bridge and one
@@ -214,3 +214,17 @@ schema-valid import. The 64 MiB valid PNG has a large ancillary chunk and small
 pixel dimensions; it exercises original bytes, not the 100 MP decoded-pixel limit.
 Full-limit archive/restore, physical protection/power loss and exhaustive VFS
 faults remain separate checks. Do not fill a host volume to simulate disk full.
+
+## Custom care (schema5)
+
+Settings manages custom types; plant detail adds standard or Pro custom routines.
+Type renames retain historical label snapshots. Free retains existing editing,
+care and history after revocation. Native guards capability, revisions, exact
+affected membership and the receipt-aware retry identity.
+
+The routines CHECK/index upgrade uses an atomic compiled table rebuild with
+foreign keys disabled only during migration and checked before commit. Failure
+probes at every rebuild statement retain the exact old rows/schema. Backup format3
+exports17 content tables and preserves custom mappings/history; format2 imports
+its exact15 tables with empty custom tables. No backup imports store authority.
+See [custom care owner](../../../../docs/technical/custom-care-integration.md).

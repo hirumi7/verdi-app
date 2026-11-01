@@ -318,6 +318,10 @@ class _CoreBootstrapState extends State<CoreBootstrap>
 }
 
 String _actionLabel(AppStrings s, CoreCommand command) => switch (command) {
+  CreateCustomCareType() => s.addCustomCare,
+  RenameCustomCareType() => s.renameCareType,
+  RetireCustomCareType() => s.retireCareType,
+  CreateRoutine() => s.addCare,
   MediaCommand() => s.journalAndPhotos,
   SaveDraft() => s.saveDraftAction,
   SavePlant() => s.reviewSave,

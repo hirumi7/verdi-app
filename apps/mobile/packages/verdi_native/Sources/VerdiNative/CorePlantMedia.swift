@@ -33,8 +33,10 @@ extension CoreRegistry {
         if delta.raw.count==10 {
             try require(count==0 && photos==0 && journal.array!.isEmpty && media.array!.isEmpty && (try sql.query("SELECT id FROM media_preparations WHERE plant_id=?",[.text(plant)])).isEmpty,"PREVIEW_STALE")
         } else {
-            try require(delta.raw.count==14 && delta.raw[10].integer==count && delta.raw[11].integer==photos && (try CoreSchema.same(delta.raw[12],journal)) && (try CoreSchema.same(delta.raw[13],media)),"PREVIEW_STALE")
+            try require([14,15].contains(delta.raw.count) && delta.raw[10].integer==count && delta.raw[11].integer==photos && (try CoreSchema.same(delta.raw[12],journal)) && (try CoreSchema.same(delta.raw[13],media)),"PREVIEW_STALE")
         }
+        let mappings=try CoreSchema.integer(sql.query("SELECT count(*) FROM routine_custom_types l JOIN routines r ON r.id=l.id WHERE r.plant_id=?",[.text(plant)])[0][0])
+        try require(delta.raw.count==15 ? delta.raw[14].integer==mappings : mappings==0,"PREVIEW_STALE")
         let all=(try ownedDrafts(sql,plant).array! + journal.array! + media.array!).sorted{($0.object?["draftId"]?.text ?? "")<($1.object?["draftId"]?.text ?? "")}
         try require(try CoreSchema.same(.array(guards),.array(all)),"PREVIEW_STALE")
     }

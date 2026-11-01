@@ -1399,3 +1399,52 @@ custom-care premium UI, comparison/cosmetics, internal admin, full accessibility
 reminder locked/terminated tap evidence, and full-limit backup/performance checks.
 Next bounded build scope is custom-care integration, then photo comparison/share
 cards, while device/store release evidence stays separate. Follow the same workflow.
+
+## Custom care integration — 2026-11-01
+
+**Author:** Codex (AI assistant), independently reviewed by core_readiness_review.
+
+**Date:** 2026-11-01 (Asia/Jakarta).
+
+Implemented against published docs pin
+`b11772d9cf1f7dcd1df6ffd0f82fce3c60469b7c`, covering REQ-014 custom care and
+preserving REQ-006/007/008/009/010/012/015/018. Settings manages custom types;
+plant detail adds standard/Pro custom routines with explicit interval and seed.
+Existing type/routine edits stay Free. Rename keeps original event-label snapshots;
+bulk grouping uses stable custom-type IDs. Native checks Pro, revisions, exact
+rename membership, fixed labels and catalog suggestion identity.
+
+Schema5 migrates exact1–4 stores using an atomic routines rebuild. Backup format3
+includes custom types/mappings and accepts exact format2 with empty custom tables.
+Deletion removes owned mappings and preserves shared types. Unknown preparation
+locks its form: same-ID retry or receipt-aware cancellation is required before
+editing; unavailable receipt reads do not imply absence. Store continuation uses
+the exact frozen command and fresh confirmation, without automatic saving.
+
+Executed: core133 tests and analyzer passed; Flutter70 tests and analyzer passed;
+full native suite152 passed/4 opt-in probes skipped, followed by13 passing affected
+native tests after final Unicode and migration-failure changes. Native
+warnings-as-errors build passed. Localization/build_runner and76-file format check
+passed. Retained iOS18.3.1 simulator integration passed with before-freeze loss,
+failed cancellation receipt read, safe retry/cancel, after-freeze reply loss with
+same-ID retry, optional Pro/Free exit, explicit standard care creation and native
+reopen. Existing plant/photo/draft identities stayed preserved. Widget checks
+exercise custom creation, downgrade editing, validation/discard and320% text.
+
+Independent review closed native historical-label equality, custom deletion links,
+Unicode trim parity, and uncertain preparation/cancellation findings. Migration
+fault probes at each rebuild statement preserve the exact prior schema/rows;
+format2 and format3 roundtrips, Unicode historical snapshots and catalog-envelope
+parity pass. Earlier intermediate fixture/compiler/UI test failures were fixed;
+no skipped check was counted as passing. All accepted requirement bytes remain
+unchanged. No production store/device or whole-app release claim is made.
+
+Remaining: share cards/comparison and optional photo optimization, optional-off
+personality/authored cosmetics, privacy/help, full accessibility, internal TanStack
+catalog tools, reviewed production profile/store registration, submission host,
+physical checks and full-limit backup/performance. User confirms no compatible
+submission host and simulator-only testing for now; those release gates remain open.
+
+Final ordinary `flutter build ios --simulator --debug -t lib/main_development.dart`
+also passed after the recovery corrections. The build's CocoaPods-to-SPM advisory
+is unchanged; this slice does not alter the template's native integration setup.

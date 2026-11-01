@@ -19,6 +19,7 @@ class TodayPage extends StatefulWidget {
 class _TodayPageState extends State<TodayPage> {
   bool selecting = false;
   StandardCareKind? selectedKind;
+  String? selectedCustomTypeId;
   final selected = <String, CareTarget>{};
   String? error;
   AddPastCare? historyAlternative;
@@ -66,7 +67,10 @@ class _TodayPageState extends State<TodayPage> {
   Widget check(CheckRow row, WorkspaceState state) {
     final s = strings(context);
     final cubit = context.read<WorkspaceCubit>();
-    final compatible = selectedKind == null || selectedKind == row.careKind;
+    final compatible =
+        selectedKind == null ||
+        (selectedKind == row.careKind &&
+            selectedCustomTypeId == row.customTypeId);
     return Card(
       child: Padding(
         padding: const EdgeInsets.all(12),
@@ -81,7 +85,7 @@ class _TodayPageState extends State<TodayPage> {
                     value: selected.containsKey(row.routineId),
                     semanticLabel: s.plantNamed(
                       row.plantName,
-                      kindLabel(s, row.careKind),
+                      kindLabel(s, row.careKind, customLabel: row.careLabel),
                     ),
                     onChanged: !compatible || state.busy
                         ? null
@@ -90,6 +94,7 @@ class _TodayPageState extends State<TodayPage> {
                               selected[row.routineId] = row.target;
                               selectedNames[row.routineId] = row.plantName;
                               selectedKind = row.careKind;
+                              selectedCustomTypeId = row.customTypeId;
                             } else {
                               selected.remove(row.routineId);
                               selectedNames.remove(row.routineId);
@@ -113,7 +118,11 @@ class _TodayPageState extends State<TodayPage> {
                           style: Theme.of(context).textTheme.titleMedium,
                         ),
                         Text(
-                          kindLabel(s, row.careKind),
+                          kindLabel(
+                            s,
+                            row.careKind,
+                            customLabel: row.careLabel,
+                          ),
                           style: Theme.of(context).textTheme.bodyMedium,
                         ),
                         Text(
@@ -152,11 +161,23 @@ class _TodayPageState extends State<TodayPage> {
                             if (date != null && mounted) {
                               await perform(
                                 CompleteCurrent(row.target, date),
-                                kindLabel(s, row.careKind, actual: true),
+                                kindLabel(
+                                  s,
+                                  row.careKind,
+                                  actual: true,
+                                  customLabel: row.careLabel,
+                                ),
                               );
                             }
                           },
-                    child: Text(kindLabel(s, row.careKind, actual: true)),
+                    child: Text(
+                      kindLabel(
+                        s,
+                        row.careKind,
+                        actual: true,
+                        customLabel: row.careLabel,
+                      ),
+                    ),
                   ),
                   TextButton(
                     onPressed: state.busy
@@ -327,6 +348,7 @@ class _TodayPageState extends State<TodayPage> {
                         : () => perform(
                             BulkComplete(
                               careKind: selectedKind!,
+                              customTypeId: selectedCustomTypeId,
                               careDate: selectedDate ?? cubit.today,
                               targets: selected.values,
                             ),
@@ -410,7 +432,14 @@ class _TodayPageState extends State<TodayPage> {
                           .cast<DoneTodayRow>())
                     ListTile(
                       title: Text(row.plantName),
-                      subtitle: Text(kindLabel(s, row.careKind, actual: true)),
+                      subtitle: Text(
+                        kindLabel(
+                          s,
+                          row.careKind,
+                          actual: true,
+                          customLabel: row.careLabel,
+                        ),
+                      ),
                       trailing: const Icon(Icons.chevron_right),
                       onTap: () => context.router.push(
                         PlantDetailRoute(plantId: row.care.plantId),

@@ -187,7 +187,7 @@ abstract class AppStrings {
   /// No description provided for @noRoutines.
   ///
   /// In en, this message translates to:
-  /// **'No checks scheduled. Add a routine when you add your next sample plant.'**
+  /// **'No checks scheduled. Open a plant and choose Add care.'**
   String get noRoutines;
 
   /// No description provided for @overdue.
@@ -1993,7 +1993,7 @@ abstract class AppStrings {
   /// No description provided for @proBenefit.
   ///
   /// In en, this message translates to:
-  /// **'Pro gives you unlimited active plants in this preview.'**
+  /// **'Pro gives you unlimited active plants and new custom care types and routines in this preview.'**
   String get proBenefit;
 
   /// No description provided for @proFree.
@@ -2103,6 +2103,102 @@ abstract class AppStrings {
   /// In en, this message translates to:
   /// **'An earlier approval request may still exist. Retrying does not cancel it and may open a new store request. No plant will save automatically. Continue?'**
   String get proRetryPendingBody;
+
+  /// No description provided for @customCare.
+  ///
+  /// In en, this message translates to:
+  /// **'Custom care'**
+  String get customCare;
+
+  /// No description provided for @customCarePro.
+  ///
+  /// In en, this message translates to:
+  /// **'Creating custom care types and routines requires Pro. Existing care stays editable on Free.'**
+  String get customCarePro;
+
+  /// No description provided for @careTypes.
+  ///
+  /// In en, this message translates to:
+  /// **'Care types'**
+  String get careTypes;
+
+  /// No description provided for @addCustomCare.
+  ///
+  /// In en, this message translates to:
+  /// **'Add custom care type'**
+  String get addCustomCare;
+
+  /// No description provided for @careTypeLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Care type name'**
+  String get careTypeLabel;
+
+  /// No description provided for @careTypeLabelInvalid.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter 1–24 characters.'**
+  String get careTypeLabelInvalid;
+
+  /// No description provided for @renameCareType.
+  ///
+  /// In en, this message translates to:
+  /// **'Rename care type'**
+  String get renameCareType;
+
+  /// No description provided for @retireCareType.
+  ///
+  /// In en, this message translates to:
+  /// **'Retire care type'**
+  String get retireCareType;
+
+  /// No description provided for @retiredCareType.
+  ///
+  /// In en, this message translates to:
+  /// **'Retired — existing routines retained'**
+  String get retiredCareType;
+
+  /// No description provided for @retireCareTypeBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Hide this type from new care choices. Existing routines and history remain.'**
+  String get retireCareTypeBody;
+
+  /// No description provided for @renameCareTypeBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Update current routine labels. Historical labels and reminder dates remain unchanged.'**
+  String get renameCareTypeBody;
+
+  /// No description provided for @addCare.
+  ///
+  /// In en, this message translates to:
+  /// **'Add care'**
+  String get addCare;
+
+  /// No description provided for @careType.
+  ///
+  /// In en, this message translates to:
+  /// **'Care type'**
+  String get careType;
+
+  /// No description provided for @careFormDiscard.
+  ///
+  /// In en, this message translates to:
+  /// **'Discard this unsaved care form?'**
+  String get careFormDiscard;
+
+  /// No description provided for @noCareChoices.
+  ///
+  /// In en, this message translates to:
+  /// **'All standard care types are already added. Create custom care types in Settings.'**
+  String get noCareChoices;
+
+  /// No description provided for @careTypeEffects.
+  ///
+  /// In en, this message translates to:
+  /// **'Affected routines: {count}'**
+  String careTypeEffects(int count);
 }
 
 class _AppStringsDelegate extends LocalizationsDelegate<AppStrings> {

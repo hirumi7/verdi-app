@@ -3,6 +3,7 @@ import Foundation
 extension CoreRegistry {
     static func validatePayload(_ type: String, _ p: [String:CanonicalValue]) throws {
         try require(try CanonicalCommand.bytes(.object(p)).count<=1024*1024,"PLAN_LIMIT")
+        if customCommands.contains(type) {try customPayload(type,p);return}
         if mediaCommands.contains(type) {try validateMediaPayload(type,p);return}
         func keys(_ expected: [String]) throws { try require(Set(p.keys) == Set(expected),"FIELD_INVALID") }
         func id(_ key: String) throws { try CoreSchema.uuid(CoreSchema.string(p[key])) }
@@ -37,7 +38,7 @@ extension CoreRegistry {
         case "Undo": try keys(["originalCommandId"]); try id("originalCommandId")
         case "BulkComplete":
             try keys(["targets","careKind","customTypeId","careDate"]); try date("careDate")
-            try require(p["customTypeId"]?.isNull == true && ["water","fertilize","mist","repot","rotate"].contains(p["careKind"]?.text ?? ""),"FIELD_INVALID")
+            if p["careKind"]?.text == "custom" {try id("customTypeId")} else {try require(p["customTypeId"]?.isNull == true && standardKinds.contains(p["careKind"]?.text ?? ""),"FIELD_INVALID")}
             let targets = try CoreSchema.array(p["targets"]); try require(!targets.isEmpty && targets.count <= 200,"FIELD_INVALID")
             for t in targets { try targetShape(t) }
             let ids = try targets.map { try CoreSchema.string($0.object?["routineId"]) }

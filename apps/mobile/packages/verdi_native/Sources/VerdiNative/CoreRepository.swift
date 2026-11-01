@@ -174,16 +174,16 @@ public final class CoreRepository {
             tryCatalog(db)
             if let backupControl {try backupEngine.acknowledgeReopen(backupControl,dataset:datasetID)}
             var result = try CoreSchema.object(db.read { try metadata($0) })
-            result["sessionId"] = .string(sessionID); result["profile"] = .string("custom_core_v1"); result["schemaVersion"] = .integer(4)
+            result["sessionId"] = .string(sessionID); result["profile"] = .string("custom_core_v1"); result["schemaVersion"] = .integer(5)
             result["fileProtectionVerified"] = .boolean(Self.deviceProtectionRequired)
             result["clock"] = CoreClockFrame.capture(now(), zone: zone()).value; let access=withCapability{$0}; result["capabilityRevision"] = .integer(access.revision); result["access"] = .string(access.pro ? "pro":"free")
             return .object(result)
         } catch { try? db.close(); throw error }
     }
     static func openDatabase(_ file:URL, fault:((SQLiteBoundary)throws->Void)? = nil, expectedDataset:String? = nil) throws -> SQLiteDatabase {
-        for version:Int32 in [3,2,1] {
-            let migration = (version == 1 ? CoreSchema.catalogDefinitions : []) + (version <= 2 ? CoreSchema.mediaDefinitions : []) + CoreSchema.settingsDefinitions + [CoreSchema.settingsSeed]
-            do {return try SQLiteDatabase.open(at:file,schema:CoreSchema.schema(expectedDataset:expectedDataset),upgradeFrom:CoreSchema.schema(version:version,expectedDataset:expectedDataset),migrationStatements:migration,fault:fault)}
+        for version:Int32 in [4,3,2,1] {
+            let migration = (version == 1 ? CoreSchema.catalogDefinitions : []) + (version <= 2 ? CoreSchema.mediaDefinitions : []) + (version <= 3 ? CoreSchema.settingsDefinitions + [CoreSchema.settingsSeed] : []) + CoreSchema.customMigration
+            do {return try SQLiteDatabase.open(at:file,schema:CoreSchema.schema(expectedDataset:expectedDataset),upgradeFrom:CoreSchema.schema(version:version,expectedDataset:expectedDataset),migrationStatements:migration,rebuildTables:true,fault:fault)}
             catch StorageFailure.schemaMismatch {continue}
         }
         throw StorageFailure.schemaMismatch

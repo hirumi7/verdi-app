@@ -11,6 +11,8 @@ void _validateShape(CoreCommand command) {
     throw CommandRejected('FIELD_INVALID', {'draft': 'PAYLOAD_TOO_LARGE'});
   }
   switch (command) {
+    case CustomCareCommand():
+      _validateCustomCare(command);
     case MediaCommand():
       _validateMedia(command);
     case SaveDraft():
@@ -60,6 +62,10 @@ void _validateShape(CoreCommand command) {
     case Undo():
       _id(command.originalCommandId);
     case BulkComplete():
+      if ((command.careKind == StandardCareKind.custom) !=
+          (command.customTypeId != null))
+        throw CommandRejected('FIELD_INVALID');
+      if (command.customTypeId != null) _id(command.customTypeId!);
       if (command.targets.isEmpty ||
           command.targets.length > 200 ||
           command.targets.map((t) => t.routineId).toSet().length !=
@@ -157,6 +163,8 @@ extension on MemoryOperationCoordinator {
   }
 
   _Plan _calculate(FrozenCommand intent, CareClock clock) {
+    if (intent.command is CustomCareCommand)
+      return _planCustomCare(intent, clock);
     if (intent.command is MediaCommand) return _planMedia(intent, clock);
     final current = _store._state.collection;
     final plants = {...current.plants};
@@ -182,6 +190,8 @@ extension on MemoryOperationCoordinator {
     final command = intent.command;
 
     switch (command) {
+      case CustomCareCommand():
+        throw StateError("Handled by custom care planner");
       case MediaCommand():
         throw StateError('Handled by media planner');
       case Undo():
@@ -240,7 +250,8 @@ extension on MemoryOperationCoordinator {
         for (var i = 0; i < command.targets.length; i++) {
           final target = command.targets[i];
           final old = _targetRoutine(current, target);
-          if (careKinds[old.id] != command.careKind) {
+          if (careKinds[old.id] != command.careKind ||
+              current.customTypeIds[old.id] != command.customTypeId) {
             throw CommandRejected('FIELD_INVALID', {
               old.id: 'CARE_KIND_MISMATCH',
             });
@@ -459,6 +470,7 @@ extension on MemoryOperationCoordinator {
             StandardCareKind.mist => 'Mist',
             StandardCareKind.repot => 'Repot',
             StandardCareKind.rotate => 'Rotate',
+            StandardCareKind.custom => throw CommandRejected('FIELD_INVALID'),
           };
           var routine = seed.raw.seedKind == SeedKind.unknown
               ? RoutineCore.unknown(
@@ -931,6 +943,11 @@ extension on MemoryOperationCoordinator {
         mediaDrafts,
         photos,
         covers,
+        current.customCareTypes,
+        {
+          for (final e in current.customTypeIds.entries)
+            if (routines.containsKey(e.key)) e.key: e.value,
+        },
       ),
       effects,
       canonicalCommandJson(bindings),

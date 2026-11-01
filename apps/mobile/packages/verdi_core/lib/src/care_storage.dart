@@ -27,7 +27,8 @@ abstract final class CareStorage {
           row[1] != routine[1] ||
           row[2] != routine[0] ||
           row[4] != routine[3] ||
-          row[5] != routine[4])
+          (routine[3] != 'custom' && row[5] != routine[4]) ||
+          (row[5] as String).trim().isEmpty)
         throw const DomainException('STORAGE_INVALID');
       final id = row[0] as String;
       _id(id);
@@ -84,6 +85,7 @@ abstract final class CareStorage {
           row[9] as String,
           row[3] as int,
           chain,
+          row[5] as String,
         ),
       );
     }

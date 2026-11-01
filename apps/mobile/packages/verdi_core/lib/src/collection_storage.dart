@@ -20,6 +20,8 @@ final class CoreStorageProjection {
     'media_drafts',
     'photos',
     'plant_covers',
+    'custom_care_types',
+    'routine_custom_types',
   ];
   final MemoryCoreStore _store;
   late final MemoryOperationCoordinator reader;
@@ -61,7 +63,25 @@ final class CoreStorageProjection {
       _revision(revision);
       _revision(storageRevision);
       final ids = <String>{};
-      final lengths = [11, 13, 5, 11, 12, 10, 8, 4, 11, 3, 8, 9, 8, 14, 2];
+      final lengths = [
+        11,
+        13,
+        5,
+        11,
+        12,
+        10,
+        8,
+        4,
+        11,
+        3,
+        8,
+        9,
+        8,
+        14,
+        2,
+        4,
+        2,
+      ];
       for (var t = 0; t < tables.length; t++) {
         final tableIds = <String>{};
         for (final row in rows[tables[t]]!) {
@@ -74,6 +94,7 @@ final class CoreStorageProjection {
                 'plant_catalog',
                 'routine_suggestions',
                 'plant_covers',
+                'routine_custom_types',
               ].contains(tables[t]) &&
               !ids.add(row[0] as String))
             throw CommandRejected('STORAGE_INVALID');
@@ -117,6 +138,33 @@ final class CoreStorageProjection {
           throw CommandRejected('STORAGE_INVALID');
         }
       }
+      final types = <String, CustomCareType>{};
+      for (final row in rows['custom_care_types']!) {
+        _revision(row[1] as int);
+        final errors = <String, String>{};
+        final label = _text(
+          row[2] as String,
+          24,
+          'label',
+          errors,
+          required: true,
+        );
+        if (errors.isNotEmpty || label != row[2])
+          throw CommandRejected('STORAGE_INVALID');
+        types[row[0] as String] = CustomCareType(
+          row[0] as String,
+          row[1] as int,
+          label,
+          CareStorage.flag(row[3]),
+        );
+      }
+      final links = <String, String>{};
+      for (final row in rows['routine_custom_types']!) {
+        _id(row[1] as String);
+        if (!types.containsKey(row[1]))
+          throw CommandRejected('STORAGE_INVALID');
+        links[row[0] as String] = row[1] as String;
+      }
       final routines = <String, RoutineCore>{};
       final kinds = <String, StandardCareKind>{};
       final eventIds = rows['care_events']!.map((e) => e[0]).toSet();
@@ -130,6 +178,17 @@ final class CoreStorageProjection {
         CareStorage.instant(r[11]);
         CareStorage.instant(r[12]);
         final kind = StandardCareKind.values.byName(r[3] as String);
+        if ((kind == StandardCareKind.custom) != links.containsKey(r[0]))
+          throw CommandRejected('STORAGE_INVALID');
+        if (kind == StandardCareKind.custom) {
+          if (r[5] != 'retired' && r[4] != types[links[r[0]]]!.label)
+            throw CommandRejected('STORAGE_INVALID');
+          for (final e in rows['care_events']!.where((e) => e[2] == r[0])) {
+            final errors = <String, String>{};
+            _text(e[5] as String, 24, 'label', errors, required: true);
+            if (errors.isNotEmpty) throw CommandRejected('STORAGE_INVALID');
+          }
+        }
         var routine = CareStorage.hydrate(
           routine: r,
           head: heads.single,
@@ -137,13 +196,14 @@ final class CoreStorageProjection {
           events: rows['care_events']!.where((e) => e[2] == r[0]).toList(),
           corrections: rows['event_corrections']!,
         );
-        if (routines.values.any(
-          (x) =>
-              x.plantId == routine.plantId &&
-              x.status != RoutineStatus.retired &&
-              routine.status != RoutineStatus.retired &&
-              kinds[x.id] == kind,
-        ))
+        if (kind != StandardCareKind.custom &&
+            routines.values.any(
+              (x) =>
+                  x.plantId == routine.plantId &&
+                  x.status != RoutineStatus.retired &&
+                  routine.status != RoutineStatus.retired &&
+                  kinds[x.id] == kind,
+            ))
           throw CommandRejected('STORAGE_INVALID');
         final link = rows['routine_suggestions']!
             .where((c) => c[0] == r[0])
@@ -156,6 +216,8 @@ final class CoreStorageProjection {
         routines[routine.id] = routine;
         kinds[routine.id] = kind;
       }
+      if (links.keys.any((id) => !routines.containsKey(id)))
+        throw CommandRejected('STORAGE_INVALID');
       if (rows['heads']!.any((h) => !routines.containsKey(h[1])) ||
           rows['care_events']!.any((e) => !routines.containsKey(e[2])))
         throw CommandRejected('STORAGE_INVALID');
@@ -268,6 +330,8 @@ final class CoreStorageProjection {
           media.media,
           media.photos,
           media.covers,
+          types,
+          links,
         ),
         prior.receipts,
         prior.usedDraftIds,
@@ -427,6 +491,9 @@ final class CoreStorageProjection {
                   ..sort((a, b) => a.id.compareTo(b.id)))
               {'draftId': d.id, 'revision': d.revision},
           ],
+          snapshot.customTypeIds.keys
+              .where((id) => snapshot.routines[id]?.plantId == command.plantId)
+              .length,
         ],
       });
     } else {
@@ -583,7 +650,10 @@ final class CoreStorageProjection {
       'expectedCollectionRevision': snapshot.revision,
       'draftGuards': draftGuards,
       'accessRevision':
-          command is RestorePlant ||
+          command is CreateCustomCareType ||
+              (command is CreateRoutine &&
+                  command.careKind == StandardCareKind.custom) ||
+              command is RestorePlant ||
               (command is SavePlant &&
                   snapshot.drafts[command.draftId]?.mode == DraftMode.add)
           ? _store._capabilityRevision
@@ -623,6 +693,14 @@ final class CoreStorageProjection {
         p.updatedAt.toIso8601String(),
       ]);
     }
+    result['custom_care_types']!.addAll(
+      s.customCareTypes.values.map(
+        (t) => [t.id, t.revision, t.label, t.retired ? 1 : 0],
+      ),
+    );
+    result['routine_custom_types']!.addAll(
+      s.customTypeIds.entries.map((e) => [e.key, e.value]),
+    );
     for (final r in s.routines.values) {
       final old = _rows['routines']!.where((x) => x[0] == r.id).firstOrNull;
       result['routines']!.add([
@@ -656,7 +734,7 @@ final class CoreStorageProjection {
           r.id,
           e.revision,
           s.careKinds[r.id]!.name,
-          r.careLabel,
+          e.careLabel,
           e.original.careDate.toString(),
           _outcomeName(e.original.outcome),
           e.recordedAt.toIso8601String(),

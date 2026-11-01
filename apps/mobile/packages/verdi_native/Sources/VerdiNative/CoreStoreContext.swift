@@ -27,6 +27,13 @@ extension CoreRepository {
                         let plant=try CoreSchema.string(payload["plantId"]),revision=try CoreSchema.number(payload["plantRevision"])
                         let rows=try sql.query("SELECT revision,archived FROM plants WHERE id=?",[.text(plant)])
                         guard rows.first == [.integer(revision),.integer(1)] else {throw CoreRepositoryError("STALE_TARGET")}
+                    case "CreateCustomCareType": break
+                    case "CreateRoutine":
+                        guard payload["careKind"]?.text == "custom" else {throw CoreRepositoryError("NOT_ELIGIBLE")}
+                        let plant=try CoreSchema.string(payload["plantId"]),revision=try CoreSchema.number(payload["plantRevision"])
+                        guard try sql.query("SELECT revision,archived FROM plants WHERE id=?",[.text(plant)]).first == [.integer(revision),.integer(0)] else {throw CoreRepositoryError("STALE_TARGET")}
+                        let type=try CoreSchema.string(payload["customTypeId"]),typeRevision=try CoreSchema.number(payload["customTypeRevision"])
+                        guard try sql.query("SELECT revision,retired FROM custom_care_types WHERE id=?",[.text(type)]).first == [.integer(typeRevision),.integer(0)] else {throw CoreRepositoryError("STALE_TARGET")}
                     default:throw CoreRepositoryError("NOT_ELIGIBLE")
                     }
                 }

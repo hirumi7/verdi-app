@@ -55,7 +55,7 @@ final class SQLiteDatabase {
         return database
     }
 
-    static func open(at url: URL, schema: CompiledSchema, upgradeFrom: CompiledSchema? = nil, migrationStatements: [String] = [], controlProfile: Bool = false, fault: ((SQLiteBoundary) throws -> Void)? = nil) throws -> SQLiteDatabase {
+    static func open(at url: URL, schema: CompiledSchema, upgradeFrom: CompiledSchema? = nil, migrationStatements: [String] = [], rebuildTables: Bool = false, controlProfile: Bool = false, fault: ((SQLiteBoundary) throws -> Void)? = nil) throws -> SQLiteDatabase {
         let target = try canonicalTarget(url)
         let database = SQLiteDatabase(fault: fault, controlProfile: controlProfile)
         try database.queue.sync {
@@ -76,11 +76,16 @@ final class SQLiteDatabase {
                 if migrating {
                     try database.validate(upgradeFrom!)
                     try database.configure()
+                    if rebuildTables {try database.control("PRAGMA foreign_keys = OFF")}
                     try database.atomic { sql in
                         try database.validate(upgradeFrom!)
                         for statement in migrationStatements { try sql.execute(statement) }
                         try database.control("PRAGMA user_version = \(schema.version)")
                         try database.validate(schema)
+                    }
+                    if rebuildTables {
+                        try database.control("PRAGMA foreign_keys = ON")
+                        guard try database.raw("PRAGMA foreign_keys").first?.first == .integer(1) else {throw StorageFailure.integrityFailure}
                     }
                 } else { try database.validate(schema); try database.configure() }
                 database.usable = true

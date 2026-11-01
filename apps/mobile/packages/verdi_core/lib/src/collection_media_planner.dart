@@ -408,6 +408,8 @@ extension on MemoryOperationCoordinator {
         media,
         photos,
         covers,
+        s.customCareTypes,
+        s.customTypeIds,
       ),
       CommandEffects._(
         [PreviewRow._(plantId, plant.name, null, null, null)],

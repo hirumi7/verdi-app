@@ -10,12 +10,13 @@ enum BackupContent {
             cursor = try CoreSchema.text(row[0]); try work(row)
         }
     }
-    static func counts(_ db: SQLiteDatabase) throws -> CanonicalValue {
+    static func counts(_ db: SQLiteDatabase, version:Int64 = 3) throws -> CanonicalValue {
         try db.read { sql in
             var result = [String:CanonicalValue]()
             for (key,query) in [("activePlants","SELECT count(*) FROM plants WHERE archived=0"),("archivedPlants","SELECT count(*) FROM plants WHERE archived=1"),("events","SELECT count(*) FROM care_events"),("journalEntries","SELECT count(*) FROM journal_entries"),("photos","SELECT count(*) FROM photos")] {
                 result[key] = CoreSchema.canonical(try sql.query(query)[0][0])
             }
+            if version == 3 {result["customCareTypes"] = CoreSchema.canonical(try sql.query("SELECT count(*) FROM custom_care_types")[0][0])}
             return .object(result)
         }
     }
@@ -25,7 +26,7 @@ enum BackupContent {
             let revision = try CoreSchema.integer(sql.query("SELECT collection_revision FROM metadata")[0][0])
             let settings = try CanonicalParser.parse(CoreSchema.text(sql.query("SELECT payload_json FROM user_settings WHERE slot=1")[0][0]))
             try BackupSettings.validate(settings)
-            try output.write("{\"schemaVersion\":2,\"profile\":\"\(profile)\",\"collectionRevision\":\(revision),\"settings\":\(try settings.json()),\"tables\":{")
+            try output.write("{\"schemaVersion\":3,\"profile\":\"\(profile)\",\"collectionRevision\":\(revision),\"settings\":\(try settings.json()),\"tables\":{")
             for (i,table) in CoreSchema.tables.sorted().enumerated() {
                 if i > 0 {try output.write(",")}; try output.write("\"\(table)\":[")
                 var first = true
@@ -50,7 +51,7 @@ enum BackupContent {
         let data = try BackupIO.hash(output.url,limit:512*1024*1024,cancel:cancel), counts = try counts(db)
         let catalog = try db.read { try $0.query("SELECT version FROM catalog_head").first?.first?.stringValue ?? "unavailable" }
         let manifest = try BackupWriter(root.appendingPathComponent("manifest.json"),limit:16*1024*1024,io:io)
-        let prefix: [String:CanonicalValue] = ["format":.string("verdi-backup"),"formatVersion":.integer(2),"dataSchemaVersion":.integer(2),"profile":.string(profile),"createdAt":.string(instant),"appVersion":.string("verdi-development-2"),"catalogVersion":.string(catalog),"data":.object(["path":.string("data.json"),"sha256":.string(data.0),"bytes":.integer(data.1)]),"counts":counts]
+        let prefix: [String:CanonicalValue] = ["format":.string("verdi-backup"),"formatVersion":.integer(3),"dataSchemaVersion":.integer(3),"profile":.string(profile),"createdAt":.string(instant),"appVersion":.string("verdi-development-3"),"catalogVersion":.string(catalog),"data":.object(["path":.string("data.json"),"sha256":.string(data.0),"bytes":.integer(data.1)]),"counts":counts]
         let encoded = try CanonicalValue.object(prefix).json()
         try manifest.write(String(encoded.dropLast())+",\"files\":[")
         var first = true
@@ -59,6 +60,15 @@ enum BackupContent {
             try manifest.write(CanonicalValue.object(["photoId":CoreSchema.canonical(row[0]),"path":CoreSchema.canonical(row[1]),"sha256":CoreSchema.canonical(row[2]),"bytes":CoreSchema.canonical(row[3]),"mime":CoreSchema.canonical(row[4])]).json())
         }
         try manifest.write("]}");try manifest.finish()
+    }
+    static func archiveVersion(_ root:URL) throws -> Int64 {
+        let reader=try BackupJSONReader(root.appendingPathComponent("manifest.json"),limit:16*1024*1024,cancel:{})
+        var version:Int64 = 0
+        try reader.object { key in
+            if key == "files" {try reader.array {_ = try reader.value(depth:2)}}
+            else {let value=try reader.value(depth:1);if key == "formatVersion" {version=value.integer ?? 0}}
+        }
+        try reader.end();return version
     }
     static func importData(root: URL, index: BackupIndex, dataset: String, instant: String, cancel: @escaping () throws -> Void) throws -> SQLiteDatabase {
         let manifestReader = try BackupJSONReader(root.appendingPathComponent("manifest.json"),limit:16*1024*1024,cancel:cancel)
@@ -82,7 +92,9 @@ enum BackupContent {
         try manifestReader.end()
         try BackupIO.require(hasFiles && Set(manifest.keys) == Set(["format","formatVersion","dataSchemaVersion","profile","createdAt","appVersion","catalogVersion","data","counts"]))
         try BackupIO.require(manifest["format"]?.text == "verdi-backup")
-        try BackupIO.require(manifest["formatVersion"]?.integer == 2 && manifest["dataSchemaVersion"]?.integer == 2 && manifest["profile"]?.text == profile,"BACKUP_VERSION_UNSUPPORTED")
+        let version = manifest["formatVersion"]?.integer ?? 0
+        try BackupIO.require([2,3].contains(version) && manifest["dataSchemaVersion"]?.integer == version && manifest["profile"]?.text == profile,"BACKUP_VERSION_UNSUPPORTED")
+        let expectedTables = Set(CoreSchema.tables.filter {version == 3 || !["custom_care_types","routine_custom_types"].contains($0)})
         try instantValue(CoreSchema.string(manifest["createdAt"]))
         for key in ["appVersion","catalogVersion"] { try text(CoreSchema.string(manifest[key]),max:80,required:true) }
         let data = try CoreSchema.object(manifest["data"])
@@ -97,7 +109,7 @@ enum BackupContent {
                 try reader.object { key in
                     seen.insert(key)
                     switch key {
-                    case "schemaVersion": try BackupIO.require(try reader.value().integer == 2,"BACKUP_VERSION_UNSUPPORTED")
+                    case "schemaVersion": try BackupIO.require(try reader.value().integer == version,"BACKUP_VERSION_UNSUPPORTED")
                     case "profile": try BackupIO.require(try reader.value().text == profile,"BACKUP_VERSION_UNSUPPORTED")
                     case "collectionRevision":
                         let revision = try reader.value(); try BackupSettings.revision(revision)
@@ -107,10 +119,11 @@ enum BackupContent {
                         try sql.execute("UPDATE user_settings SET revision=?,payload_json=? WHERE slot=1",[try CoreSchema.scalar(settings.object!["revision"]!),.text(try settings.json())])
                     case "tables":
                         try reader.object { table in
-                            try BackupIO.require(CoreSchema.tables.contains(table)); tables.insert(table)
+                            try BackupIO.require(expectedTables.contains(table)); tables.insert(table)
                             try reader.array {
                                 let value = try reader.value(depth:3), row = try CoreSchema.array(value).map(CoreSchema.scalar)
                                 try validateRow(table,row)
+                                if version == 2 && ["routines","care_events"].contains(table) {try BackupIO.require(row[table == "routines" ? 3:4] != .text("custom"))}
                                 try sql.execute("INSERT INTO \(table) VALUES(\(Array(repeating:"?",count:row.count).joined(separator:",")))",row)
                                 if !CoreSchema.linkedTables.contains(table) {
                                     let kind = table == "plant_drafts" ? "draft" : table == "journal_drafts" ? "journalDraft" : table == "media_drafts" ? "mediaDraft" : "entity"
@@ -123,10 +136,10 @@ enum BackupContent {
                     }
                 }
                 try reader.end()
-                try BackupIO.require(seen == Set(["schemaVersion","profile","collectionRevision","settings","tables"]) && tables == Set(CoreSchema.tables))
+                try BackupIO.require(seen == Set(["schemaVersion","profile","collectionRevision","settings","tables"]) && tables == expectedTables)
                 try validateGraph(sql,cancel:cancel)
             }
-            let expectedCounts = try CoreSchema.object(manifest["counts"]), actualCounts = try counts(db)
+            let expectedCounts = try CoreSchema.object(manifest["counts"]), actualCounts = try counts(db,version:version)
             try BackupIO.require(try CoreSchema.same(.object(expectedCounts),actualCounts),"BACKUP_REFERENCE_INVALID")
             let files = try MediaFiles(root:root)
             try db.read { sql in
@@ -175,9 +188,12 @@ enum BackupContent {
         switch table {
         case "plants":
             for (i,max,required) in [(2,60,true),(3,40,false),(4,2000,false),(5,160,true)] {try text(string(i),max:max,required:required)}
-        case "routines": try text(string(4),max:60,required:true);try date(8);try date(10)
+        case "custom_care_types":
+            let label=try string(2);try text(label,max:24,required:true)
+            try BackupIO.require(label == CoreRegistry.trimLikeDart(label))
+        case "routines": try text(string(4),max:try string(3) == "custom" ? 24:60,required:true);try date(8);try date(10)
         case "heads":try date(3);try date(4)
-        case "care_events":try date(6);try text(string(5),max:60,required:true);try text(string(9),max:128,required:true)
+        case "care_events":try date(6);try text(string(5),max:try string(4) == "custom" ? 24:60,required:true);try text(string(9),max:128,required:true)
         case "event_corrections":
             try date(3);try date(6)
             for i in [4,7] {try BackupIO.require(["actual_care","checked_not_needed","skipped"].contains(try string(i)))}
@@ -231,7 +247,8 @@ enum BackupContent {
     static func validateGraph(_ sql: SQLiteSession, cancel: () throws -> Void) throws {
         func rejectRows(_ query:String) throws {try BackupIO.require(try sql.query(query+" LIMIT 1").isEmpty,"BACKUP_REFERENCE_INVALID")}
         try rejectRows("SELECT r.id FROM routines r LEFT JOIN heads h ON h.routine_id=r.id WHERE h.id IS NULL")
-        try rejectRows("SELECT e.id FROM care_events e JOIN routines r ON r.id=e.routine_id WHERE e.plant_id!=r.plant_id OR e.care_kind!=r.care_kind OR e.care_label!=r.label")
+        try rejectRows("SELECT e.id FROM care_events e JOIN routines r ON r.id=e.routine_id WHERE e.plant_id!=r.plant_id OR e.care_kind!=r.care_kind OR (r.care_kind!='custom' AND e.care_label!=r.label)")
+        try rejectRows("SELECT r.id FROM routines r LEFT JOIN routine_custom_types l ON l.id=r.id LEFT JOIN custom_care_types t ON t.id=l.custom_type_id WHERE (r.care_kind='custom' AND (l.id IS NULL OR (r.state!='retired' AND r.label!=t.label))) OR (r.care_kind!='custom' AND l.id IS NOT NULL)")
         try rejectRows("SELECT c.id FROM routine_changes c JOIN routines r ON r.id=c.routine_id WHERE c.plant_id!=r.plant_id")
         try rejectRows("SELECT s.id FROM suggestion_snapshots s JOIN routines r ON r.id=s.routine_id WHERE s.plant_id!=r.plant_id OR s.care_kind!=r.care_kind")
         try rejectRows("SELECT l.id FROM routine_suggestions l JOIN suggestion_snapshots s ON s.id=l.applied_id LEFT JOIN suggestion_snapshots o ON o.id=l.original_id WHERE s.routine_id!=l.id OR (o.id IS NOT NULL AND o.routine_id!=l.id)")

@@ -94,6 +94,38 @@ CoreCommand _storedCommand(String type, Map<String, Object?> p) {
   final command =
       _storedMediaCommand(type, p) ??
       switch (type) {
+        'CreateCustomCareType' => CreateCustomCareType(p['label'] as String),
+        'RenameCustomCareType' => RenameCustomCareType(
+          p['customTypeId'] as String,
+          p['revision'] as int,
+          p['label'] as String,
+        ),
+        'RetireCustomCareType' => RetireCustomCareType(
+          p['customTypeId'] as String,
+          p['revision'] as int,
+        ),
+        'CreateRoutine' => CreateRoutine(
+          plantId: p['plantId'] as String,
+          plantRevision: p['plantRevision'] as int,
+          careKind: StandardCareKind.values.byName(p['careKind'] as String),
+          customTypeId: p['customTypeId'] as String?,
+          customTypeRevision: p['customTypeRevision'] as int?,
+          interval: CareInterval(
+            _map(p['interval'])['count'] as int,
+            IntervalUnit.values.byName(_map(p['interval'])['unit'] as String),
+          ),
+          seedKind: SeedKind.values.byName(_map(p['seed'])['kind'] as String),
+          seedDate: LocalDate.parse(
+            (_map(p['seed'])['careDate'] ?? _map(p['seed'])['firstCheckDate'])
+                as String,
+          ),
+          catalogSelection: p['catalogSelection'] == null
+              ? null
+              : CatalogSelection.fromJson(
+                  _map(p['catalogSelection'])['speciesId'] as String,
+                  p['catalogSelection'],
+                ),
+        ),
         'SaveDraft' => SaveDraft(
           draftId: p['draftId'] as String,
           expectedRevision: p['expectedRevision'] as int?,
@@ -168,6 +200,7 @@ CoreCommand _storedCommand(String type, Map<String, Object?> p) {
           plantRevision: p['plantRevision'] as int,
         ),
         'BulkComplete' => BulkComplete(
+          customTypeId: p['customTypeId'] as String?,
           careKind: StandardCareKind.values.byName(p['careKind'] as String),
           careDate: d('careDate'),
           targets: _list(p['targets']).map(_storedTarget),

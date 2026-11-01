@@ -342,7 +342,8 @@ final class BackupEngine {
                 try idleContent(current);return try fingerprint(current)
             }
             let expanded=try index.database.read {try CoreSchema.integer($0.query("SELECT COALESCE(sum(expanded),0) FROM entries")[0][0])}
-            preview.merge(["importId":.string(id),"sourceSha256":.string(digest.0),"formatVersion":.integer(2),"dataSchemaVersion":.integer(2),"counts":counts,"requiredAdditionalBytes":.integer(expanded),"warningKey":.string("replace_not_merge")]) {_,new in new}
+            let archiveVersion=try BackupContent.archiveVersion(root)
+            preview.merge(["importId":.string(id),"sourceSha256":.string(digest.0),"formatVersion":.integer(archiveVersion),"dataSchemaVersion":.integer(archiveVersion),"counts":counts,"requiredAdditionalBytes":.integer(expanded),"warningKey":.string("replace_not_merge")]) {_,new in new}
             let value=CanonicalValue.object(preview)
             try control.db.transaction {try $0.execute("UPDATE jobs SET preview_json=? WHERE id=?",[.text(try value.json()),.text(id)])}
             try state(id,.object(["kind":.string("preview_ready"),"preview":value]),control)

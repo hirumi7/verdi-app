@@ -116,7 +116,7 @@ final class CareTimelineEntry extends TimelineEntry {
   final StandardCareKind careKind;
   final String careLabel;
   CareTimelineEntry._(RoutineCore routine, this.event, this.careKind)
-    : careLabel = routine.careLabel,
+    : careLabel = event.careLabel,
       super._(
         event.id,
         routine.plantId,
@@ -159,6 +159,7 @@ sealed class TodayRow {
 }
 
 final class CheckRow extends TodayRow {
+  final String? customTypeId;
   final CareTarget target;
   final TodaySection section;
   final int overdueDays;
@@ -167,6 +168,7 @@ final class CheckRow extends TodayRow {
     RoutineCore routine,
     StandardCareKind kind,
     LocalDate today,
+    this.customTypeId,
   ) : target = _readTarget(plant, routine),
       section = routine.nextCheck.compareTo(today) < 0
           ? TodaySection.overdue
@@ -485,6 +487,7 @@ extension CollectionReads on MemoryOperationCoordinator {
                 r,
                 snapshot.careKinds[r.id]!,
                 today,
+                snapshot.customTypeIds[r.id],
               ),
             )
             .toList()
@@ -553,6 +556,7 @@ extension CollectionReads on MemoryOperationCoordinator {
                 r,
                 snapshot.careKinds[r.id]!,
                 today,
+                snapshot.customTypeIds[r.id],
               ),
             )
             .toList()

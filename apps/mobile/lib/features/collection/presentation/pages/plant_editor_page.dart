@@ -46,12 +46,12 @@ class _PlantEditorPageState extends State<PlantEditorPage>
       name: FocusNode(),
   };
   final routineKeys = {
-    for (final kind in StandardCareKind.values)
+    for (final kind in standardCareKinds)
       for (final field in ['count', 'seed', 'date'])
         '${kind.name}-$field': GlobalKey(),
   };
   final routineFocus = {
-    for (final kind in StandardCareKind.values)
+    for (final kind in standardCareKinds)
       for (final field in ['count', 'seed', 'date'])
         '${kind.name}-$field': FocusNode(),
   };
@@ -221,7 +221,7 @@ class _PlantEditorPageState extends State<PlantEditorPage>
               ),
               for (final r in review.detail?.routines ?? <RoutineRead>[])
                 Text(
-                  '${kindLabel(s, r.careKind)} · ${s.routineEvery(r.routine.interval.count, unitLabel(s, r.routine.interval.unit))} · ${s.nextAfter(dateLabel(context, r.routine.nextCheck))}',
+                  '${kindLabel(s, r.careKind, customLabel: r.routine.careLabel)} · ${s.routineEvery(r.routine.interval.count, unitLabel(s, r.routine.interval.unit))} · ${s.nextAfter(dateLabel(context, r.routine.nextCheck))}',
                 ),
             ],
           ),
@@ -573,7 +573,14 @@ class _PlantEditorPageState extends State<PlantEditorPage>
                                             crossAxisAlignment:
                                                 CrossAxisAlignment.start,
                                             children: [
-                                              Text(kindLabel(s, row.careKind)),
+                                              Text(
+                                                kindLabel(
+                                                  s,
+                                                  row.careKind,
+                                                  customLabel:
+                                                      row.routine.careLabel,
+                                                ),
+                                              ),
                                               RadioGroup<String>(
                                                 groupValue:
                                                     f.keepRoutineIds.contains(

@@ -58,7 +58,7 @@ class AppStringsEn extends AppStrings {
 
   @override
   String get noRoutines =>
-      'No checks scheduled. Add a routine when you add your next sample plant.';
+      'No checks scheduled. Open a plant and choose Add care.';
 
   @override
   String get overdue => 'Overdue checks';
@@ -1099,7 +1099,7 @@ class AppStringsEn extends AppStrings {
 
   @override
   String get proBenefit =>
-      'Pro gives you unlimited active plants in this preview.';
+      'Pro gives you unlimited active plants and new custom care types and routines in this preview.';
 
   @override
   String get proFree =>
@@ -1163,4 +1163,58 @@ class AppStringsEn extends AppStrings {
   @override
   String get proRetryPendingBody =>
       'An earlier approval request may still exist. Retrying does not cancel it and may open a new store request. No plant will save automatically. Continue?';
+
+  @override
+  String get customCare => 'Custom care';
+
+  @override
+  String get customCarePro =>
+      'Creating custom care types and routines requires Pro. Existing care stays editable on Free.';
+
+  @override
+  String get careTypes => 'Care types';
+
+  @override
+  String get addCustomCare => 'Add custom care type';
+
+  @override
+  String get careTypeLabel => 'Care type name';
+
+  @override
+  String get careTypeLabelInvalid => 'Enter 1–24 characters.';
+
+  @override
+  String get renameCareType => 'Rename care type';
+
+  @override
+  String get retireCareType => 'Retire care type';
+
+  @override
+  String get retiredCareType => 'Retired — existing routines retained';
+
+  @override
+  String get retireCareTypeBody =>
+      'Hide this type from new care choices. Existing routines and history remain.';
+
+  @override
+  String get renameCareTypeBody =>
+      'Update current routine labels. Historical labels and reminder dates remain unchanged.';
+
+  @override
+  String get addCare => 'Add care';
+
+  @override
+  String get careType => 'Care type';
+
+  @override
+  String get careFormDiscard => 'Discard this unsaved care form?';
+
+  @override
+  String get noCareChoices =>
+      'All standard care types are already added. Create custom care types in Settings.';
+
+  @override
+  String careTypeEffects(int count) {
+    return 'Affected routines: $count';
+  }
 }

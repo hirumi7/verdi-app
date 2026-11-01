@@ -160,14 +160,19 @@ final class CoreRepositoryTests: XCTestCase {
         XCTAssertEqual(try allRows("journal_entries"),before)
         XCTAssertEqual(try allRows("journal_drafts").count,1)
     }
+    func legacyRoutinesDDL() -> String {
+        let table=CoreSchema.legacyDefinitions.first{$0.hasPrefix("CREATE TABLE routines(")}!
+        let index=CoreSchema.legacyDefinitions.first{$0.hasPrefix("CREATE UNIQUE INDEX current_kind")}!
+        return "CREATE TEMP TABLE kept_routines AS SELECT * FROM routines; DROP TABLE routine_custom_types; DROP TABLE custom_care_types; DROP TABLE routines; " + table + "; INSERT INTO routines SELECT * FROM kept_routines; DROP TABLE kept_routines; " + index + ";"
+    }
     func testExactV2MigrationPreservesAllRowsAndFrozenCommand() throws {
         try execute(0);_ = try plan(1);_ = try call("close")
         let url=directory.appendingPathComponent("core.sqlite")
         var raw:OpaquePointer?;XCTAssertEqual(sqlite3_open(url.path,&raw),SQLITE_OK)
-        XCTAssertEqual(sqlite3_exec(raw,"BEGIN; DROP TABLE user_settings; DROP TABLE plant_covers; DROP TABLE media_drafts; DROP TABLE journal_drafts; DROP TABLE journal_entries; DROP TABLE photos; DROP TABLE media_preparations; DROP TABLE media_selections; DROP TABLE media_files; DROP TABLE media_cleanup; PRAGMA user_version=2; COMMIT;",nil,nil,nil),SQLITE_OK)
+        XCTAssertEqual(sqlite3_exec(raw,"BEGIN; \(legacyRoutinesDDL()) DROP TABLE user_settings; DROP TABLE plant_covers; DROP TABLE media_drafts; DROP TABLE journal_drafts; DROP TABLE journal_entries; DROP TABLE photos; DROP TABLE media_preparations; DROP TABLE media_selections; DROP TABLE media_files; DROP TABLE media_cleanup; PRAGMA user_version=2; COMMIT;",nil,nil,nil),SQLITE_OK)
         sqlite3_close(raw)
         let old=try SQLiteDatabase.open(at:url,schema:CoreSchema.schema(version:2))
-        let tables=Array(CoreSchema.tables.filter{!["plant_covers","media_drafts","journal_drafts","journal_entries","photos"].contains($0)})+["metadata","intents","reservations","receipts","outbox"]
+        let tables=Array(CoreSchema.tables.filter{!["custom_care_types","routine_custom_types","plant_covers","media_drafts","journal_drafts","journal_entries","photos"].contains($0)})+["metadata","intents","reservations","receipts","outbox"]
         let before=try old.read{sql in try tables.map{try sql.query("SELECT * FROM \($0) ORDER BY 1")}};try old.close()
         try open()
         XCTAssertEqual(try repo.queue.sync{try repo.database!.read{sql in try tables.map{try sql.query("SELECT * FROM \($0) ORDER BY 1")}}},before)
@@ -227,13 +232,13 @@ final class CoreRepositoryTests: XCTestCase {
             var raw: OpaquePointer?
             XCTAssertEqual(sqlite3_open(url.path,&raw),SQLITE_OK)
             defer {sqlite3_close(raw)}
-            XCTAssertEqual(sqlite3_exec(raw,"BEGIN; DROP TABLE user_settings; DROP TABLE plant_covers; DROP TABLE media_drafts; DROP TABLE journal_drafts; DROP TABLE journal_entries; DROP TABLE photos; DROP TABLE media_preparations; DROP TABLE media_selections; DROP TABLE media_files; DROP TABLE media_cleanup; DROP TABLE routine_suggestions; DROP TABLE suggestion_snapshots; DROP TABLE plant_catalog; DROP TABLE catalog_head; DROP TABLE catalog_entries; DROP TABLE catalog_identity; PRAGMA user_version=1; COMMIT;",nil,nil,nil),SQLITE_OK)
+            XCTAssertEqual(sqlite3_exec(raw,"BEGIN; \(legacyRoutinesDDL()) DROP TABLE user_settings; DROP TABLE plant_covers; DROP TABLE media_drafts; DROP TABLE journal_drafts; DROP TABLE journal_entries; DROP TABLE photos; DROP TABLE media_preparations; DROP TABLE media_selections; DROP TABLE media_files; DROP TABLE media_cleanup; DROP TABLE routine_suggestions; DROP TABLE suggestion_snapshots; DROP TABLE plant_catalog; DROP TABLE catalog_head; DROP TABLE catalog_entries; DROP TABLE catalog_identity; PRAGMA user_version=1; COMMIT;",nil,nil,nil),SQLITE_OK)
             sqlite3_close(raw);raw=nil
             db=try SQLiteDatabase.open(at:url,schema:CoreSchema.schema(version:1));try db.close()
-            XCTAssertThrowsError(try SQLiteDatabase.open(at:url,schema:CoreSchema.schema(),upgradeFrom:CoreSchema.schema(version:1),migrationStatements:CoreSchema.catalogDefinitions+CoreSchema.mediaDefinitions,fault:{if $0 == .beforeCommit {throw StorageFailure.unavailable}}))
+            XCTAssertThrowsError(try SQLiteDatabase.open(at:url,schema:CoreSchema.schema(),upgradeFrom:CoreSchema.schema(version:1),migrationStatements:CoreSchema.catalogDefinitions+CoreSchema.mediaDefinitions+CoreSchema.settingsDefinitions+[CoreSchema.settingsSeed]+CoreSchema.customMigration,rebuildTables:true,fault:{if $0 == .beforeCommit {throw StorageFailure.unavailable}}))
             db=try SQLiteDatabase.open(at:url,schema:CoreSchema.schema(version:1))
             XCTAssertEqual(try db.read {sql in try tables.map{try sql.query("SELECT * FROM \($0) ORDER BY 1")}},before);try db.close()
-            XCTAssertThrowsError(try SQLiteDatabase.open(at:url,schema:CoreSchema.schema(),upgradeFrom:CoreSchema.schema(version:1),migrationStatements:CoreSchema.catalogDefinitions+CoreSchema.mediaDefinitions,fault:{if $0 == .afterCommit {throw StorageFailure.unavailable}}))
+            XCTAssertThrowsError(try SQLiteDatabase.open(at:url,schema:CoreSchema.schema(),upgradeFrom:CoreSchema.schema(version:1),migrationStatements:CoreSchema.catalogDefinitions+CoreSchema.mediaDefinitions+CoreSchema.settingsDefinitions+[CoreSchema.settingsSeed]+CoreSchema.customMigration,rebuildTables:true,fault:{if $0 == .afterCommit {throw StorageFailure.unavailable}}))
             try open()
             db=try SQLiteDatabase.open(at:url,schema:CoreSchema.schema())
             XCTAssertEqual(try db.read {sql in try tables.map{try sql.query("SELECT * FROM \($0) ORDER BY 1")}},before);try db.close()
@@ -375,7 +380,7 @@ final class CoreRepositoryTests: XCTestCase {
             try execute(index)
             if [3,10,18,24,27].contains(index) { try open(); try verifyRows(index) }
         }
-        XCTAssertEqual(Set(steps.compactMap{$0["intent"]?.object?["commandType"]?.text}),CoreRegistry.commands.subtracting(CoreRegistry.mediaCommands))
+        XCTAssertEqual(Set(steps.compactMap{$0["intent"]?.object?["commandType"]?.text}),CoreRegistry.commands.subtracting(CoreRegistry.mediaCommands).subtracting(CoreRegistry.customCommands))
     }
     func testAtomicRollbackAndLostReplyResolveWithoutDuplicate() throws {
         let p = try plan(0)

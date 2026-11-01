@@ -4,7 +4,7 @@ import ZIPFoundation
 @testable import VerdiNative
 
 extension CoreRepositoryTests {
-    func alteredBackup(_ zip:URL,_ mutate:(inout [String:CanonicalValue])throws->Void) throws -> URL {
+    func alteredBackup(_ zip:URL, manifestMutation:((inout [String:CanonicalValue])throws->Void)? = nil,_ mutate:(inout [String:CanonicalValue])throws->Void) throws -> URL {
         let root=directory.appendingPathComponent("fixture-"+UUID().uuidString);try BackupIO.directory(root)
         let original=try Archive(url:zip,accessMode:.read)
         for entry in original { _=try original.extract(entry,to:root.appendingPathComponent(entry.path)) }
@@ -13,6 +13,7 @@ extension CoreRepositoryTests {
         try mutate(&data);try Data(try CanonicalValue.object(data).json().utf8).write(to:dataURL)
         let manifestURL=root.appendingPathComponent("manifest.json")
         var manifest=try CoreSchema.object(CanonicalParser.package(String(contentsOf:manifestURL)))
+        try manifestMutation?(&manifest)
         let hash=try BackupIO.hash(dataURL)
         manifest["data"] = .object(["path":.string("data.json"),"sha256":.string(hash.0),"bytes":.integer(hash.1)])
         try Data(try CanonicalValue.object(manifest).json().utf8).write(to:manifestURL)
@@ -37,7 +38,7 @@ extension CoreRepositoryTests {
         }}
         let (_,zip)=try exportBackup(),old=dataset,before=try allRows("plants")
         let mutations:[(String,(inout [String:CanonicalValue])throws->Void)] = [
-            ("future",{$0["schemaVersion"] = .integer(3)}),
+            ("future",{$0["schemaVersion"] = .integer(4)}),
             ("entitlement",{$0["isPro"] = .boolean(true)}),
             ("duplicate",{data in var t=data["tables"]!.object!,p=t["plants"]!.array!;p.append(p[0]);t["plants"] = .array(p);data["tables"] = .object(t)}),
             ("long-name",{data in try self.alterRow(&data,"plants",2,.string(String(repeating:"a",count:61)))}),

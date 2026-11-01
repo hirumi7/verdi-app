@@ -2,7 +2,7 @@ part of 'collection.dart';
 
 enum DraftMode { add, edit }
 
-enum StandardCareKind { water, fertilize, mist, repot, rotate }
+enum StandardCareKind { water, fertilize, mist, repot, rotate, custom }
 
 enum CustomLight { unknown, low, medium, brightIndirect, direct }
 
@@ -301,6 +301,8 @@ final class CollectionSnapshot {
   final Map<String, MediaDraft> mediaDrafts;
   final Map<String, PlantPhoto> photos;
   final Map<String, String> covers;
+  final Map<String, CustomCareType> customCareTypes;
+  final Map<String, String> customTypeIds;
 
   /// Fake reminder invalidation only; no OS notification is scheduled.
   final int reminderGeneration;
@@ -319,6 +321,8 @@ final class CollectionSnapshot {
     Map<String, MediaDraft> mediaDrafts = const {},
     Map<String, PlantPhoto> photos = const {},
     Map<String, String> covers = const {},
+    Map<String, CustomCareType> customCareTypes = const {},
+    Map<String, String> customTypeIds = const {},
   ]) : plants = Map.unmodifiable(plants),
        routines = Map.unmodifiable(routines),
        careKinds = Map.unmodifiable(careKinds),
@@ -329,7 +333,9 @@ final class CollectionSnapshot {
        journalDrafts = Map.unmodifiable(journalDrafts),
        mediaDrafts = Map.unmodifiable(mediaDrafts),
        photos = Map.unmodifiable(photos),
-       covers = Map.unmodifiable(covers);
+       covers = Map.unmodifiable(covers),
+       customCareTypes = Map.unmodifiable(customCareTypes),
+       customTypeIds = Map.unmodifiable(customTypeIds);
 
   List<PlantCore> get activePlants =>
       List.unmodifiable(plants.values.where((p) => !p.archived));
@@ -447,7 +453,7 @@ final class ClockReading {
   const ClockReading(this.care, this.elapsed);
 }
 
-enum PreviewGate { allowed, activeLimit }
+enum PreviewGate { allowed, activeLimit, proRequired }
 
 final class PreviewRow {
   final String plantId;
