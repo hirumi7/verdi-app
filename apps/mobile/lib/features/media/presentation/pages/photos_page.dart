@@ -1,3 +1,4 @@
+import '../../../optimization/presentation/optimization_page.dart';
 import '../../../cards/presentation/card_page.dart';
 
 import 'package:auto_route/auto_route.dart';
@@ -154,6 +155,22 @@ class _PhotosPageState extends State<PhotosPage> {
                     : () => openCard(context, widget.plantId, comparison: true),
                 icon: const Icon(Icons.compare),
                 label: Text(s.comparePhotos),
+              ),
+              OutlinedButton.icon(
+                onPressed: busy
+                    ? null
+                    : () async {
+                        final chosen = await openOptimization(
+                          context,
+                          widget.plantId,
+                        );
+                        if (chosen != null && mounted) {
+                          setState(() => selected = chosen);
+                        }
+                        await cubit.load(photoId: selected);
+                      },
+                icon: const Icon(Icons.photo_size_select_large),
+                label: Text(s.optimizePhotos),
               ),
               if (busy) const LinearProgressIndicator(),
               if (localError ?? state.errorCode case final String error) ...[

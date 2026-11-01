@@ -281,7 +281,7 @@ extension on MemoryOperationCoordinator {
               fresh.height,
               fresh.observedDate,
               fresh.sourceKind,
-              null,
+              fresh.optimizedFromHash,
               p.createdAt,
             );
             bindings['draft'] = d.toRow();

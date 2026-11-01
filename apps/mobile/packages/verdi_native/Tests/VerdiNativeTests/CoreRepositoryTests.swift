@@ -163,7 +163,7 @@ final class CoreRepositoryTests: XCTestCase {
     func legacyRoutinesDDL() -> String {
         let table=CoreSchema.legacyDefinitions.first{$0.hasPrefix("CREATE TABLE routines(")}!
         let index=CoreSchema.legacyDefinitions.first{$0.hasPrefix("CREATE UNIQUE INDEX current_kind")}!
-        return "CREATE TEMP TABLE kept_routines AS SELECT * FROM routines; DROP TABLE routine_custom_types; DROP TABLE custom_care_types; DROP TABLE routines; " + table + "; INSERT INTO routines SELECT * FROM kept_routines; DROP TABLE kept_routines; " + index + ";"
+        return "DROP TABLE IF EXISTS optimization_targets; DROP TABLE IF EXISTS optimization_jobs; CREATE TEMP TABLE kept_routines AS SELECT * FROM routines; DROP TABLE routine_custom_types; DROP TABLE custom_care_types; DROP TABLE routines; " + table + "; INSERT INTO routines SELECT * FROM kept_routines; DROP TABLE kept_routines; " + index + ";"
     }
     func testExactV2MigrationPreservesAllRowsAndFrozenCommand() throws {
         try execute(0);_ = try plan(1);_ = try call("close")

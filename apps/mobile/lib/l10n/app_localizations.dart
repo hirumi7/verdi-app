@@ -2583,6 +2583,192 @@ abstract class AppStrings {
   /// In en, this message translates to:
   /// **'Your edited message is kept only on this page. A copy you already made will remain on the clipboard.'**
   String get feedbackDiscardBody;
+
+  /// No description provided for @optimizePhotos.
+  ///
+  /// In en, this message translates to:
+  /// **'Optimize photos'**
+  String get optimizePhotos;
+
+  /// No description provided for @optimizationIntro.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose up to 200 saved photos. Nothing is selected automatically. Optimization is optional and available for Free.'**
+  String get optimizationIntro;
+
+  /// No description provided for @optimizationWarning.
+  ///
+  /// In en, this message translates to:
+  /// **'Replace the selected app-stored originals with JPEGs at quality 85%, up to 1280 pixels on the longest edge, without enlarging them. Metadata is removed. Cover and journal views will use the replacements. Files may not become smaller. Alpha-bearing images are skipped to preserve transparency. Export originals or make a backup first if you want to keep them. Copies outside Verdi are unchanged.'**
+  String get optimizationWarning;
+
+  /// No description provided for @optimizationReview.
+  ///
+  /// In en, this message translates to:
+  /// **'Review selected photos'**
+  String get optimizationReview;
+
+  /// No description provided for @optimizationConfirm.
+  ///
+  /// In en, this message translates to:
+  /// **'Replace selected originals'**
+  String get optimizationConfirm;
+
+  /// No description provided for @optimizationCancel.
+  ///
+  /// In en, this message translates to:
+  /// **'Cancel remaining'**
+  String get optimizationCancel;
+
+  /// No description provided for @optimizationRecovery.
+  ///
+  /// In en, this message translates to:
+  /// **'Resolve interrupted job'**
+  String get optimizationRecovery;
+
+  /// No description provided for @optimizationResults.
+  ///
+  /// In en, this message translates to:
+  /// **'Optimization results'**
+  String get optimizationResults;
+
+  /// No description provided for @optimizationRunning.
+  ///
+  /// In en, this message translates to:
+  /// **'Working on selected photos…'**
+  String get optimizationRunning;
+
+  /// No description provided for @optimizationComplete.
+  ///
+  /// In en, this message translates to:
+  /// **'Finished. Each photo’s result is shown below.'**
+  String get optimizationComplete;
+
+  /// No description provided for @optimizationCancelled.
+  ///
+  /// In en, this message translates to:
+  /// **'Remaining work cancelled. Completed replacements are kept.'**
+  String get optimizationCancelled;
+
+  /// No description provided for @optimizationInterrupted.
+  ///
+  /// In en, this message translates to:
+  /// **'Interrupted. Saved receipts were checked; no replacements were resumed.'**
+  String get optimizationInterrupted;
+
+  /// No description provided for @optimizationFailureHelp.
+  ///
+  /// In en, this message translates to:
+  /// **'Failed and unattempted originals remain unchanged. A retained replacement draft can be opened or explicitly discarded in the photo viewer before a fresh selection and confirmation.'**
+  String get optimizationFailureHelp;
+
+  /// No description provided for @optimizationRecoveryNeeded.
+  ///
+  /// In en, this message translates to:
+  /// **'The stop result is not yet confirmed. Resolve this job before starting another or restoring a backup.'**
+  String get optimizationRecoveryNeeded;
+
+  /// No description provided for @optimizationLeaveTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Cancel remaining optimization?'**
+  String get optimizationLeaveTitle;
+
+  /// No description provided for @optimizationLeaveBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Completed replacements will be kept. Resolve any pending result before leaving.'**
+  String get optimizationLeaveBody;
+
+  /// No description provided for @optimizationSucceeded.
+  ///
+  /// In en, this message translates to:
+  /// **'Replaced'**
+  String get optimizationSucceeded;
+
+  /// No description provided for @optimizationFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Original kept — failed'**
+  String get optimizationFailed;
+
+  /// No description provided for @optimizationNotAttempted.
+  ///
+  /// In en, this message translates to:
+  /// **'Not attempted'**
+  String get optimizationNotAttempted;
+
+  /// No description provided for @optimizationPending.
+  ///
+  /// In en, this message translates to:
+  /// **'Pending'**
+  String get optimizationPending;
+
+  /// No description provided for @optimizationNoPhotos.
+  ///
+  /// In en, this message translates to:
+  /// **'No saved photos are available for this plant.'**
+  String get optimizationNoPhotos;
+
+  /// No description provided for @optimizationConflict.
+  ///
+  /// In en, this message translates to:
+  /// **'Finish or explicitly discard this photo’s existing replacement draft before optimizing it.'**
+  String get optimizationConflict;
+
+  /// No description provided for @optimizationUnsupported.
+  ///
+  /// In en, this message translates to:
+  /// **'Alpha-bearing or unsupported image; original kept.'**
+  String get optimizationUnsupported;
+
+  /// No description provided for @optimizationGenericError.
+  ///
+  /// In en, this message translates to:
+  /// **'Optimization could not continue. Your saved photos and recoverable drafts remain available.'**
+  String get optimizationGenericError;
+
+  /// No description provided for @optimizationNotStarted.
+  ///
+  /// In en, this message translates to:
+  /// **'No optimization job was recorded. Review your selection again.'**
+  String get optimizationNotStarted;
+
+  /// No description provided for @optimizationPhoto.
+  ///
+  /// In en, this message translates to:
+  /// **'Photo {number}'**
+  String optimizationPhoto(int number);
+
+  /// No description provided for @optimizationDimensions.
+  ///
+  /// In en, this message translates to:
+  /// **'{width} × {height} pixels · {bytes} bytes'**
+  String optimizationDimensions(int width, int height, int bytes);
+
+  /// No description provided for @optimizationPhotoUnavailable.
+  ///
+  /// In en, this message translates to:
+  /// **'This photo is no longer available in this plant.'**
+  String get optimizationPhotoUnavailable;
+
+  /// No description provided for @optimizationOpenPhoto.
+  ///
+  /// In en, this message translates to:
+  /// **'Open photo and replacement draft'**
+  String get optimizationOpenPhoto;
+
+  /// No description provided for @optimizationDiskFull.
+  ///
+  /// In en, this message translates to:
+  /// **'Not enough storage to prepare this replacement. Free space, then review a new selection.'**
+  String get optimizationDiskFull;
+
+  /// No description provided for @optimizationWriteFailure.
+  ///
+  /// In en, this message translates to:
+  /// **'The replacement file could not be saved. The prior photo was not replaced.'**
+  String get optimizationWriteFailure;
 }
 
 class _AppStringsDelegate extends LocalizationsDelegate<AppStrings> {

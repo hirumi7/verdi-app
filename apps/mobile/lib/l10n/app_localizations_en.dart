@@ -1440,4 +1440,117 @@ class AppStringsEn extends AppStrings {
   @override
   String get feedbackDiscardBody =>
       'Your edited message is kept only on this page. A copy you already made will remain on the clipboard.';
+
+  @override
+  String get optimizePhotos => 'Optimize photos';
+
+  @override
+  String get optimizationIntro =>
+      'Choose up to 200 saved photos. Nothing is selected automatically. Optimization is optional and available for Free.';
+
+  @override
+  String get optimizationWarning =>
+      'Replace the selected app-stored originals with JPEGs at quality 85%, up to 1280 pixels on the longest edge, without enlarging them. Metadata is removed. Cover and journal views will use the replacements. Files may not become smaller. Alpha-bearing images are skipped to preserve transparency. Export originals or make a backup first if you want to keep them. Copies outside Verdi are unchanged.';
+
+  @override
+  String get optimizationReview => 'Review selected photos';
+
+  @override
+  String get optimizationConfirm => 'Replace selected originals';
+
+  @override
+  String get optimizationCancel => 'Cancel remaining';
+
+  @override
+  String get optimizationRecovery => 'Resolve interrupted job';
+
+  @override
+  String get optimizationResults => 'Optimization results';
+
+  @override
+  String get optimizationRunning => 'Working on selected photos…';
+
+  @override
+  String get optimizationComplete =>
+      'Finished. Each photo’s result is shown below.';
+
+  @override
+  String get optimizationCancelled =>
+      'Remaining work cancelled. Completed replacements are kept.';
+
+  @override
+  String get optimizationInterrupted =>
+      'Interrupted. Saved receipts were checked; no replacements were resumed.';
+
+  @override
+  String get optimizationFailureHelp =>
+      'Failed and unattempted originals remain unchanged. A retained replacement draft can be opened or explicitly discarded in the photo viewer before a fresh selection and confirmation.';
+
+  @override
+  String get optimizationRecoveryNeeded =>
+      'The stop result is not yet confirmed. Resolve this job before starting another or restoring a backup.';
+
+  @override
+  String get optimizationLeaveTitle => 'Cancel remaining optimization?';
+
+  @override
+  String get optimizationLeaveBody =>
+      'Completed replacements will be kept. Resolve any pending result before leaving.';
+
+  @override
+  String get optimizationSucceeded => 'Replaced';
+
+  @override
+  String get optimizationFailed => 'Original kept — failed';
+
+  @override
+  String get optimizationNotAttempted => 'Not attempted';
+
+  @override
+  String get optimizationPending => 'Pending';
+
+  @override
+  String get optimizationNoPhotos =>
+      'No saved photos are available for this plant.';
+
+  @override
+  String get optimizationConflict =>
+      'Finish or explicitly discard this photo’s existing replacement draft before optimizing it.';
+
+  @override
+  String get optimizationUnsupported =>
+      'Alpha-bearing or unsupported image; original kept.';
+
+  @override
+  String get optimizationGenericError =>
+      'Optimization could not continue. Your saved photos and recoverable drafts remain available.';
+
+  @override
+  String get optimizationNotStarted =>
+      'No optimization job was recorded. Review your selection again.';
+
+  @override
+  String optimizationPhoto(int number) {
+    return 'Photo $number';
+  }
+
+  @override
+  String optimizationDimensions(int width, int height, int bytes) {
+    return '$width × $height pixels · $bytes bytes';
+  }
+
+  @override
+  String get optimizationPhotoUnavailable =>
+      'This photo is no longer available in this plant.';
+
+  @override
+  String get optimizationOpenPhoto => 'Open photo and replacement draft';
+
+  @override
+  String get optimizationDiskFull =>
+      'Not enough storage to prepare this replacement. Free space, then review a new selection.';
+
+  @override
+  String get optimizationWriteFailure =>
+      'The replacement file could not be saved. The prior photo was not replaced.';
 }

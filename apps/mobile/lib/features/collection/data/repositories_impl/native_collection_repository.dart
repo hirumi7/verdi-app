@@ -74,6 +74,7 @@ final class NativeCollectionRepository implements CollectionRepository {
   int _sequence = 0;
   final Map<String, String> _retryIds = {};
   final Map<String, String> _preparationIds = {};
+  final Set<String> _retiredOptimizationIds = {};
   Future<void>? _connecting;
   @override
   late String datasetId;
@@ -100,6 +101,34 @@ final class NativeCollectionRepository implements CollectionRepository {
     }
     return _call('verificationFault', fault);
   }
+
+  Future<Map<String, Object?>?> optimization(
+    String operation,
+    Map<String, Object?> args,
+  ) async {
+    final result = await _call<Map<String, Object?>?>('optimization', (
+      operation,
+      args,
+    ));
+    if (result != null && result['results'] is List) {
+      for (final raw in result['results'] as List) {
+        final row = _map(raw);
+        if (row['state'] == 'pending') continue;
+        for (final key in ['draftCommandId', 'replaceCommandId']) {
+          final id = row[key] as String;
+          _retiredOptimizationIds.add(id);
+          _preparationIds.removeWhere((_, value) => value == id);
+          _retryIds.removeWhere((_, value) => value == id);
+        }
+      }
+    }
+    return result;
+  }
+
+  Future<CommandSuccess> submitOptimizationDraft(
+    SaveMediaDraft command,
+    String commandId,
+  ) => _call('submit', command, commandId);
 
   @override
   Future<CollectionSnapshot> mediaSnapshot() => _call('mediaSnapshot');
@@ -284,7 +313,9 @@ final class NativeCollectionRepository implements CollectionRepository {
       _preparationIds.remove(hash);
       return prepared;
     } on UnknownCommandOutcome catch (error) {
-      _preparationIds[hash] = error.commandId;
+      if (!_retiredOptimizationIds.contains(error.commandId)) {
+        _preparationIds[hash] = error.commandId;
+      }
       rethrow;
     } on CommandRejected {
       _preparationIds.remove(hash);
@@ -694,6 +725,40 @@ final class _Worker {
     }
     final reader = projection.reader, dataset = projection.datasetId;
     switch (request.operation) {
+      case 'optimization':
+        final (operation, args) = value as (String, Map<String, Object?>);
+        const allowed = {
+          'previewOptimization',
+          'startOptimization',
+          'getOptimizationJob',
+          'latestOptimizationJob',
+          'prepareOptimizationPhoto',
+          'finishOptimizationTarget',
+          'stopOptimization',
+        };
+        if (!allowed.contains(operation)) {
+          throw CommandRejected('FIELD_INVALID');
+        }
+        final reply = await native(operation, args);
+        final result = reply == null ? null : _map(reply);
+        if (operation == 'finishOptimizationTarget' ||
+            operation == 'stopOptimization') {
+          for (final raw in result?['results'] as List? ?? const []) {
+            final child = _map(raw);
+            if (child['state'] == 'pending') continue;
+            for (final key in ['draftCommandId', 'replaceCommandId']) {
+              final id = child[key] as String;
+              pending.remove(id);
+              plans.remove(id);
+              tokens.remove(id);
+              projection.forget(id);
+              if (unresolved == id) unresolved = null;
+            }
+          }
+          await hydrate();
+          await loadPending();
+        }
+        return result;
       case 'preparePhoto':
         return _map(
           await native('preparePhoto', value as Map<String, Object?>),

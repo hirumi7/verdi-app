@@ -93,11 +93,16 @@ enum CoreSchema {
         "ALTER TABLE routines_v5 RENAME TO routines",
         customIndexDefinition,
     ] + customDefinitions
-    static let definitions = version4Definitions.map { statement in
+    static let version5Definitions = version4Definitions.map { statement in
         statement.hasPrefix("CREATE TABLE routines(") ? customRoutineDefinition : statement.hasPrefix("CREATE UNIQUE INDEX current_kind ") ? customIndexDefinition : statement
     } + customDefinitions
-    static func schema(dataset: String? = nil, instant: String = "", version: Int32 = 5, expectedDataset: String? = nil) -> CompiledSchema {
-        let expected = version == 1 ? legacyDefinitions : version == 2 ? legacyDefinitions + catalogDefinitions : version == 3 ? legacyDefinitions + catalogDefinitions + mediaDefinitions : version == 4 ? version4Definitions : definitions
+    static let optimizationDefinitions = [
+        "CREATE TABLE optimization_jobs(id TEXT PRIMARY KEY NOT NULL,plant_id TEXT NOT NULL,request_hash TEXT NOT NULL,targets_json TEXT NOT NULL,state TEXT NOT NULL CHECK(state IN ('running','complete','cancelled','interrupted')),created_at TEXT NOT NULL)",
+        "CREATE TABLE optimization_targets(job_id TEXT NOT NULL REFERENCES optimization_jobs(id),ordinal INTEGER NOT NULL,photo_id TEXT NOT NULL,photo_revision INTEGER NOT NULL,source_hash TEXT NOT NULL,draft_id TEXT NOT NULL UNIQUE,draft_command_id TEXT NOT NULL UNIQUE,preparation_id TEXT NOT NULL UNIQUE,replace_command_id TEXT NOT NULL UNIQUE,state TEXT NOT NULL CHECK(state IN ('pending','succeeded','failed','not_attempted')),code TEXT,PRIMARY KEY(job_id,ordinal),UNIQUE(job_id,photo_id))",
+    ]
+    static let definitions = version5Definitions + optimizationDefinitions
+    static func schema(dataset: String? = nil, instant: String = "", version: Int32 = 6, expectedDataset: String? = nil) -> CompiledSchema {
+        let expected = version == 1 ? legacyDefinitions : version == 2 ? legacyDefinitions + catalogDefinitions : version == 3 ? legacyDefinitions + catalogDefinitions + mediaDefinitions : version == 4 ? version4Definitions : version == 5 ? version5Definitions : definitions
         return CompiledSchema(applicationID: 0x56435231, version: version,
             statements: expected + (version >= 4 ? [settingsSeed] : []) + (dataset.map { ["INSERT INTO metadata VALUES(1,'\($0)','custom_core_v1',1,1,'\(instant)')"] } ?? [])) { sql in
             let metadata = try sql.query("SELECT slot,dataset_id,profile,collection_revision,storage_revision FROM metadata")

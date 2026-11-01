@@ -105,12 +105,14 @@ final class MediaFiles {
         let status=Darwin.close(fd);closed=true;guard status==0 else {throw CoreRepositoryError("IO_FAILURE")}
         try fault?(.parentFlush);guard fsync(dir)==0 else {throw CoreRepositoryError("IO_FAILURE")}
     }
-    func writeCard(_ data:Data,to relative:String) throws {
+    func writeCard(_ data:Data,to relative:String) throws {try writeGeneratedImage(data,to:relative)}
+    func writeGeneratedImage(_ data:Data,to relative:String) throws {
         guard !data.isEmpty,data.count<=CardRenderer.maximumBytes else{throw CoreRepositoryError("CARD_GENERATION_FAILED")}
         let (dir,name)=try parent(relative,create:true);defer{Darwin.close(dir)}
         try fault?(.create)
         let fd=openat(dir,name,O_WRONLY|O_CREAT|O_EXCL|O_NOFOLLOW|O_CLOEXEC,S_IRUSR|S_IWUSR)
-        guard fd>=0 else{throw CoreRepositoryError("IO_FAILURE")};defer{Darwin.close(fd)}
+        guard fd>=0 else{throw CoreRepositoryError("IO_FAILURE")}
+        var closed=false;defer{if !closed{Darwin.close(fd)}}
         try protection(root.appendingPathComponent(relative))
         var url=root.appendingPathComponent(relative),values=URLResourceValues();values.isExcludedFromBackup=true;try url.setResourceValues(values)
         try data.withUnsafeBytes { raw in
@@ -122,6 +124,7 @@ final class MediaFiles {
             }
         }
         try fault?(.flush);guard fsync(fd)==0,fcntl(fd,F_FULLFSYNC)==0 else{throw CoreRepositoryError("IO_FAILURE")}
+        let closeStatus=Darwin.close(fd);closed=true;guard closeStatus==0 else{throw CoreRepositoryError("IO_FAILURE")}
         try fault?(.parentFlush);guard fsync(dir)==0 else{throw CoreRepositoryError("IO_FAILURE")}
     }
     func readCard(_ relative:String) throws -> Data {

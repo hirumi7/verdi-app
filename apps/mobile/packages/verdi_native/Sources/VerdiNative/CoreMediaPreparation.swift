@@ -77,6 +77,7 @@ extension CoreRepository {
         var hashed=args;hashed.removeValue(forKey:"sessionId");let hash=try CanonicalCommand.hash(.object(hashed)),photoID=UUID().uuidString.lowercased(),session=sessionID
         var work:(String,String,String?)?
         let status=try db.transaction {sql -> CanonicalValue in
+            try guardOrdinaryPreparation(sql,draftID,prepID)
             if let old=try sql.query("SELECT request_hash FROM media_preparations WHERE id=?",[.text(prepID)]).first {
                 try CoreRegistry.require(old[0] == .text(hash),"COMMAND_ID_REUSED");return try photoPreparation(sql,prepID)
             }

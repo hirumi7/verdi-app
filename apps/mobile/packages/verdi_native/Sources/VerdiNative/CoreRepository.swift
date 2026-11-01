@@ -44,6 +44,7 @@ public final class CoreRepository {
     let queue = DispatchQueue(label: "verdi.native.core-repository")
     let mediaWorker = DispatchQueue(label:"verdi.native.media-files")
     var cardPreviews:[String:CardPreview]=[:]
+    var optimizationPreviews:[String:OptimizationPreview]=[:]
     var cardOSFiles:[String:URL]=[:]
     var exportLeases:[String:Date]=[:]
     var pendingMediaFailures:[String:(session:String,code:String)]=[:]
@@ -75,6 +76,7 @@ public final class CoreRepository {
                 if operation == "open" { return try open(args).json() }
                 guard args["sessionId"]?.text == sessionID, let db = database, !sessionID.isEmpty else { throw CoreRepositoryError("SESSION_INVALID") }
                 if ["preparePhoto","photoPreparation","draftPreparations"].contains(operation) {try persistMediaFailures(db)}
+                if Self.optimizationOperations.contains(operation) {try persistMediaFailures(db);return try optimizationCall(operation,args,db).json()}
                 let value: CanonicalValue
                 switch operation {
                 case "close": try db.close(); database = nil; sessionID = ""; cardPreviews.removeAll(); grants.removeAll(); previews.removeAll(); value = .null
@@ -134,7 +136,7 @@ public final class CoreRepository {
     }
     private func open(_ args: [String: CanonicalValue]) throws -> CanonicalValue {
         guard args["protocolVersion"]?.integer == 1, args["profile"]?.text == "custom_core_v1" else { throw CoreRepositoryError("PROTOCOL_INCOMPATIBLE") }
-        sessionID = ""; cardPreviews.removeAll(); previews.removeAll(); grants.removeAll()
+        sessionID = ""; optimizationPreviews.removeAll(); cardPreviews.removeAll(); previews.removeAll(); grants.removeAll()
         if let database { try database.close(); self.database = nil }
         if BackupControl.exists(installationDirectory) {
             if backupControl == nil {backupControl = try BackupControl(legacy:installationDirectory,fault:backupFault,transactionFault:backupControlFault,io:backupFileIO)}
@@ -172,19 +174,20 @@ public final class CoreRepository {
             sessionID = UUID().uuidString.lowercased(); database = db
             mediaFiles = try MediaFiles(root:directory)
             try recoverMedia(db)
+            try recoverOptimizations(db)
             mediaWorker.async {self.cleanupMedia()}
             tryCatalog(db)
             if let backupControl {try backupEngine.acknowledgeReopen(backupControl,dataset:datasetID)}
             var result = try CoreSchema.object(db.read { try metadata($0) })
-            result["sessionId"] = .string(sessionID); result["profile"] = .string("custom_core_v1"); result["schemaVersion"] = .integer(5)
+            result["sessionId"] = .string(sessionID); result["profile"] = .string("custom_core_v1"); result["schemaVersion"] = .integer(6)
             result["fileProtectionVerified"] = .boolean(Self.deviceProtectionRequired)
             result["clock"] = CoreClockFrame.capture(now(), zone: zone()).value; let access=withCapability{$0}; result["capabilityRevision"] = .integer(access.revision); result["access"] = .string(access.pro ? "pro":"free")
             return .object(result)
         } catch { try? db.close(); throw error }
     }
     static func openDatabase(_ file:URL, fault:((SQLiteBoundary)throws->Void)? = nil, expectedDataset:String? = nil) throws -> SQLiteDatabase {
-        for version:Int32 in [4,3,2,1] {
-            let migration = (version == 1 ? CoreSchema.catalogDefinitions : []) + (version <= 2 ? CoreSchema.mediaDefinitions : []) + (version <= 3 ? CoreSchema.settingsDefinitions + [CoreSchema.settingsSeed] : []) + CoreSchema.customMigration
+        for version:Int32 in [5,4,3,2,1] {
+            let migration = (version == 1 ? CoreSchema.catalogDefinitions : []) + (version <= 2 ? CoreSchema.mediaDefinitions : []) + (version <= 3 ? CoreSchema.settingsDefinitions + [CoreSchema.settingsSeed] : []) + (version <= 4 ? CoreSchema.customMigration : []) + CoreSchema.optimizationDefinitions
             do {return try SQLiteDatabase.open(at:file,schema:CoreSchema.schema(expectedDataset:expectedDataset),upgradeFrom:CoreSchema.schema(version:version,expectedDataset:expectedDataset),migrationStatements:migration,rebuildTables:true,fault:fault)}
             catch StorageFailure.schemaMismatch {continue}
         }
@@ -238,6 +241,7 @@ public final class CoreRepository {
         let allocated = try CoreSchema.array(intent["allocatedIds"]).map { try CoreSchema.string($0) }
         guard allocated.count <= 10000, Set(allocated).count == allocated.count else { throw CoreRepositoryError("FIELD_INVALID") }
         for value in allocated { try CoreSchema.uuid(value) }
+        try guardOptimizationCommand(sql,id:id,type:type,payload:payload,allocated:allocated)
         let body = try CanonicalValue.object(intent).json()
         if let row = try sql.query("SELECT hash,body,status FROM intents WHERE id=?", [.text(id)]).first {
             guard row[0] == .text(hash), row[2] != .text("abandoned") else { throw CoreRepositoryError("COMMAND_ID_REUSED") }
@@ -277,6 +281,7 @@ public final class CoreRepository {
         let plan = try CoreSchema.object(args["plan"]); let parsed = try CoreRegistry.parse(plan, session: sessionID, dataset: datasetID)
         guard CoreRegistry.needsPreview(parsed.type) else { throw CoreRepositoryError("PLAN_INVALID") }
         let mediaFingerprint = try db.read { sql -> String in
+            try guardOptimizationCommand(sql,id:parsed.id,type:parsed.type,payload:parsed.payload)
             let changes = try CoreRegistry.validate(sql, parsed, clock: CoreClockFrame.capture(now(), zone: zone()), grants: grants, elapsed: elapsed(), access:access)
             try validateNewPhotoLinks(sql,parsed,changes)
             return try CoreRegistry.mediaPreviewFingerprint(sql,parsed)
@@ -291,6 +296,7 @@ public final class CoreRepository {
         var undo: CanonicalValue?
         let result = try db.transaction { sql -> CanonicalValue in
             if let replay = try receipt(sql, parsed.id, hash: parsed.payloadHash) { return replay }
+            try guardOptimizationCommand(sql,id:parsed.id,type:parsed.type,payload:parsed.payload)
             let clock = CoreClockFrame.capture(now(), zone: zone())
             if CoreRegistry.needsPreview(parsed.type) {
                 guard let token = parsed.body["previewToken"]?.text, let p = previews[token], p.command == parsed.id, p.hash == parsed.hash,

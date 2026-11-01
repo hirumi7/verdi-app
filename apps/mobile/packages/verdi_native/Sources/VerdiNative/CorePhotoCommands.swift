@@ -25,6 +25,7 @@ extension CoreRegistry {
             try require(target.values[4] == .text("media/\(id)/\(try CoreSchema.text(fresh[5])).\(ext)"))
             for i in [0,1,2,13] {try require(target.values[i]==old[i])}
             for i in 5...12 {try require(target.values[i]==fresh[i])}
+            if fresh[12] != .null {try require(fresh[12]==old[5] && fresh[10]==old[10] && fresh[11]==old[11],"STALE_TARGET")}
         } else if p.type=="DeletePhoto" {
             try require(target.action=="delete" && d.allSatisfy{["photos","plant_covers","journal_entries","journal_drafts","plant_drafts"].contains($0.table)})
             try require(try sql.query("SELECT id FROM media_drafts WHERE photo_id=?",[.text(id)]).isEmpty,"DRAFT_CONFLICT")

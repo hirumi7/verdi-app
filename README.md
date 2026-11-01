@@ -158,7 +158,7 @@ as covers, replaced without changing their ID, or deleted with shared references
 updated atomically. Journal entries join care history in the plant timeline.
 Free original export uses an explicit metadata warning and the OS share sheet.
 Camera code is present; physical capture/protection tests remain outstanding.
-Optional photo optimization and remaining release checks are separate scopes.
+Optional photo optimization is now available through explicit selection and confirmation; remaining release checks stay separate.
 
 The media integration test uses the real OS picker. Seed the bundled
 `assets/illustrations/empty-plants.png` and the distinct synthetic
@@ -276,3 +276,23 @@ checks. Run `flutter test integration_test/help_test.dart -d DEVICE_ID
 clipboard content and unchanged collection evidence. It copies a synthetic QA
 message to the simulator clipboard without sending it. Public support/policy,
 network observation and platform privacy disclosures remain release work.
+
+## Optional local photo optimization
+
+Photos → Optimize photos starts with nothing selected. Review 1–200 saved photos,
+JPEG quality 85%, a 1280px maximum long edge without upscaling, and replacement of
+app-stored originals before confirming. Existing cover/journal references and
+photo IDs/dates remain. Alpha-bearing PNGs remain unchanged with an explanation;
+smaller files are not guaranteed. Each result is durable. Cancel remaining does
+not undo successes; an interruption requires explicit recovery, never automatic
+replacement retry. Failed replacement drafts can be opened from the result.
+
+Run `swift test --filter Optimization` from the native package and `flutter test
+test/optimization_test.dart` from `apps/mobile`. The actual-main-UI test
+`integration_test/optimization_test.dart` needs a **separate QA simulator**, a
+large opaque JPEG and alpha-bearing PNG in its Photos library, and operator picker
+selection. Use `--no-uninstall`; it changes only its named Optimization QA fern
+fixture and retains other plants. It covers partial results and lost-reply recovery.
+The schema6 additive operational ledger is excluded from content backup format3;
+formats2/3 and old switched-generation recovery remain supported. Device memory,
+protection and power-loss checks remain open.

@@ -590,5 +590,56 @@
   "feedbackCopyUnknown": "Copying was not confirmed. Your edits are still here; check the clipboard or choose Copy feedback again.",
   "feedbackLoadFailed": "App details could not be loaded. Help and your collection are still available. Retry to prepare feedback.",
   "feedbackDiscardTitle": "Discard this feedback draft?",
-  "feedbackDiscardBody": "Your edited message is kept only on this page. A copy you already made will remain on the clipboard."
+  "feedbackDiscardBody": "Your edited message is kept only on this page. A copy you already made will remain on the clipboard.",
+  "optimizePhotos": "Optimize photos",
+  "optimizationIntro": "Choose up to 200 saved photos. Nothing is selected automatically. Optimization is optional and available for Free.",
+  "optimizationWarning": "Replace the selected app-stored originals with JPEGs at quality 85%, up to 1280 pixels on the longest edge, without enlarging them. Metadata is removed. Cover and journal views will use the replacements. Files may not become smaller. Alpha-bearing images are skipped to preserve transparency. Export originals or make a backup first if you want to keep them. Copies outside Verdi are unchanged.",
+  "optimizationReview": "Review selected photos",
+  "optimizationConfirm": "Replace selected originals",
+  "optimizationCancel": "Cancel remaining",
+  "optimizationRecovery": "Resolve interrupted job",
+  "optimizationResults": "Optimization results",
+  "optimizationRunning": "Working on selected photos…",
+  "optimizationComplete": "Finished. Each photo’s result is shown below.",
+  "optimizationCancelled": "Remaining work cancelled. Completed replacements are kept.",
+  "optimizationInterrupted": "Interrupted. Saved receipts were checked; no replacements were resumed.",
+  "optimizationFailureHelp": "Failed and unattempted originals remain unchanged. A retained replacement draft can be opened or explicitly discarded in the photo viewer before a fresh selection and confirmation.",
+  "optimizationRecoveryNeeded": "The stop result is not yet confirmed. Resolve this job before starting another or restoring a backup.",
+  "optimizationLeaveTitle": "Cancel remaining optimization?",
+  "optimizationLeaveBody": "Completed replacements will be kept. Resolve any pending result before leaving.",
+  "optimizationSucceeded": "Replaced",
+  "optimizationFailed": "Original kept — failed",
+  "optimizationNotAttempted": "Not attempted",
+  "optimizationPending": "Pending",
+  "optimizationNoPhotos": "No saved photos are available for this plant.",
+  "optimizationConflict": "Finish or explicitly discard this photo’s existing replacement draft before optimizing it.",
+  "optimizationUnsupported": "Alpha-bearing or unsupported image; original kept.",
+  "optimizationGenericError": "Optimization could not continue. Your saved photos and recoverable drafts remain available.",
+  "optimizationNotStarted": "No optimization job was recorded. Review your selection again.",
+  "optimizationPhoto": "Photo {number}",
+  "@optimizationPhoto": {
+    "placeholders": {
+      "number": {
+        "type": "int"
+      }
+    }
+  },
+  "optimizationDimensions": "{width} × {height} pixels · {bytes} bytes",
+  "@optimizationDimensions": {
+    "placeholders": {
+      "width": {
+        "type": "int"
+      },
+      "height": {
+        "type": "int"
+      },
+      "bytes": {
+        "type": "int"
+      }
+    }
+  },
+  "optimizationPhotoUnavailable": "This photo is no longer available in this plant.",
+  "optimizationOpenPhoto": "Open photo and replacement draft",
+  "optimizationDiskFull": "Not enough storage to prepare this replacement. Free space, then review a new selection.",
+  "optimizationWriteFailure": "The replacement file could not be saved. The prior photo was not replaced."
 }

@@ -1546,3 +1546,51 @@ prior code and decisions remain preserved. Public support identity, public polic
 privacy manifest/disclosure audit, actual traffic observation, physical accessibility,
 photo optimization, personality/cosmetics, internal admin, production store/profile,
 submission host and physical/full-limit tests remain open release work.
+
+## Optional photo optimization — 2026-11-01
+
+**Author:** Codex (AI assistant), independently reviewed by core_readiness_review.
+
+**Date:** 2026-11-01 (Asia/Jakarta).
+
+Implemented against published docs pin
+`ef06035d1f595c2c5e5c5871503dad1f82dd0b7d`, covering REQ-011 AC9 and preserving
+REQ-006/012/015/018 and prior sharing behavior. Main gallery offers explicit Free
+selection, preview, confirmation, per-photo results and cancellation. Native schema6
+adds only operational jobs; saved photos still use the compiled Dart replacement
+planner. Stable IDs/dates/creation times and cover/journal links survive replacement.
+JPEG encoding uses integer policy85/1280, no upscaling and fresh RGB pixels. Alpha
+PNGs are refused without replacing their originals; no space-saving promise.
+
+Durable reserved child identities, receipt reconciliation, generation/worker leases
+and native source guards prevent stale or late work from silently replacing another
+photo. Unknown outcomes stop the job; explicit recovery retains acknowledged drafts.
+Review fixed cancelled-worker races, reserved-ID admission, stale root recovery
+caches, and stop-result ambiguity. Additive schema migration preserves content.
+An interrupted backup switch now attests exact schema4/5/6 bytes before migration;
+failed attestation and retry retain the staged bytes and rollback state.
+
+Executed: full native177 discovered/173 passed/4 existing opt-in skips; final9 focused
+optimization tests passed after persisted-policy/200-target additions. Native
+warnings-as-errors build passed. Core134 and Flutter91 tests passed; both analyzers
+clean; localization/build_runner, Pigeon reproducibility and94-file format check
+passed. Tests cover file create/write/flush/publish/parent-flush failures, source
+hash/orientation/no-upscale/alpha rejection, exact bounds, migration/identity guards,
+restart, lost replies, cancellation races and375px/320% controls.
+
+Actual SE3/iOS18.3.1 main UI integration passed using real PHPicker, files/SQLite and
+Dart compiled writes. JPEG replacement preserved identity/date/cover/journal; the
+alpha PNG stayed unchanged with its recoverable draft. An injected lost prepare
+reply stopped safely and ordinary manual recovery succeeded on the first attempt.
+Only the named QA plant/photos were changed; an unrelated existing plant survived.
+The initial fixture/picker and own-plant-revision test errors were corrected before
+the final pass. The retained iPhone16 QA collection then passed ordinary development
+build/launch and schema5→6 preservation: hashes of all19 existing content/settings/
+metadata tables and original photo bytes were unchanged. No collection reset.
+
+Independent final review found no remaining bounded-scope blocker. Physical
+memory/protection/power-loss and broad codec/device matrix remain unverified.
+Authored personality/cosmetics, internal admin, public support/policy and privacy
+audit, full accessibility/traffic observation, production store/profile, compatible
+submission host and physical/full-limit tests remain open. All accepted requirements,
+decisions, inherited work and the development-only release guard are preserved.

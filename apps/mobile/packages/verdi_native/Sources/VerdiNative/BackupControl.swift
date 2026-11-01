@@ -178,11 +178,11 @@ final class BackupControl {
         do {
             try requireStorage(new)
             try BackupIO.require(try BackupIO.hash(root.appendingPathComponent("core.sqlite")).0 == CoreSchema.text(r[4]),"BACKUP_HASH_MISMATCH")
-            let opened = try SQLiteDatabase.open(at:root.appendingPathComponent("core.sqlite"),schema:CoreSchema.schema(expectedDataset:expectedDataset(new)))
+            let (opened,stagedVersion) = try openAttestedGeneration(root.appendingPathComponent("core.sqlite"),dataset:expectedDataset(new))
             let content: (String,CanonicalValue)
             do {
                 try BackupIO.require(try Self.mediaHash(opened,root:root) == CoreSchema.text(r[5]),"BACKUP_HASH_MISMATCH")
-                content = (try opened.read {try CoreSchema.text($0.query("SELECT dataset_id FROM metadata")[0][0])},try BackupContent.counts(opened))
+                content = (try opened.read {try CoreSchema.text($0.query("SELECT dataset_id FROM metadata")[0][0])},try BackupContent.counts(opened,version:stagedVersion==4 ? 2:3))
                 try opened.close()
             } catch {try? opened.close();throw error}
             try db.transaction(fault:{try self.transactionFault?(.verify,$0)}) { sql in
@@ -203,6 +203,15 @@ final class BackupControl {
                 try sql.execute("UPDATE jobs SET state_json=?,updated=? WHERE id=?",[.text(try Self.failure(code:"STORAGE_UNAVAILABLE",dataset:nil,recovery:"open_recovery",preserved:true).json()),.text(at),.text(job)])
             }
         }
+    }
+    /// A switch may have been prepared by a previous supported build. Its hash
+    /// attests to those exact bytes; migration must wait until verification is durable.
+    func openAttestedGeneration(_ file:URL,dataset:String) throws -> (SQLiteDatabase,Int32) {
+        for version:Int32 in [6,5,4] {
+            do {return (try SQLiteDatabase.open(at:file,schema:CoreSchema.schema(version:version,expectedDataset:dataset)),version)}
+            catch StorageFailure.schemaMismatch {continue}
+        }
+        throw StorageFailure.schemaMismatch
     }
     func verifyOrdinary(_ generation:String) throws {
         try requireStorage(generation)
