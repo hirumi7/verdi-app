@@ -1773,6 +1773,204 @@ abstract class AppStrings {
   /// In en, this message translates to:
   /// **'The restored language preference is retained, but is not supported yet. Verdi is using device formatting.'**
   String get backupLocaleFallback;
+
+  /// No description provided for @remindersTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Reminders'**
+  String get remindersTitle;
+
+  /// No description provided for @remindersBestEffort.
+  ///
+  /// In en, this message translates to:
+  /// **'Get local reminders to check your plants. Delivery is approximate and depends on your device settings.'**
+  String get remindersBestEffort;
+
+  /// No description provided for @remindersPermission.
+  ///
+  /// In en, this message translates to:
+  /// **'Notification permission: {status}'**
+  String remindersPermission(String status);
+
+  /// No description provided for @remindersEnable.
+  ///
+  /// In en, this message translates to:
+  /// **'Enable reminders'**
+  String get remindersEnable;
+
+  /// No description provided for @remindersAllow.
+  ///
+  /// In en, this message translates to:
+  /// **'Allow notifications'**
+  String get remindersAllow;
+
+  /// No description provided for @remindersSystemSettings.
+  ///
+  /// In en, this message translates to:
+  /// **'Open system settings'**
+  String get remindersSystemSettings;
+
+  /// No description provided for @remindersNeedsSchedule.
+  ///
+  /// In en, this message translates to:
+  /// **'Save a plant with a care schedule before allowing notifications.'**
+  String get remindersNeedsSchedule;
+
+  /// No description provided for @remindersPreferredTime.
+  ///
+  /// In en, this message translates to:
+  /// **'Preferred local time'**
+  String get remindersPreferredTime;
+
+  /// No description provided for @remindersQuietStart.
+  ///
+  /// In en, this message translates to:
+  /// **'Quiet hours start'**
+  String get remindersQuietStart;
+
+  /// No description provided for @remindersQuietEnd.
+  ///
+  /// In en, this message translates to:
+  /// **'Quiet hours end'**
+  String get remindersQuietEnd;
+
+  /// No description provided for @remindersQuietExplanation.
+  ///
+  /// In en, this message translates to:
+  /// **'Equal start and end times turn quiet hours off. Otherwise, reminders move to the end of quiet hours, sometimes the next day. Care dates stay unchanged.'**
+  String get remindersQuietExplanation;
+
+  /// No description provided for @remindersSave.
+  ///
+  /// In en, this message translates to:
+  /// **'Save reminder settings'**
+  String get remindersSave;
+
+  /// No description provided for @remindersRetrySave.
+  ///
+  /// In en, this message translates to:
+  /// **'Resolve and retry save'**
+  String get remindersRetrySave;
+
+  /// No description provided for @remindersUnknownSave.
+  ///
+  /// In en, this message translates to:
+  /// **'Your save is unresolved. Keep these inputs and retry to check whether it was saved before sending it again.'**
+  String get remindersUnknownSave;
+
+  /// No description provided for @remindersSaved.
+  ///
+  /// In en, this message translates to:
+  /// **'Reminder settings saved. Scheduling status is shown below.'**
+  String get remindersSaved;
+
+  /// No description provided for @remindersReload.
+  ///
+  /// In en, this message translates to:
+  /// **'Reload saved settings'**
+  String get remindersReload;
+
+  /// No description provided for @remindersRetryQueue.
+  ///
+  /// In en, this message translates to:
+  /// **'Retry scheduling'**
+  String get remindersRetryQueue;
+
+  /// No description provided for @remindersTodayAuthority.
+  ///
+  /// In en, this message translates to:
+  /// **'Today always shows your checks, even when a reminder is delayed or unavailable. Past reminder times do not trigger a catch-up burst.'**
+  String get remindersTodayAuthority;
+
+  /// No description provided for @remindersQueueCounts.
+  ///
+  /// In en, this message translates to:
+  /// **'Confirmed pending: {pending}. Omitted for capacity: {omitted}. Past reminder times: {past}.'**
+  String remindersQueueCounts(int pending, int omitted, int past);
+
+  /// No description provided for @remindersNotAsked.
+  ///
+  /// In en, this message translates to:
+  /// **'Not requested'**
+  String get remindersNotAsked;
+
+  /// No description provided for @remindersDenied.
+  ///
+  /// In en, this message translates to:
+  /// **'Notifications are not permitted. Today and care logging still work.'**
+  String get remindersDenied;
+
+  /// No description provided for @remindersAuthorized.
+  ///
+  /// In en, this message translates to:
+  /// **'Allowed'**
+  String get remindersAuthorized;
+
+  /// No description provided for @remindersQuietPermission.
+  ///
+  /// In en, this message translates to:
+  /// **'Quiet authorization'**
+  String get remindersQuietPermission;
+
+  /// No description provided for @remindersUnavailable.
+  ///
+  /// In en, this message translates to:
+  /// **'Reminder status is unavailable. Your saved care remains available.'**
+  String get remindersUnavailable;
+
+  /// No description provided for @remindersQueueReady.
+  ///
+  /// In en, this message translates to:
+  /// **'The current queue has been checked. This does not confirm delivery.'**
+  String get remindersQueueReady;
+
+  /// No description provided for @remindersOff.
+  ///
+  /// In en, this message translates to:
+  /// **'Reminders are off.'**
+  String get remindersOff;
+
+  /// No description provided for @remindersPartial.
+  ///
+  /// In en, this message translates to:
+  /// **'Some reminders could not be scheduled. Retry or review system settings.'**
+  String get remindersPartial;
+
+  /// No description provided for @remindersDeferred.
+  ///
+  /// In en, this message translates to:
+  /// **'Scheduling is waiting for a fresh check.'**
+  String get remindersDeferred;
+
+  /// No description provided for @remindersContextOffer.
+  ///
+  /// In en, this message translates to:
+  /// **'Your schedule is saved. Choose whether to allow local reminders.'**
+  String get remindersContextOffer;
+
+  /// No description provided for @remindersCurrentTap.
+  ///
+  /// In en, this message translates to:
+  /// **'Review your current checks below. Opening a reminder does not record care.'**
+  String get remindersCurrentTap;
+
+  /// No description provided for @remindersStaleTap.
+  ///
+  /// In en, this message translates to:
+  /// **'This reminder has changed or is no longer current. Today shows your current checks; no care was recorded.'**
+  String get remindersStaleTap;
+
+  /// No description provided for @remindersWaitingTap.
+  ///
+  /// In en, this message translates to:
+  /// **'A reminder is waiting. Finish or save this screen, then open Today. No care has been recorded.'**
+  String get remindersWaitingTap;
+
+  /// No description provided for @remindersOpenToday.
+  ///
+  /// In en, this message translates to:
+  /// **'Open Today'**
+  String get remindersOpenToday;
 }
 
 class _AppStringsDelegate extends LocalizationsDelegate<AppStrings> {

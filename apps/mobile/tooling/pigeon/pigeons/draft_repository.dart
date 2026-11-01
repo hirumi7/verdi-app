@@ -170,3 +170,29 @@ abstract class BackupPlatformHostApi {
   @async
   String shareBackup(String request);
 }
+
+
+@HostApi()
+abstract class ReminderPlatformHostApi {
+  @async
+  String readState();
+  @async
+  String reconcile();
+  @async
+  String requestPermission(String context);
+  @async
+  String savePreferences(String request);
+  @async
+  String resolvePreferences(String request);
+  @async
+  void openSettings();
+  @async
+  String readTap();
+  @async
+  void acknowledgeTap(String eventId);
+}
+
+@FlutterApi()
+abstract class ReminderPlatformEventsApi {
+  void changed();
+}

@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 
 import '../widgets/presentation_helpers.dart';
 import '../../../backup/presentation/backup_page.dart';
+import '../../../reminders/presentation/reminder_page.dart';
 
 @RoutePage()
 class SettingsPage extends StatelessWidget {
@@ -16,6 +17,15 @@ class SettingsPage extends StatelessWidget {
         children: [
           Text(s.settings, style: Theme.of(context).textTheme.headlineLarge),
           const SizedBox(height: 24),
+          if (ReminderHost.maybeOf(context) != null)
+            Card(
+              child: ListTile(
+                leading: const Icon(Icons.notifications_outlined),
+                title: Text(s.remindersTitle),
+                trailing: const Icon(Icons.chevron_right),
+                onTap: () => openReminders(context),
+              ),
+            ),
           if (BackupHost.maybeOf(context) != null)
             Card(
               child: ListTile(

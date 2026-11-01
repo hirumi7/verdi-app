@@ -55,6 +55,10 @@ private func wrapError(_ error: Any) -> [Any?] {
   ]
 }
 
+private func createConnectionError(withChannelName channelName: String) -> PigeonError {
+  return PigeonError(code: "channel-error", message: "Unable to establish connection on channel: '\(channelName)'.", details: "")
+}
+
 enum DraftBridgePigeonInternal {
   static func isNullish(_ value: Any?) -> Bool {
     guard let innerValue = value else {
@@ -1059,6 +1063,190 @@ class BackupPlatformHostApiSetup {
       }
     } else {
       shareBackupChannel.setMessageHandler(nil)
+    }
+  }
+}
+/// Generated protocol from Pigeon that represents a handler of messages from Flutter.
+protocol ReminderPlatformHostApi {
+  func readState() async throws -> String
+  func reconcile() async throws -> String
+  func requestPermission(context: String) async throws -> String
+  func savePreferences(request: String) async throws -> String
+  func resolvePreferences(request: String) async throws -> String
+  func openSettings() async throws
+  func readTap() async throws -> String
+  func acknowledgeTap(eventId: String) async throws
+}
+
+/// Generated setup class from Pigeon to handle messages through the `binaryMessenger`.
+class ReminderPlatformHostApiSetup {
+  static var codec: FlutterStandardMessageCodec { DraftBridgePigeonCodec.shared }
+  /// Sets up an instance of `ReminderPlatformHostApi` to handle messages through the `binaryMessenger`.
+  static func setUp(binaryMessenger: FlutterBinaryMessenger, api: ReminderPlatformHostApi?, messageChannelSuffix: String = "") {
+    let channelSuffix = messageChannelSuffix.count > 0 ? ".\(messageChannelSuffix)" : ""
+    let readStateChannel = FlutterBasicMessageChannel(name: "dev.flutter.pigeon.verdi_mobile.ReminderPlatformHostApi.readState\(channelSuffix)", binaryMessenger: binaryMessenger, codec: codec)
+    if let api = api {
+      readStateChannel.setMessageHandler { _, reply in
+        Task { @MainActor in
+          do {
+            let result = try await api.readState()
+            reply(wrapResult(result))
+          } catch {
+            reply(wrapError(error))
+          }
+        }
+      }
+    } else {
+      readStateChannel.setMessageHandler(nil)
+    }
+    let reconcileChannel = FlutterBasicMessageChannel(name: "dev.flutter.pigeon.verdi_mobile.ReminderPlatformHostApi.reconcile\(channelSuffix)", binaryMessenger: binaryMessenger, codec: codec)
+    if let api = api {
+      reconcileChannel.setMessageHandler { _, reply in
+        Task { @MainActor in
+          do {
+            let result = try await api.reconcile()
+            reply(wrapResult(result))
+          } catch {
+            reply(wrapError(error))
+          }
+        }
+      }
+    } else {
+      reconcileChannel.setMessageHandler(nil)
+    }
+    let requestPermissionChannel = FlutterBasicMessageChannel(name: "dev.flutter.pigeon.verdi_mobile.ReminderPlatformHostApi.requestPermission\(channelSuffix)", binaryMessenger: binaryMessenger, codec: codec)
+    if let api = api {
+      requestPermissionChannel.setMessageHandler { message, reply in
+        let args = message as! [Any?]
+        let contextArg = args[0] as! String
+        Task { @MainActor in
+          do {
+            let result = try await api.requestPermission(context: contextArg)
+            reply(wrapResult(result))
+          } catch {
+            reply(wrapError(error))
+          }
+        }
+      }
+    } else {
+      requestPermissionChannel.setMessageHandler(nil)
+    }
+    let savePreferencesChannel = FlutterBasicMessageChannel(name: "dev.flutter.pigeon.verdi_mobile.ReminderPlatformHostApi.savePreferences\(channelSuffix)", binaryMessenger: binaryMessenger, codec: codec)
+    if let api = api {
+      savePreferencesChannel.setMessageHandler { message, reply in
+        let args = message as! [Any?]
+        let requestArg = args[0] as! String
+        Task { @MainActor in
+          do {
+            let result = try await api.savePreferences(request: requestArg)
+            reply(wrapResult(result))
+          } catch {
+            reply(wrapError(error))
+          }
+        }
+      }
+    } else {
+      savePreferencesChannel.setMessageHandler(nil)
+    }
+    let resolvePreferencesChannel = FlutterBasicMessageChannel(name: "dev.flutter.pigeon.verdi_mobile.ReminderPlatformHostApi.resolvePreferences\(channelSuffix)", binaryMessenger: binaryMessenger, codec: codec)
+    if let api = api {
+      resolvePreferencesChannel.setMessageHandler { message, reply in
+        let args = message as! [Any?]
+        let requestArg = args[0] as! String
+        Task { @MainActor in
+          do {
+            let result = try await api.resolvePreferences(request: requestArg)
+            reply(wrapResult(result))
+          } catch {
+            reply(wrapError(error))
+          }
+        }
+      }
+    } else {
+      resolvePreferencesChannel.setMessageHandler(nil)
+    }
+    let openSettingsChannel = FlutterBasicMessageChannel(name: "dev.flutter.pigeon.verdi_mobile.ReminderPlatformHostApi.openSettings\(channelSuffix)", binaryMessenger: binaryMessenger, codec: codec)
+    if let api = api {
+      openSettingsChannel.setMessageHandler { _, reply in
+        Task { @MainActor in
+          do {
+            try await api.openSettings()
+            reply(wrapResult(nil))
+          } catch {
+            reply(wrapError(error))
+          }
+        }
+      }
+    } else {
+      openSettingsChannel.setMessageHandler(nil)
+    }
+    let readTapChannel = FlutterBasicMessageChannel(name: "dev.flutter.pigeon.verdi_mobile.ReminderPlatformHostApi.readTap\(channelSuffix)", binaryMessenger: binaryMessenger, codec: codec)
+    if let api = api {
+      readTapChannel.setMessageHandler { _, reply in
+        Task { @MainActor in
+          do {
+            let result = try await api.readTap()
+            reply(wrapResult(result))
+          } catch {
+            reply(wrapError(error))
+          }
+        }
+      }
+    } else {
+      readTapChannel.setMessageHandler(nil)
+    }
+    let acknowledgeTapChannel = FlutterBasicMessageChannel(name: "dev.flutter.pigeon.verdi_mobile.ReminderPlatformHostApi.acknowledgeTap\(channelSuffix)", binaryMessenger: binaryMessenger, codec: codec)
+    if let api = api {
+      acknowledgeTapChannel.setMessageHandler { message, reply in
+        let args = message as! [Any?]
+        let eventIdArg = args[0] as! String
+        Task { @MainActor in
+          do {
+            try await api.acknowledgeTap(eventId: eventIdArg)
+            reply(wrapResult(nil))
+          } catch {
+            reply(wrapError(error))
+          }
+        }
+      }
+    } else {
+      acknowledgeTapChannel.setMessageHandler(nil)
+    }
+  }
+}
+
+/// Generated protocol from Pigeon that represents Flutter messages that can be called from Swift.
+protocol ReminderPlatformEventsApiProtocol {
+  @MainActor func changed() async throws
+}
+class ReminderPlatformEventsApi: ReminderPlatformEventsApiProtocol {
+  private let binaryMessenger: FlutterBinaryMessenger
+  private let messageChannelSuffix: String
+  init(binaryMessenger: FlutterBinaryMessenger, messageChannelSuffix: String = "") {
+    self.binaryMessenger = binaryMessenger
+    self.messageChannelSuffix = messageChannelSuffix.count > 0 ? ".\(messageChannelSuffix)" : ""
+  }
+  var codec: DraftBridgePigeonCodec {
+    return DraftBridgePigeonCodec.shared
+  }
+  @MainActor func changed() async throws {
+    return try await withCheckedThrowingContinuation { continuation in
+      let channelName: String = "dev.flutter.pigeon.verdi_mobile.ReminderPlatformEventsApi.changed\(messageChannelSuffix)"
+      let channel = FlutterBasicMessageChannel(name: channelName, binaryMessenger: binaryMessenger, codec: codec)
+      channel.sendMessage(nil) { response in
+        guard let listResponse = response as? [Any?] else {
+          continuation.resume(throwing: createConnectionError(withChannelName: channelName))
+          return
+        }
+        if listResponse.count > 1 {
+          let code: String = listResponse[0] as! String
+          let message: String? = nilOrValue(listResponse[1])
+          let details: String? = nilOrValue(listResponse[2])
+          continuation.resume(throwing: PigeonError(code: code, message: message, details: details))
+        } else {
+          continuation.resume()
+        }
+      }
     }
   }
 }

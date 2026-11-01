@@ -1,3 +1,5 @@
+import '../../../reminders/presentation/reminder_page.dart';
+
 import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -236,6 +238,7 @@ class _TodayPageState extends State<TodayPage> {
               ),
               const SizedBox(height: 4),
               Text(s.today, style: Theme.of(context).textTheme.headlineLarge),
+              const ReminderTodayCard(),
               if (state.loading) const LinearProgressIndicator(),
               if (error != null || state.errorCode != null)
                 ErrorNotice(error ?? state.errorCode!),

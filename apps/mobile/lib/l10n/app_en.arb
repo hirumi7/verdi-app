@@ -415,5 +415,58 @@
   "backupLimit": "This backup exceeds a supported size or content limit. Nothing was truncated or replaced.",
   "backupInvalid": "This file is incomplete, damaged or not a supported Verdi backup. Your collection has not been replaced.",
   "backupFailure": "The operation could not finish. Keep your backup file. Check the status or try again; Verdi retains the previous collection during recovery.",
-  "backupLocaleFallback": "The restored language preference is retained, but is not supported yet. Verdi is using device formatting."
+  "backupLocaleFallback": "The restored language preference is retained, but is not supported yet. Verdi is using device formatting.",
+  "remindersTitle": "Reminders",
+  "remindersBestEffort": "Get local reminders to check your plants. Delivery is approximate and depends on your device settings.",
+  "remindersPermission": "Notification permission: {status}",
+  "remindersEnable": "Enable reminders",
+  "remindersAllow": "Allow notifications",
+  "remindersSystemSettings": "Open system settings",
+  "remindersNeedsSchedule": "Save a plant with a care schedule before allowing notifications.",
+  "remindersPreferredTime": "Preferred local time",
+  "remindersQuietStart": "Quiet hours start",
+  "remindersQuietEnd": "Quiet hours end",
+  "remindersQuietExplanation": "Equal start and end times turn quiet hours off. Otherwise, reminders move to the end of quiet hours, sometimes the next day. Care dates stay unchanged.",
+  "remindersSave": "Save reminder settings",
+  "remindersRetrySave": "Resolve and retry save",
+  "remindersUnknownSave": "Your save is unresolved. Keep these inputs and retry to check whether it was saved before sending it again.",
+  "remindersSaved": "Reminder settings saved. Scheduling status is shown below.",
+  "remindersReload": "Reload saved settings",
+  "remindersRetryQueue": "Retry scheduling",
+  "remindersTodayAuthority": "Today always shows your checks, even when a reminder is delayed or unavailable. Past reminder times do not trigger a catch-up burst.",
+  "remindersQueueCounts": "Confirmed pending: {pending}. Omitted for capacity: {omitted}. Past reminder times: {past}.",
+  "remindersNotAsked": "Not requested",
+  "remindersDenied": "Notifications are not permitted. Today and care logging still work.",
+  "remindersAuthorized": "Allowed",
+  "remindersQuietPermission": "Quiet authorization",
+  "remindersUnavailable": "Reminder status is unavailable. Your saved care remains available.",
+  "remindersQueueReady": "The current queue has been checked. This does not confirm delivery.",
+  "remindersOff": "Reminders are off.",
+  "remindersPartial": "Some reminders could not be scheduled. Retry or review system settings.",
+  "remindersDeferred": "Scheduling is waiting for a fresh check.",
+  "remindersContextOffer": "Your schedule is saved. Choose whether to allow local reminders.",
+  "remindersCurrentTap": "Review your current checks below. Opening a reminder does not record care.",
+  "remindersStaleTap": "This reminder has changed or is no longer current. Today shows your current checks; no care was recorded.",
+  "@remindersPermission": {
+    "placeholders": {
+      "status": {
+        "type": "String"
+      }
+    }
+  },
+  "@remindersQueueCounts": {
+    "placeholders": {
+      "pending": {
+        "type": "int"
+      },
+      "omitted": {
+        "type": "int"
+      },
+      "past": {
+        "type": "int"
+      }
+    }
+  },
+  "remindersWaitingTap": "A reminder is waiting. Finish or save this screen, then open Today. No care has been recorded.",
+  "remindersOpenToday": "Open Today"
 }

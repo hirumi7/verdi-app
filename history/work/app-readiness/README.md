@@ -1216,3 +1216,63 @@ Flutter permission/settings/Today integration. Verify date/capacity/failure race
 real simulator pending queues, UI recovery/large text, then independent review.
 Physical delivery/restart and release-capacity evidence remain open. Host storage
 now has approximately27GiB free; full-limit backup remains separately unverified.
+
+### Main Flutter reminders — implementation and verification
+
+**Author:** Codex (AI assistant). **Date:** 2026-11-01 (Asia/Jakarta).
+
+Implemented REQ-010 against published design pin
+`629da057c5dd2fb1707241092d440bb391a7fb2a`, preserving related
+REQ-008/009/012/015/018 and every accepted requirement/decision. Schema4 and
+format2 backups remain unchanged. Native local notifications use a protected,
+backup-excluded sidecar ledger, bounded nearest-first batches, quiet/DST rules,
+stable IDs, obsolete-request cleanup, permission checks and runtime/time callbacks.
+Preferences merge only reminder fields through atomic canonical receipts; unknown
+outcomes retain the exact request and resolve before retry. Queue failures do not
+roll back saved care or claim delivery. Notification taps only open Today, defer
+around editors/modals/mutations and retain a retry notice without recording care.
+
+Independent source/design review by core_readiness_review closed ledger recovery,
+current issued-ID eviction, stale Flutter reads, timeout, editor-navigation and
+restore/add-race findings. Actual simulator integration exposed ordinary JSON at
+the canonical save boundary; corrected both save and resolution encoding and
+added a regression. A cold-start routing race was fixed without discarding drafts.
+
+Executed on Flutter3.47.8/Dart3.13.7/macOS14.6/Xcode16.2/iOS18.3.1:
+
+- `flutter analyze`: no issues. `flutter test`:59 passed, including8 reminder
+  tests for deadlines/canonical bytes, uncertain saves, stale reads, current/stale
+  taps, modal deferral, unsaved plant/journal text and320px/320% settings.
+- Core package `dart test`:127 passed.
+- Native `swift test`:144 discovered,140 passed,4 explicit opt-in skips; no failures.
+  Nine reminder tests cover quiet/DST,10,000-head bounds, real SQLite unknown
+  outcomes/reopen, denied permission, partial queue retries, stale mutations,
+  real import BUSY during an OS lease then successful replacement, tap retention
+  and outbox acknowledgement recovery.
+- Native iOS `xcodebuild` on disposable SE3:132 discovered,131 passed,1 opt-in
+  skip; no failures. `swift build -Xswiftc -warnings-as-errors` passed.
+- Pinned Pigeon generator/formatter drift check passed for both Dart and Swift.
+- `flutter test integration_test/reminders_test.dart -d CD70BD52-1239-4C9E-A998-8D8962DA0354 --no-uninstall --dart-define=VERDI_REMINDER_DELIVERY=true`
+  passed: real OS authorization, UI preference save, confirmed pending queue,
+  preserved dark/en-GB settings and retained plant/photo/history counts. The
+  optional delivery handoff uses normal care/preference commands on disposable
+  QA data; it does not inject a notification or modify TCC.
+
+Logs are `/tmp/verdi-reminders-{analyze,flutter-full,core-full,native-full,native-ios,swift-strict,pigeon-check,integration}.log`.
+Normal-app delivered-notification observation is recorded separately below.
+The user's retained development simulator was untouched. Host space is now
+approximately27GiB; full8GiB/12GiB backup roundtrip remains unverified.
+Physical protection/restart/first unlock, supported-device capacity, Focus/summary,
+full accessibility, StoreKit/admin and release remain open. REQ-010 stays partial.
+
+Ordinary `flutter run --debug -t lib/main_development.dart` built and launched on
+the same disposable QA simulator. The app was then terminated before the scheduled
+10:25 local reminder. At10:26 the OS lock-screen accessibility tree exposed
+“VERDI PREVIEW … Plant-care checks … A plant-care check to review”. This proves
+one delivered notification with the app terminated, not a general delivery promise.
+Read-only snapshots of27 core tables (all except the regenerable outbox) matched
+before/after delivery; no care/history mutation occurred. The notification inbox
+remained empty because the UI automation did not successfully open the OS card.
+Actual cold-launch notification tap/delegate delivery is therefore unverified;
+widget/native tap tests are separate evidence. Normal app launch was restored.
+Logs: `verdi-reminders-normal-run.log` and `verdi-reminders-delivery.log`.

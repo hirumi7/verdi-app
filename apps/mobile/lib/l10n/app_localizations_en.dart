@@ -970,4 +970,121 @@ class AppStringsEn extends AppStrings {
   @override
   String get backupLocaleFallback =>
       'The restored language preference is retained, but is not supported yet. Verdi is using device formatting.';
+
+  @override
+  String get remindersTitle => 'Reminders';
+
+  @override
+  String get remindersBestEffort =>
+      'Get local reminders to check your plants. Delivery is approximate and depends on your device settings.';
+
+  @override
+  String remindersPermission(String status) {
+    return 'Notification permission: $status';
+  }
+
+  @override
+  String get remindersEnable => 'Enable reminders';
+
+  @override
+  String get remindersAllow => 'Allow notifications';
+
+  @override
+  String get remindersSystemSettings => 'Open system settings';
+
+  @override
+  String get remindersNeedsSchedule =>
+      'Save a plant with a care schedule before allowing notifications.';
+
+  @override
+  String get remindersPreferredTime => 'Preferred local time';
+
+  @override
+  String get remindersQuietStart => 'Quiet hours start';
+
+  @override
+  String get remindersQuietEnd => 'Quiet hours end';
+
+  @override
+  String get remindersQuietExplanation =>
+      'Equal start and end times turn quiet hours off. Otherwise, reminders move to the end of quiet hours, sometimes the next day. Care dates stay unchanged.';
+
+  @override
+  String get remindersSave => 'Save reminder settings';
+
+  @override
+  String get remindersRetrySave => 'Resolve and retry save';
+
+  @override
+  String get remindersUnknownSave =>
+      'Your save is unresolved. Keep these inputs and retry to check whether it was saved before sending it again.';
+
+  @override
+  String get remindersSaved =>
+      'Reminder settings saved. Scheduling status is shown below.';
+
+  @override
+  String get remindersReload => 'Reload saved settings';
+
+  @override
+  String get remindersRetryQueue => 'Retry scheduling';
+
+  @override
+  String get remindersTodayAuthority =>
+      'Today always shows your checks, even when a reminder is delayed or unavailable. Past reminder times do not trigger a catch-up burst.';
+
+  @override
+  String remindersQueueCounts(int pending, int omitted, int past) {
+    return 'Confirmed pending: $pending. Omitted for capacity: $omitted. Past reminder times: $past.';
+  }
+
+  @override
+  String get remindersNotAsked => 'Not requested';
+
+  @override
+  String get remindersDenied =>
+      'Notifications are not permitted. Today and care logging still work.';
+
+  @override
+  String get remindersAuthorized => 'Allowed';
+
+  @override
+  String get remindersQuietPermission => 'Quiet authorization';
+
+  @override
+  String get remindersUnavailable =>
+      'Reminder status is unavailable. Your saved care remains available.';
+
+  @override
+  String get remindersQueueReady =>
+      'The current queue has been checked. This does not confirm delivery.';
+
+  @override
+  String get remindersOff => 'Reminders are off.';
+
+  @override
+  String get remindersPartial =>
+      'Some reminders could not be scheduled. Retry or review system settings.';
+
+  @override
+  String get remindersDeferred => 'Scheduling is waiting for a fresh check.';
+
+  @override
+  String get remindersContextOffer =>
+      'Your schedule is saved. Choose whether to allow local reminders.';
+
+  @override
+  String get remindersCurrentTap =>
+      'Review your current checks below. Opening a reminder does not record care.';
+
+  @override
+  String get remindersStaleTap =>
+      'This reminder has changed or is no longer current. Today shows your current checks; no care was recorded.';
+
+  @override
+  String get remindersWaitingTap =>
+      'A reminder is waiting. Finish or save this screen, then open Today. No care has been recorded.';
+
+  @override
+  String get remindersOpenToday => 'Open Today';
 }

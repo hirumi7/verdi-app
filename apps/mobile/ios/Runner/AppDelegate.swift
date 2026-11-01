@@ -8,6 +8,7 @@ import UIKit
   private var coreBridge: CoreRepositoryBridge?
   private var mediaBridge: MediaPlatformBridge?
   private var backupBridge: BackupPlatformBridge?
+  private var reminderBridge: ReminderPlatformBridge?
   #endif
 
   override func application(
@@ -24,6 +25,10 @@ import UIKit
       do {
         let bridge = try CoreRepositoryBridge()
         coreBridge = bridge
+        let reminders = ReminderPlatformBridge(repository:bridge.repository)
+        reminderBridge = reminders
+        reminders.attach(registrar.messenger())
+        ReminderPlatformHostApiSetup.setUp(binaryMessenger:registrar.messenger(),api:reminders)
         let media = MediaPlatformBridge(repository:bridge.repository)
         mediaBridge = media
         let backup = BackupPlatformBridge(repository:bridge.repository)

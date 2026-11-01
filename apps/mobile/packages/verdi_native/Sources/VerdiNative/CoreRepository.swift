@@ -24,6 +24,8 @@ struct CoreUndoGrant {
 /// One serialized native owner for the permanent custom_core_v1 installation.
 /// JSON envelopes contain bounded typed protocol values, never arbitrary SQL.
 public final class CoreRepository {
+    public var reminderInvalidated: (() -> Void)?
+    var reminderRecoveryRequired=false
     let installationDirectory: URL
     var directory: URL
     var backupControl: BackupControl?
@@ -59,6 +61,7 @@ public final class CoreRepository {
     public func invalidateUndo() { queue.sync { grants.removeAll() } }
     public func call(operation: String, body: String) throws -> String {
         try queue.sync {
+            defer {if operation == "open" || operation == "commit" {reminderInvalidated?()}}
             do {
                 let args = try CoreSchema.object(CanonicalParser.parse(body))
                 guard !replacementAdmissionClosed else {throw CoreRepositoryError("BUSY")}

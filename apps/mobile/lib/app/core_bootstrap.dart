@@ -1,3 +1,5 @@
+import '../features/reminders/data/reminder_service.dart';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:verdi_core/verdi_core.dart';
@@ -25,6 +27,7 @@ class CoreBootstrap extends StatefulWidget {
 class _CoreBootstrapState extends State<CoreBootstrap>
     with WidgetsBindingObserver {
   NativeCollectionRepository? repository;
+  ReminderService? reminderService;
   WorkspaceCubit? recoveryWorkspace;
   List<PendingCoreAction> pending = [];
   bool busy = true, ready = false;
@@ -86,6 +89,7 @@ class _CoreBootstrapState extends State<CoreBootstrap>
   Future<void> _finish() async {
     await getIt.reset();
     await configureDependencies(environment: 'native', repository: repository);
+    reminderService = NativeReminderService();
     if (mounted) setState(() => ready = true);
   }
 
@@ -181,6 +185,8 @@ class _CoreBootstrapState extends State<CoreBootstrap>
         reopen: _reopenAfterRestore,
         child: VerdiApp(
           key: ValueKey(repository!.datasetId),
+          reminderService: reminderService,
+          reminderNewId: repository!.newId,
           restored: restored,
           localeFallback: !supported,
           locale: supported && locale != null
