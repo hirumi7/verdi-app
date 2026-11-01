@@ -1279,3 +1279,17 @@ widget/native tap tests are separate evidence. Normal app launch was restored.
 Logs: `verdi-reminders-normal-run.log` proves launch and
 `verdi-reminders-delivery.log` proves table equality. The notification observation
 is primary-assistant session evidence, not an assertion in those automated logs.
+
+### Reminder evidence publication and final docs pin
+
+**Author:** Codex (AI assistant). **Date:** 2026-11-01 (Asia/Jakarta).
+
+Implementation `153d4e19e622c07869116562c5b97b50cfc78146` and the clarified
+observation handoff are published. Docs
+`8cffca68d7bad7b4eca52179e9a5c9b8c79a2df0` was published before pin adoption.
+Final docs aggregate:8/8 checks and268 tooling tests passed
+(`/tmp/verdi-reminders-docs-final.log`). Independent evidence review verified
+counts, skips, input identities and unchanged accepted records; the observed OS
+notification is explicitly separate from automated logs. Staged consumer/gitlink
+checks pass for that exact published pin. REQ-010 remains partial; actual
+cold-launch notification tap and physical-device/release gates remain unverified.
