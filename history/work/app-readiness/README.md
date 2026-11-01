@@ -1348,3 +1348,18 @@ The empty inbox is not evidence of acknowledgement. Ordinary launch was restored
 using simctl; Today still exposed the due watering check. User-retained simulator
 and all accepted records remain untouched. REQ-010 remains partial; physical
 protection/restart/first-unlock, Focus/summary, capacity and release gates remain.
+
+### Published cold-launch correction handoff
+
+**Author:** Codex (AI assistant). **Date:** 2026-11-01 (Asia/Jakarta).
+
+App `96d99ca252ba554bbbc13277b1cc6e1adb314e65` is published. Independent final
+source/evidence review found no blocking mismatch, including the explicit real-tap
+limitation. Published docs `8f9a22a77a2f34e6d13573a4da4ddad5af9a8094` records the
+correction, current checks and remaining work; all8 docs checks and268 tooling
+tests passed (`/tmp/verdi-reminders-cold-docs-final.log`). Published docs preceded
+this pin adoption. Staged consumer and gitlink checks passed for that exact pin.
+REQ-010 stays partial and all accepted records stay unchanged. Next concrete
+reminder check is actual terminated/locked notification-tap navigation with
+observable delegate receipt and no care mutation, followed by physical-device
+and release verification. No simulator interaction attempt is counted as a pass.
