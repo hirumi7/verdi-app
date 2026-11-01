@@ -1201,3 +1201,18 @@ Accepted requirement, decision and question files are byte-preserved. Consumer
 and gitlink checks pass for the exact published pin. Both task-created APFS images
 were detached and removed. REQ-012 remains partial, with full-limit end-to-end,
 physical-device and release gates explicitly open.
+
+### Main Flutter reminders — scoped implementation plan
+
+**Author:** Codex (AI assistant). **Date:** 2026-11-01 (Asia/Jakarta).
+
+REQ-010 and related REQ-008/009/012/015/018 follow published reviewed docs
+`629da057c5dd2fb1707241092d440bb391a7fb2a`. Independent design review closed tap
+queue/issued-plan ordering and uncertain settings receipt recovery. Docs8/8 and
+268 tooling tests passed, followed by consumer validation. Preserve schema4,
+format2 backups, accepted decisions and the retained user simulator collection.
+Implement native planning/ledger/OS adapter, guarded preference receipts and main
+Flutter permission/settings/Today integration. Verify date/capacity/failure races,
+real simulator pending queues, UI recovery/large text, then independent review.
+Physical delivery/restart and release-capacity evidence remain open. Host storage
+now has approximately27GiB free; full-limit backup remains separately unverified.
