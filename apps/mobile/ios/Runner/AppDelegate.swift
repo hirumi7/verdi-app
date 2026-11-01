@@ -15,18 +15,30 @@ import UIKit
     _ application: UIApplication,
     didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?
   ) -> Bool {
+    #if DEBUG
+    // UIKit needs the notification delegate before launch finishes. Creating
+    // these owners does not open the core database or request authorization.
+    try? prepareNativeOwners()
+    #endif
     return super.application(application, didFinishLaunchingWithOptions: launchOptions)
   }
+
+  #if DEBUG
+  private func prepareNativeOwners() throws {
+    if coreBridge == nil { coreBridge = try CoreRepositoryBridge() }
+    if reminderBridge == nil, let coreBridge {
+      reminderBridge = ReminderPlatformBridge(repository: coreBridge.repository)
+    }
+  }
+  #endif
 
   func didInitializeImplicitFlutterEngine(_ engineBridge: FlutterImplicitEngineBridge) {
     GeneratedPluginRegistrant.register(with: engineBridge.pluginRegistry)
     #if DEBUG
     if let registrar = engineBridge.pluginRegistry.registrar(forPlugin: "VerdiCoreRepository") {
       do {
-        let bridge = try CoreRepositoryBridge()
-        coreBridge = bridge
-        let reminders = ReminderPlatformBridge(repository:bridge.repository)
-        reminderBridge = reminders
+        try prepareNativeOwners()
+        guard let bridge = coreBridge, let reminders = reminderBridge else { return }
         reminders.attach(registrar.messenger())
         ReminderPlatformHostApiSetup.setUp(binaryMessenger:registrar.messenger(),api:reminders)
         let media = MediaPlatformBridge(repository:bridge.repository)
@@ -36,7 +48,10 @@ import UIKit
         BackupPlatformHostApiSetup.setUp(binaryMessenger:registrar.messenger(),api:backup)
         MediaPlatformHostApiSetup.setUp(binaryMessenger:registrar.messenger(),api:media)
         CoreRepositoryHostApiSetup.setUp(binaryMessenger: registrar.messenger(), api: bridge)
-      } catch { coreBridge = nil }
+      } catch {
+        // Keep any early owner/tap intact. Missing channels leave core startup
+        // unavailable rather than replacing it with another collection.
+      }
     }
     // Preserve the separate isolated-draft integration namespace.
     if let registrar = engineBridge.pluginRegistry.registrar(forPlugin: "VerdiDraftIntegration") {

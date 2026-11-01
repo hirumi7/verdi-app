@@ -1306,3 +1306,45 @@ and defer core opening/validation to normal recovery. Independent design review
 found no blocker; docs8/8 and268 tooling tests plus consumer handoff passed. This
 changes no accepted behavior, schemas, permission policy or release status.
 Correct obsolete preview copy; test pre-open inbox retention and actual OS taps.
+
+### Cold-launch reminder correction — build and automated checks
+
+**Author:** Codex (AI assistant). **Date:** 2026-11-01 (Asia/Jakarta).
+
+AppDelegate now initializes and strongly retains the native core/reminder owners
+before launch returns, then attaches Flutter channels to those same instances.
+The helper is idempotent; failures keep existing owners and leave core startup
+unavailable. Catalog/core database reads remain deferred. The preview copy now
+accurately describes best-effort local reminders and unconnected purchases.
+Independent source review found no blocker and confirmed that the pinned Flutter
+superclass/current generated plugins do not replace this delegate.
+
+Against docs `8a978d26b1c995413f6e981efdf4a8db3c446b62`, actual checks:
+`flutter analyze` clean; `flutter test`59 passed; native `swift test --filter Reminder`
+10 passed; targeted native iOS pre-open tap test1 passed; ordinary development app
+built/ran on disposable QA iPhone16/iOS18.3.1. New native coverage retains and
+deduplicates a tap before core open, keeps validation deferred with BUSY, then
+opens the same repository, reads/acknowledges once and preserves plants/heads/events.
+Its initial assertion expected SESSION_INVALID; corrected to the existing BUSY
+contract after inspecting the failed result. No production error behavior changed.
+Logs use `/tmp/verdi-reminders-cold-{analyze,flutter,native,native-ios,normal}.log`.
+Earlier full native/core/Pigeon evidence is inherited; those production files and
+contracts did not change. Real OS tap observations follow separately.
+
+The real OS queue integration passed again on disposable QA
+(`/tmp/verdi-reminders-cold-integration.log`). In the ordinary development app,
+the primary assistant observed the genuine10:56 reminder on the locked Simulator
+via computer-use AX and screenshot: “VERDI PREVIEW … Plant-care checks … A
+plant-care check to review”. This is session observation, not an automated-log
+assertion. The app had been terminated before delivery. Attempts to open the card
+revealed its Open control but did not verify navigation or delegate receipt;
+sleeping/stale Simulator UI observations prevented a conclusive tap result.
+Actual terminated/locked notification-tap validation remains open.
+
+Read-only before/after snapshots of27 core tables (excluding regenerable outbox)
+matched SHA256 `83de6997e1651eef70d417aaaa96e76f318acb5da40cae240a304add6f6e42b6`;
+tap inbox remained empty. Log: `/tmp/verdi-reminders-cold-tap-fixed.log`.
+The empty inbox is not evidence of acknowledgement. Ordinary launch was restored
+using simctl; Today still exposed the due watering check. User-retained simulator
+and all accepted records remain untouched. REQ-010 remains partial; physical
+protection/restart/first-unlock, Focus/summary, capacity and release gates remain.

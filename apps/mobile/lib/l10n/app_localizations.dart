@@ -127,7 +127,7 @@ abstract class AppStrings {
   /// No description provided for @developmentDetails.
   ///
   /// In en, this message translates to:
-  /// **'Plants, care history, journals, photos and drafts stay on this device between launches. Purchases and notifications are not connected yet.'**
+  /// **'Plants, care history, journals, photos and drafts stay on this device between launches. Local reminders are best-effort and depend on notification permission and system settings. Purchases are not connected yet.'**
   String get developmentDetails;
 
   /// No description provided for @noPlants.

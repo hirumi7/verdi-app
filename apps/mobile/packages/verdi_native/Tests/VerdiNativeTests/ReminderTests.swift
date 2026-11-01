@@ -49,6 +49,41 @@ extension CoreRepositoryTests {
         return try CanonicalValue.object(["operationId":.string(id),"datasetId":.string(dataset),"expectedRevision":.integer(context.revision),"values":.object(["enabled":.boolean(enabled),"preferredMinute":.integer(Int64(minute)),"quietStartMinute":.integer(0),"quietEndMinute":.integer(0)])]).json()
     }
     func removeReminderLedger() {try? FileManager.default.removeItem(at:URL(fileURLWithPath:directory.path+"-reminders"))}
+    func testReminderTapBeforeCoreOpenSurvivesRecoveryAndAcknowledgement() async throws {
+        defer{removeReminderLedger()}
+        try execute(0);try execute(1)
+        _ = try repo.reminderSettings(reminderRequest(),resolve:false)
+        let center=FakeReminderCenter()
+        let first=ReminderCoordinator(core:repo,center:center,now:{self.now},zone:{TimeZone(secondsFromGMT:0)!})
+        _ = await first.reconcile()
+        let request=try XCTUnwrap(center.requests.values.first)
+        let events=try allRows("care_events"),heads=try allRows("heads"),plants=try allRows("plants")
+        await first.closeForTests()
+        _ = try call("close")
+        // A fresh process installs its delegate before Dart opens the core.
+        repo=CoreRepository(directory:directory,fault:nil,now:{self.now},elapsed:{self.ticks},zone:{TimeZone(secondsFromGMT:0)!})
+        let early=ReminderCoordinator(core:repo,center:center,now:{self.now},zone:{TimeZone(secondsFromGMT:0)!})
+        XCTAssertNil(repo.database)
+        try await early.retainTap(requestID:request.identifier,payload:request.payloadJSON)
+        try await early.retainTap(requestID:request.identifier,payload:request.payloadJSON)
+        do {_ = try await early.readTap();XCTFail("Core recovery must precede validation")}
+        catch let error as CoreRepositoryError {XCTAssertEqual(error.code,"BUSY")}
+        let deferred=try CanonicalParser.parse(await early.reconcile())
+        XCTAssertEqual(deferred.object?["state"]?.text,"deferred")
+        XCTAssertEqual(center.requests.count,1)
+        XCTAssertEqual(center.prompts,0)
+        // Attaching observation does not replace the native owner or its inbox.
+        await early.observe({})
+        try open()
+        let tap=try CanonicalParser.parse(await early.readTap())
+        XCTAssertEqual(try tap.object?["current"]?.json(),"true")
+        try await early.acknowledgeTap(CoreSchema.string(tap.object?["eventId"]))
+        let empty=try await early.readTap();XCTAssertEqual(empty,"null")
+        XCTAssertEqual(try allRows("care_events"),events)
+        XCTAssertEqual(try allRows("heads"),heads)
+        XCTAssertEqual(try allRows("plants"),plants)
+        await early.closeForTests()
+    }
     func testReminderSettingsReceiptUnknownRecoveryAndUnrelatedValues() throws {
         try execute(0);try execute(1)
         let rows=try allRows("plants")

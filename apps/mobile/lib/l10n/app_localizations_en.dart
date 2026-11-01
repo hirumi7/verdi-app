@@ -26,7 +26,7 @@ class AppStringsEn extends AppStrings {
 
   @override
   String get developmentDetails =>
-      'Plants, care history, journals, photos and drafts stay on this device between launches. Purchases and notifications are not connected yet.';
+      'Plants, care history, journals, photos and drafts stay on this device between launches. Local reminders are best-effort and depend on notification permission and system settings. Purchases are not connected yet.';
 
   @override
   String get noPlants => 'No plants yet';

@@ -5,7 +5,7 @@
   "plants": "Plants",
   "settings": "Settings",
   "developmentNotice": "Development preview · on-device storage",
-  "developmentDetails": "Plants, care history, journals, photos and drafts stay on this device between launches. Purchases and notifications are not connected yet.",
+  "developmentDetails": "Plants, care history, journals, photos and drafts stay on this device between launches. Local reminders are best-effort and depend on notification permission and system settings. Purchases are not connected yet.",
   "noPlants": "No plants yet",
   "noPlantsBody": "Give your first plant a place here, then choose when to check on it.",
   "addPlant": "Add a plant",
