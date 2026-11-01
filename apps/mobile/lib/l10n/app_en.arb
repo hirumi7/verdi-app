@@ -642,5 +642,60 @@
   "optimizationOpenPhoto": "Open photo and replacement draft",
   "optimizationDiskFull": "Not enough storage to prepare this replacement. Free space, then review a new selection.",
   "optimizationWriteFailure": "The replacement file could not be saved. The prior photo was not replaced.",
-  "developmentShortNotice": "Development preview"
+  "developmentShortNotice": "Development preview",
+  "gridView": "Grid view",
+  "listView": "List view",
+  "careTab": "Care",
+  "historyTab": "History",
+  "statsTab": "Stats",
+  "careAndReminders": "Care & reminders",
+  "yourData": "Your data",
+  "supportSection": "Support",
+  "artworkCredits": "Artwork credits",
+  "artworkAttribution": "Botanical illustrations and interface icons: Verdi design import. Used with permission confirmed by the owner.",
+  "statsCareCount": "Actual care recorded",
+  "statsExplanation": "Counts include recorded actual care across all routines, including retired routines. Checks and skipped care are excluded.",
+  "checksDueSummary": "{count, plural, =1{One check to make.} other{{count} checks to make.}}",
+  "@checksDueSummary": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "checksDueBody": "Check your plants before recording care.",
+  "plantDetailsSection": "Plant details",
+  "routineSection": "Care routines",
+  "intervalDay": "Every {count, plural, =1 {1 day} other {{count} days}}",
+  "@intervalDay": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "intervalWeek": "Every {count, plural, =1 {1 week} other {{count} weeks}}",
+  "@intervalWeek": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "intervalMonth": "Every {count, plural, =1 {1 month} other {{count} months}}",
+  "@intervalMonth": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "intervalYear": "Every {count, plural, =1 {1 year} other {{count} years}}",
+  "@intervalYear": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  }
 }

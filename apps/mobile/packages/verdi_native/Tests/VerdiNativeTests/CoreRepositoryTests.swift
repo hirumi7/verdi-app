@@ -261,7 +261,7 @@ final class CoreRepositoryTests: XCTestCase {
         now=try date(CoreSchema.string(steps[0]["instant"]))
         repo=CoreRepository(directory:directory,fault:{[weak self] b in if self?.failure==b {self?.failure=nil;throw StorageFailure.unavailable}},now:{self.now},elapsed:{self.ticks},zone:{TimeZone(identifier:"Etc/UTC")!},catalog:catalogBytes)
         try open()
-        XCTAssertEqual(try call("catalogMeta").object?["version"]?.text,"verdi-2026-10-31.1")
+        XCTAssertEqual(try call("catalogMeta").object?["version"]?.text,try CatalogPackage(catalogBytes()).version)
     }
     func corruptCatalog(_ work: (SQLiteSession) throws -> Void) throws {
         _=try call("close")
@@ -313,7 +313,7 @@ final class CoreRepositoryTests: XCTestCase {
             t["value"] = .string("non-toxic");t["sourceRefs"] = .array([]);e["toxicity"] = .object(t)
             try sql.execute("UPDATE catalog_entries SET entry_json=? WHERE catalog_id='sp_zamioculcas_zamiifolia'",[.text(try CanonicalValue.object(e).json())])
         }
-        let page=try call("catalogRows",["version":.string("verdi-2026-10-31.1"),"after":.null])
+        let page=try call("catalogRows",["version":.string(try CatalogPackage(catalogBytes()).version),"after":.null])
         let zz=page.object!["entries"]!.array!.first{$0.object?["id"]?.text=="sp_zamioculcas_zamiifolia"}!
         XCTAssertEqual(zz.object?["toxicity"]?.object?["value"]?.text,"unknown")
         XCTAssertEqual(try call("catalogMeta").object?["limitation"]?.text,"CATALOG_UNAVAILABLE")
@@ -322,7 +322,7 @@ final class CoreRepositoryTests: XCTestCase {
             var e=try CoreSchema.object(CanonicalParser.parse(CoreSchema.text(row)));e["id"] = .string("wrong_id")
             try sql.execute("UPDATE catalog_entries SET entry_json=? WHERE entry_json=?",[.text(try CanonicalValue.object(e).json()),row])
         }
-        assertCode("CATALOG_UNAVAILABLE") {_=try call("catalogRows",["version":.string("verdi-2026-10-31.1"),"after":.null])}
+        assertCode("CATALOG_UNAVAILABLE") {_=try call("catalogRows",["version":.string(try CatalogPackage(catalogBytes()).version),"after":.null])}
     }
     func testCatalogUpdateKeepsSavedRowsAndRejectsOldNewSelection() throws {
         try useCatalogFixture();try execute(0);try execute(1)

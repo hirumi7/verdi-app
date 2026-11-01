@@ -182,6 +182,16 @@ class _JournalEditorPageState extends State<JournalEditorPage> {
             title: Text(
               widget.entryId == null ? s.newJournalEntry : s.editJournalEntry,
             ),
+            actions: [
+              if (!AppLayout.largeText(context))
+                TextButton(
+                  onPressed:
+                      valid && !busy && !state.saving && !state.attachmentFailed
+                      ? save
+                      : null,
+                  child: Text(s.saveJournal),
+                ),
+            ],
           ),
           body: SafeArea(
             child: ListView(
@@ -257,6 +267,7 @@ class _JournalEditorPageState extends State<JournalEditorPage> {
                   ],
                   Wrap(
                     spacing: 12,
+                    runSpacing: 8,
                     children: [
                       OutlinedButton.icon(
                         onPressed: busy ? null : () => pick('camera'),
@@ -404,16 +415,17 @@ class _JournalEditorPageState extends State<JournalEditorPage> {
                       child: Text(s.reviewJournalConflict),
                     ),
                   const SizedBox(height: 24),
-                  FilledButton(
-                    onPressed:
-                        valid &&
-                            !busy &&
-                            !state.saving &&
-                            !state.attachmentFailed
-                        ? save
-                        : null,
-                    child: Text(s.saveJournal),
-                  ),
+                  if (AppLayout.largeText(context))
+                    FilledButton(
+                      onPressed:
+                          valid &&
+                              !busy &&
+                              !state.saving &&
+                              !state.attachmentFailed
+                          ? save
+                          : null,
+                      child: Text(s.saveJournal),
+                    ),
                 ],
               ],
             ),

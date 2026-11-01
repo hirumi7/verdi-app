@@ -24,28 +24,40 @@ class AppPageHeader extends StatelessWidget {
     required this.title,
     this.subtitle,
     this.action,
+    this.bottomGap = AppLayout.section,
+    this.titleStyle,
   });
   final String title;
   final String? subtitle;
   final Widget? action;
+  final double bottomGap;
+  final TextStyle? titleStyle;
 
   @override
   Widget build(BuildContext context) {
     final heading = Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
+        if (subtitle != null) ...[
+          Text(
+            subtitle!,
+            style: Theme.of(context).textTheme.labelMedium!.copyWith(
+              color: Theme.of(context).colorScheme.onSurfaceVariant,
+            ),
+          ),
+          const SizedBox(height: 1),
+        ],
         Semantics(
           header: true,
-          child: Text(title, style: Theme.of(context).textTheme.headlineLarge),
+          child: Text(
+            title,
+            style: titleStyle ?? Theme.of(context).textTheme.headlineLarge,
+          ),
         ),
-        if (subtitle != null) ...[
-          const SizedBox(height: 4),
-          Text(subtitle!, style: Theme.of(context).textTheme.bodySmall),
-        ],
       ],
     );
     return Padding(
-      padding: const EdgeInsets.only(bottom: AppLayout.section),
+      padding: EdgeInsets.only(bottom: bottomGap),
       child: LayoutBuilder(
         builder: (context, constraints) {
           if (action == null) return heading;

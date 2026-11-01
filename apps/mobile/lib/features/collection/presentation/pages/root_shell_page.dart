@@ -31,6 +31,7 @@ class RootShellPage extends StatelessWidget {
           bottom: false,
           child: Column(
             children: [
+              Expanded(child: child),
               Semantics(
                 liveRegion: false,
                 label: s.developmentNotice,
@@ -40,12 +41,10 @@ class RootShellPage extends StatelessWidget {
                   color: Theme.of(context).colorScheme.primaryContainer,
                   padding: const EdgeInsets.symmetric(
                     horizontal: 16,
-                    vertical: 6,
+                    vertical: 3,
                   ),
                   child: Text(
-                    AppLayout.largeText(context)
-                        ? s.developmentShortNotice
-                        : s.developmentNotice,
+                    s.developmentShortNotice,
                     textAlign: TextAlign.center,
                     style: Theme.of(context).textTheme.labelMedium!.copyWith(
                       color: Theme.of(context).colorScheme.onPrimaryContainer,
@@ -53,24 +52,24 @@ class RootShellPage extends StatelessWidget {
                   ),
                 ),
               ),
-              Expanded(child: child),
             ],
           ),
         ),
         bottomNavigationBar: NavigationBar(
+          height: 44 + MediaQuery.textScalerOf(context).scale(12),
           selectedIndex: tabs.activeIndex,
           onDestinationSelected: tabs.setActiveIndex,
           destinations: [
             NavigationDestination(
-              icon: const Icon(Icons.calendar_today_outlined),
+              icon: const FigmaIcon('today', size: 25),
               label: s.today,
             ),
             NavigationDestination(
-              icon: const Icon(Icons.yard_outlined),
+              icon: const FigmaIcon('plants', size: 25),
               label: s.plants,
             ),
             NavigationDestination(
-              icon: const Icon(Icons.tune),
+              icon: const FigmaIcon('settings', size: 25),
               label: s.settings,
             ),
           ],

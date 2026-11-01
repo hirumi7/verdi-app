@@ -221,7 +221,7 @@ class _PlantEditorPageState extends State<PlantEditorPage>
               ),
               for (final r in review.detail?.routines ?? <RoutineRead>[])
                 Text(
-                  '${kindLabel(s, r.careKind, customLabel: r.routine.careLabel)} · ${s.routineEvery(r.routine.interval.count, unitLabel(s, r.routine.interval.unit))} · ${s.nextAfter(dateLabel(context, r.routine.nextCheck))}',
+                  '${kindLabel(s, r.careKind, customLabel: r.routine.careLabel)} · ${careIntervalLabel(s, r.routine.interval)} · ${s.nextAfter(dateLabel(context, r.routine.nextCheck))}',
                 ),
             ],
           ),
@@ -337,6 +337,40 @@ class _PlantEditorPageState extends State<PlantEditorPage>
                             widget.plantId == null ? s.addPlant : s.editPlant,
                           ),
                         ),
+                        if (f.catalogSelection != null) ...[
+                          FigmaGroup(
+                            children: [
+                              Padding(
+                                padding: const EdgeInsets.all(12),
+                                child: Row(
+                                  children: [
+                                    SizedBox(
+                                      width: 64,
+                                      height: 80,
+                                      child: CatalogArtwork(
+                                        speciesId:
+                                            f.catalogSelection!.speciesId,
+                                      ),
+                                    ),
+                                    const SizedBox(width: 12),
+                                    Expanded(
+                                      child: Text(
+                                        f.speciesName,
+                                        style: Theme.of(context)
+                                            .textTheme
+                                            .titleMedium!
+                                            .copyWith(
+                                              fontStyle: FontStyle.italic,
+                                            ),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ],
+                          ),
+                          const SizedBox(height: 24),
+                        ],
                         if (photoLocked) const LinearProgressIndicator(),
                         if (photoError != null ||
                             state.photoFailed ||
@@ -398,6 +432,7 @@ class _PlantEditorPageState extends State<PlantEditorPage>
                         ],
                         Wrap(
                           spacing: 8,
+                          runSpacing: 8,
                           children: [
                             OutlinedButton.icon(
                               onPressed: photoLocked
@@ -625,18 +660,9 @@ class _PlantEditorPageState extends State<PlantEditorPage>
                                                         s.keepRoutine,
                                                       ),
                                                       subtitle: Text(
-                                                        s.routineEvery(
-                                                          row
-                                                              .routine
-                                                              .interval
-                                                              .count,
-                                                          unitLabel(
-                                                            s,
-                                                            row
-                                                                .routine
-                                                                .interval
-                                                                .unit,
-                                                          ),
+                                                        careIntervalLabel(
+                                                          s,
+                                                          row.routine.interval,
                                                         ),
                                                       ),
                                                     ),
@@ -670,12 +696,9 @@ class _PlantEditorPageState extends State<PlantEditorPage>
                                                     }
                                                   },
                                                   child: Text(
-                                                    s.routineEvery(
-                                                      interval.count,
-                                                      unitLabel(
-                                                        s,
-                                                        interval.unit,
-                                                      ),
+                                                    careIntervalLabel(
+                                                      s,
+                                                      interval,
                                                     ),
                                                   ),
                                                 ),

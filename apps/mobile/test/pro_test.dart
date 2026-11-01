@@ -307,6 +307,12 @@ void main() {
         ),
       );
       await press(tester, 'Open offer');
+      await tester.scrollUntilVisible(
+        find.text('Get Pro'),
+        150,
+        scrollable: find.byType(Scrollable).last,
+      );
+      await tester.pumpAndSettle();
       await tester.tap(find.text('Get Pro'));
       await tester.pump();
       expect(service.request!['intentId'], prior['intentId']);

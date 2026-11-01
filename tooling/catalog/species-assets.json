@@ -1,0 +1,286 @@
+{
+  "assets": [
+    {
+      "id": "art_monstera_deliciosa",
+      "resourceName": "art_monstera_deliciosa",
+      "sha256": "f207370cc15fdb48b859b716101a2c2842fcbc1529660334ee6c0da6d1120ba6",
+      "mimeType": "image/png",
+      "pixelWidth": 173,
+      "pixelHeight": 217,
+      "provenance": [
+        {
+          "ref": "figma_monstera_deliciosa",
+          "title": "Verdi botanical illustration: monstera-deliciosa",
+          "publisherOrCreator": "Verdi design import",
+          "locator": "Figma 13:388; source species label; SRC-011 user commercial-rights confirmation",
+          "capturedAt": "2026-11-01T10:00:00.000Z",
+          "captureSha256": "23d199c280a2cf91fdd26ebc93be067fa12760cc7d596c01c99327ea931ff289",
+          "retainedEvidenceRef": "tooling/catalog/species-art-evidence.txt"
+        }
+      ],
+      "rightsReview": {
+        "reviewer": "Codex (AI assistant)",
+        "actorType": "ai",
+        "reviewedAt": "2026-11-01T10:00:00.000Z",
+        "outcome": "pass",
+        "scope": "Unmodified imported botanical PNG matched to its explicit Figma species label; commercial permission evidenced by SRC-011.",
+        "evidenceRefs": [
+          "figma_monstera_deliciosa"
+        ],
+        "findings": [],
+        "permissionBasis": "other_documented",
+        "licenseOrPermission": "User confirms rights to both PLabs templates and imported artwork in SRC-011.",
+        "redistributionScope": "Bundled Verdi botanical illustration",
+        "attributionText": "Verdi design import",
+        "attributionNotRequiredReason": null,
+        "restrictions": []
+      }
+    },
+    {
+      "id": "art_goeppertia_orbifolia",
+      "resourceName": "art_goeppertia_orbifolia",
+      "sha256": "ed697b077a1899da8bdb1cfd5ecbe8abe43949a88db523ccc057605bfd66050d",
+      "mimeType": "image/png",
+      "pixelWidth": 173,
+      "pixelHeight": 217,
+      "provenance": [
+        {
+          "ref": "figma_goeppertia_orbifolia",
+          "title": "Verdi botanical illustration: goeppertia-orbifolia",
+          "publisherOrCreator": "Verdi design import",
+          "locator": "Figma 13:445; source species label; SRC-011 user commercial-rights confirmation",
+          "capturedAt": "2026-11-01T10:00:00.000Z",
+          "captureSha256": "23d199c280a2cf91fdd26ebc93be067fa12760cc7d596c01c99327ea931ff289",
+          "retainedEvidenceRef": "tooling/catalog/species-art-evidence.txt"
+        }
+      ],
+      "rightsReview": {
+        "reviewer": "Codex (AI assistant)",
+        "actorType": "ai",
+        "reviewedAt": "2026-11-01T10:00:00.000Z",
+        "outcome": "pass",
+        "scope": "Unmodified imported botanical PNG matched to its explicit Figma species label; commercial permission evidenced by SRC-011.",
+        "evidenceRefs": [
+          "figma_goeppertia_orbifolia"
+        ],
+        "findings": [],
+        "permissionBasis": "other_documented",
+        "licenseOrPermission": "User confirms rights to both PLabs templates and imported artwork in SRC-011.",
+        "redistributionScope": "Bundled Verdi botanical illustration",
+        "attributionText": "Verdi design import",
+        "attributionNotRequiredReason": null,
+        "restrictions": []
+      }
+    },
+    {
+      "id": "art_nephrolepis_exaltata",
+      "resourceName": "art_nephrolepis_exaltata",
+      "sha256": "54e34b6ef7a5eee7f4191ef430b18366fbae0eca274c64d9678c3959a770fe59",
+      "mimeType": "image/png",
+      "pixelWidth": 173,
+      "pixelHeight": 217,
+      "provenance": [
+        {
+          "ref": "figma_nephrolepis_exaltata",
+          "title": "Verdi botanical illustration: nephrolepis-exaltata",
+          "publisherOrCreator": "Verdi design import",
+          "locator": "Figma 13:484; source species label; SRC-011 user commercial-rights confirmation",
+          "capturedAt": "2026-11-01T10:00:00.000Z",
+          "captureSha256": "23d199c280a2cf91fdd26ebc93be067fa12760cc7d596c01c99327ea931ff289",
+          "retainedEvidenceRef": "tooling/catalog/species-art-evidence.txt"
+        }
+      ],
+      "rightsReview": {
+        "reviewer": "Codex (AI assistant)",
+        "actorType": "ai",
+        "reviewedAt": "2026-11-01T10:00:00.000Z",
+        "outcome": "pass",
+        "scope": "Unmodified imported botanical PNG matched to its explicit Figma species label; commercial permission evidenced by SRC-011.",
+        "evidenceRefs": [
+          "figma_nephrolepis_exaltata"
+        ],
+        "findings": [],
+        "permissionBasis": "other_documented",
+        "licenseOrPermission": "User confirms rights to both PLabs templates and imported artwork in SRC-011.",
+        "redistributionScope": "Bundled Verdi botanical illustration",
+        "attributionText": "Verdi design import",
+        "attributionNotRequiredReason": null,
+        "restrictions": []
+      }
+    },
+    {
+      "id": "art_zamioculcas_zamiifolia",
+      "resourceName": "art_zamioculcas_zamiifolia",
+      "sha256": "85319b0a61052329cc4b3b9de0c396789602b692f504cc502273bfe5807c94c0",
+      "mimeType": "image/png",
+      "pixelWidth": 173,
+      "pixelHeight": 217,
+      "provenance": [
+        {
+          "ref": "figma_zamioculcas_zamiifolia",
+          "title": "Verdi botanical illustration: zamioculcas-zamiifolia",
+          "publisherOrCreator": "Verdi design import",
+          "locator": "Figma 13:526; source species label; SRC-011 user commercial-rights confirmation",
+          "capturedAt": "2026-11-01T10:00:00.000Z",
+          "captureSha256": "23d199c280a2cf91fdd26ebc93be067fa12760cc7d596c01c99327ea931ff289",
+          "retainedEvidenceRef": "tooling/catalog/species-art-evidence.txt"
+        }
+      ],
+      "rightsReview": {
+        "reviewer": "Codex (AI assistant)",
+        "actorType": "ai",
+        "reviewedAt": "2026-11-01T10:00:00.000Z",
+        "outcome": "pass",
+        "scope": "Unmodified imported botanical PNG matched to its explicit Figma species label; commercial permission evidenced by SRC-011.",
+        "evidenceRefs": [
+          "figma_zamioculcas_zamiifolia"
+        ],
+        "findings": [],
+        "permissionBasis": "other_documented",
+        "licenseOrPermission": "User confirms rights to both PLabs templates and imported artwork in SRC-011.",
+        "redistributionScope": "Bundled Verdi botanical illustration",
+        "attributionText": "Verdi design import",
+        "attributionNotRequiredReason": null,
+        "restrictions": []
+      }
+    },
+    {
+      "id": "art_dracaena_trifasciata",
+      "resourceName": "art_dracaena_trifasciata",
+      "sha256": "0c25715c98e344063b931de22cde058ff7a74227a151f02af5388c09f923817b",
+      "mimeType": "image/png",
+      "pixelWidth": 173,
+      "pixelHeight": 217,
+      "provenance": [
+        {
+          "ref": "figma_dracaena_trifasciata",
+          "title": "Verdi botanical illustration: dracaena-trifasciata",
+          "publisherOrCreator": "Verdi design import",
+          "locator": "Figma 13:649; source species label; SRC-011 user commercial-rights confirmation",
+          "capturedAt": "2026-11-01T10:00:00.000Z",
+          "captureSha256": "23d199c280a2cf91fdd26ebc93be067fa12760cc7d596c01c99327ea931ff289",
+          "retainedEvidenceRef": "tooling/catalog/species-art-evidence.txt"
+        }
+      ],
+      "rightsReview": {
+        "reviewer": "Codex (AI assistant)",
+        "actorType": "ai",
+        "reviewedAt": "2026-11-01T10:00:00.000Z",
+        "outcome": "pass",
+        "scope": "Unmodified imported botanical PNG matched to its explicit Figma species label; commercial permission evidenced by SRC-011.",
+        "evidenceRefs": [
+          "figma_dracaena_trifasciata"
+        ],
+        "findings": [],
+        "permissionBasis": "other_documented",
+        "licenseOrPermission": "User confirms rights to both PLabs templates and imported artwork in SRC-011.",
+        "redistributionScope": "Bundled Verdi botanical illustration",
+        "attributionText": "Verdi design import",
+        "attributionNotRequiredReason": null,
+        "restrictions": []
+      }
+    },
+    {
+      "id": "art_epipremnum_aureum",
+      "resourceName": "art_epipremnum_aureum",
+      "sha256": "adc775fe1d09808b021357e21fd68f7c88f3cb128640998ba2b56f2e50527f1b",
+      "mimeType": "image/png",
+      "pixelWidth": 173,
+      "pixelHeight": 217,
+      "provenance": [
+        {
+          "ref": "figma_epipremnum_aureum",
+          "title": "Verdi botanical illustration: epipremnum-aureum",
+          "publisherOrCreator": "Verdi design import",
+          "locator": "Figma 13:688; source species label; SRC-011 user commercial-rights confirmation",
+          "capturedAt": "2026-11-01T10:00:00.000Z",
+          "captureSha256": "23d199c280a2cf91fdd26ebc93be067fa12760cc7d596c01c99327ea931ff289",
+          "retainedEvidenceRef": "tooling/catalog/species-art-evidence.txt"
+        }
+      ],
+      "rightsReview": {
+        "reviewer": "Codex (AI assistant)",
+        "actorType": "ai",
+        "reviewedAt": "2026-11-01T10:00:00.000Z",
+        "outcome": "pass",
+        "scope": "Unmodified imported botanical PNG matched to its explicit Figma species label; commercial permission evidenced by SRC-011.",
+        "evidenceRefs": [
+          "figma_epipremnum_aureum"
+        ],
+        "findings": [],
+        "permissionBasis": "other_documented",
+        "licenseOrPermission": "User confirms rights to both PLabs templates and imported artwork in SRC-011.",
+        "redistributionScope": "Bundled Verdi botanical illustration",
+        "attributionText": "Verdi design import",
+        "attributionNotRequiredReason": null,
+        "restrictions": []
+      }
+    },
+    {
+      "id": "art_ficus_lyrata",
+      "resourceName": "art_ficus_lyrata",
+      "sha256": "ad9c3a5e9383b90e71591c4d4c713b41ccc57ef082202b75691299501c5d899c",
+      "mimeType": "image/png",
+      "pixelWidth": 173,
+      "pixelHeight": 217,
+      "provenance": [
+        {
+          "ref": "figma_ficus_lyrata",
+          "title": "Verdi botanical illustration: ficus-lyrata",
+          "publisherOrCreator": "Verdi design import",
+          "locator": "Figma 13:770; source species label; SRC-011 user commercial-rights confirmation",
+          "capturedAt": "2026-11-01T10:00:00.000Z",
+          "captureSha256": "23d199c280a2cf91fdd26ebc93be067fa12760cc7d596c01c99327ea931ff289",
+          "retainedEvidenceRef": "tooling/catalog/species-art-evidence.txt"
+        }
+      ],
+      "rightsReview": {
+        "reviewer": "Codex (AI assistant)",
+        "actorType": "ai",
+        "reviewedAt": "2026-11-01T10:00:00.000Z",
+        "outcome": "pass",
+        "scope": "Unmodified imported botanical PNG matched to its explicit Figma species label; commercial permission evidenced by SRC-011.",
+        "evidenceRefs": [
+          "figma_ficus_lyrata"
+        ],
+        "findings": [],
+        "permissionBasis": "other_documented",
+        "licenseOrPermission": "User confirms rights to both PLabs templates and imported artwork in SRC-011.",
+        "redistributionScope": "Bundled Verdi botanical illustration",
+        "attributionText": "Verdi design import",
+        "attributionNotRequiredReason": null,
+        "restrictions": []
+      }
+    }
+  ],
+  "speciesArt": [
+    {
+      "catalogId": "sp_monstera_deliciosa",
+      "assetId": "art_monstera_deliciosa"
+    },
+    {
+      "catalogId": "sp_goeppertia_orbifolia",
+      "assetId": "art_goeppertia_orbifolia"
+    },
+    {
+      "catalogId": "sp_nephrolepis_exaltata",
+      "assetId": "art_nephrolepis_exaltata"
+    },
+    {
+      "catalogId": "sp_zamioculcas_zamiifolia",
+      "assetId": "art_zamioculcas_zamiifolia"
+    },
+    {
+      "catalogId": "sp_dracaena_trifasciata",
+      "assetId": "art_dracaena_trifasciata"
+    },
+    {
+      "catalogId": "sp_epipremnum_aureum",
+      "assetId": "art_epipremnum_aureum"
+    },
+    {
+      "catalogId": "sp_ficus_lyrata",
+      "assetId": "art_ficus_lyrata"
+    }
+  ]
+}

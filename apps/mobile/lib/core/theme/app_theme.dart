@@ -31,6 +31,20 @@ abstract final class AppTheme {
     final text = base.textTheme.apply(bodyColor: ink, displayColor: ink);
     return base.copyWith(
       scaffoldBackgroundColor: paper,
+      dividerColor: Color(dark ? 0xff374238 : 0xffdce0d7),
+      navigationBarTheme: NavigationBarThemeData(
+        backgroundColor: Color(dark ? 0xff151b17 : 0xfff8f9f6),
+        indicatorColor: Colors.transparent,
+        elevation: 0,
+        labelTextStyle: WidgetStateProperty.resolveWith(
+          (states) => TextStyle(
+            fontSize: 10,
+            height: 1.2,
+            fontWeight: FontWeight.w600,
+            color: states.contains(WidgetState.selected) ? leaf : muted,
+          ),
+        ),
+      ),
       textTheme: text.copyWith(
         displayLarge: text.displayLarge!.copyWith(
           fontSize: 40,
@@ -130,12 +144,23 @@ abstract final class AppTheme {
         color: surface,
         elevation: 0,
         margin: EdgeInsets.zero,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
       ),
       inputDecorationTheme: InputDecorationTheme(
         filled: true,
         fillColor: surface,
-        border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: BorderSide.none,
+        ),
+        enabledBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: BorderSide.none,
+        ),
+        focusedBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: BorderSide(color: leaf, width: 2),
+        ),
         contentPadding: AppLayout.cardPadding,
       ),
       filledButtonTheme: FilledButtonThemeData(
@@ -160,9 +185,9 @@ abstract final class AppTheme {
         contentPadding: const EdgeInsets.symmetric(
           horizontal: AppLayout.gutter,
         ),
-        minTileHeight: 64,
+        minTileHeight: 48,
         horizontalTitleGap: 12,
-        minVerticalPadding: 12,
+        minVerticalPadding: 8,
         titleTextStyle: text.titleMedium!.copyWith(
           fontSize: 17,
           height: 22 / 17,
@@ -182,10 +207,6 @@ abstract final class AppTheme {
       ),
       iconButtonTheme: IconButtonThemeData(
         style: IconButton.styleFrom(minimumSize: const Size(48, 48)),
-      ),
-      navigationBarTheme: NavigationBarThemeData(
-        backgroundColor: surface,
-        indicatorColor: scheme.primaryContainer,
       ),
     );
   }

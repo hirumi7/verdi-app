@@ -1,0 +1,12 @@
+Author: Codex (AI assistant). Date: 2026-11-01 (Asia/Jakarta).
+Seven unmodified botanical PlantArt exports from refined Verdi Figma components.
+Figma file j2I5k6LkRUkpvzDHNwpvdF; source names and species text were inspected.
+User confirms commercial rights to both templates and imported artwork in SRC-011.
+These are decorative botanical representations of explicit catalog identities, not health/photo identification.
+monstera-deliciosa: 13:388
+goeppertia-orbifolia: 13:445
+nephrolepis-exaltata: 13:484
+zamioculcas-zamiifolia: 13:526
+dracaena-trifasciata: 13:649
+epipremnum-aureum: 13:688
+ficus-lyrata: 13:770

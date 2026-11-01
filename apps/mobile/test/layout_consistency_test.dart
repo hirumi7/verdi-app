@@ -7,6 +7,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:verdi_mobile/app/app.dart';
 import 'package:verdi_mobile/core/di/injection.dart';
 import 'package:verdi_mobile/core/theme/app_layout.dart';
+import 'package:verdi_mobile/core/theme/figma_components.dart';
 import 'package:verdi_mobile/core/theme/app_theme.dart';
 import 'package:verdi_mobile/features/help/presentation/help_pages.dart';
 import 'package:verdi_mobile/l10n/app_localizations.dart';
@@ -17,38 +18,40 @@ void main() {
     await configureDependencies(environment: 'memory');
   });
   tearDown(() => getIt.reset());
-  testWidgets('tab headings align and settings cards never touch', (
-    tester,
-  ) async {
-    tester.view.physicalSize = const Size(390, 844);
-    tester.view.devicePixelRatio = 1;
-    addTearDown(tester.view.resetPhysicalSize);
-    addTearDown(tester.view.resetDevicePixelRatio);
-    await tester.pumpWidget(const VerdiApp());
-    await tester.pumpAndSettle();
-    final tops = <double>[];
-    for (final label in ['Today', 'Plants', 'Settings']) {
-      await tester.tap(find.widgetWithText(NavigationDestination, label));
+  testWidgets(
+    'Figma contextual headers and grouped settings retain page gutters',
+    (tester) async {
+      tester.view.physicalSize = const Size(390, 844);
+      tester.view.devicePixelRatio = 1;
+      addTearDown(tester.view.resetPhysicalSize);
+      addTearDown(tester.view.resetDevicePixelRatio);
+      await tester.pumpWidget(const VerdiApp());
       await tester.pumpAndSettle();
-      final title = find.descendant(
-        of: find.byType(AppPageHeader),
-        matching: find.text(label),
-      );
-      final rect = tester.getRect(title);
-      expect(rect.left, 16);
-      tops.add(rect.top);
-      expect(tester.takeException(), isNull);
-    }
-    expect(tops.toSet().length, 1);
-    final cards = find.byType(Card);
-    expect(cards.evaluate().length, greaterThan(1));
-    final first = tester.getRect(cards.at(0));
-    final second = tester.getRect(cards.at(1));
-    expect(second.top - first.bottom, 12);
-    expect(first.left, 16);
-    expect(first.height, 64);
-    expect(first.right, 374);
-  });
+      final tops = <double>[];
+      for (final label in ['Today', 'Plants', 'Settings']) {
+        await tester.tap(find.widgetWithText(NavigationDestination, label));
+        await tester.pumpAndSettle();
+        final title = find.descendant(
+          of: find.byType(AppPageHeader),
+          matching: find.text(label),
+        );
+        final rect = tester.getRect(title);
+        expect(rect.left, 16);
+        tops.add(rect.top);
+        expect(tester.takeException(), isNull);
+      }
+      expect(tops[0], tops[1]);
+      expect(tops[2], lessThan(tops[0])); // Settings has no date/count eyebrow.
+      final cards = find.byType(FigmaGroup);
+      expect(cards.evaluate().length, greaterThan(1));
+      final first = tester.getRect(cards.at(0));
+      final second = tester.getRect(cards.at(1));
+      expect(second.top - first.bottom, greaterThanOrEqualTo(24));
+      expect(first.left, 16);
+      expect(first.height, greaterThanOrEqualTo(48));
+      expect(first.right, 374);
+    },
+  );
   for (final brightness in Brightness.values) {
     testWidgets('large ${brightness.name} title scrolls with content', (
       tester,

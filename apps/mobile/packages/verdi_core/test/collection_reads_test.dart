@@ -1,9 +1,99 @@
 import 'package:test/test.dart' hide Skip;
 import 'package:verdi_core/verdi_core.dart';
+import 'catalog_test.dart' show bundledCatalog;
+import 'support/storage_scenario.dart' show fixtureId, StorageScenario;
 import 'collection_test.dart'
     show Harness, id, date, known, unknown, fields, rejected;
 
 void main() {
+  test(
+    'Today art and user cover use the same snapshot regardless of Plants filters',
+    () {
+      final s = StorageScenario();
+      final catalog = bundledCatalog();
+      s.projection.reader.catalog = catalog;
+      final selection = catalog.entry('sp_monstera_deliciosa')!.selection;
+      s.run(
+        SaveDraft(
+          draftId: fixtureId(3),
+          expectedRevision: null,
+          mode: DraftMode.add,
+          fields: CustomPlantFields(
+            name: 'Monstera',
+            speciesName: selection.speciesNameSnapshot,
+            catalogSelection: selection,
+            routines: [
+              RoutineInput(
+                kind: StandardCareKind.water,
+                count: '7',
+                unit: IntervalUnit.day,
+                seedKind: SeedKind.unknown,
+                date: '2026-10-31',
+              ),
+            ],
+          ),
+        ),
+      );
+      s.run(SavePlant(draftId: fixtureId(3), draftRevision: 1));
+      final plant = s.projection.snapshot.plants[s.plant]!;
+      final photo = fixtureId(9991), hash = 'a' * 64;
+      s.rows['photos']!.add([
+        photo,
+        plant.id,
+        null,
+        3,
+        'media/$photo/$hash.jpg',
+        hash,
+        1000,
+        'image/jpeg',
+        100,
+        100,
+        '2026-10-20',
+        'library',
+        null,
+        '2026-10-20T00:00:00.000Z',
+      ]);
+      s.rows['plant_covers']!.add([plant.id, photo]);
+      s.projection.hydrate(
+        s.rows,
+        s.projection.snapshot.revision,
+        s.projection.storageRevision + 1,
+      );
+      final reader = s.projection.reader;
+      final before = reader
+          .getReminderCandidates(datasetId: s.projection.snapshot.datasetId)
+          .items;
+      expect(before, isNotEmpty);
+      reader.listPlants(
+        datasetId: s.projection.snapshot.datasetId,
+        archived: true,
+        query: 'absent',
+        limit: 1,
+      );
+      final after = reader
+          .getReminderCandidates(datasetId: s.projection.snapshot.datasetId)
+          .items;
+      final todayRows = reader
+          .getToday(
+            datasetId: s.projection.snapshot.datasetId,
+            section: TodaySection.today,
+          )
+          .page
+          .items
+          .cast<CheckRow>();
+      expect(todayRows, isNotEmpty);
+      for (final row in [...after, ...todayRows]) {
+        expect(row.speciesId, plant.catalogSelection!.speciesId);
+        expect(row.coverPhotoId, photo);
+        expect(row.coverPhotoRevision, 3);
+      }
+      expect(
+        after.map((r) => r.target.plantId),
+        before.map((r) => r.target.plantId),
+      );
+    },
+  );
+
   test(
     'plants filter before limit; stable name/ID pages and complete active count',
     () {

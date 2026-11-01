@@ -4,7 +4,12 @@ import XCTest
 
 func catalogBytes() throws -> BundledCatalogBytes {
     func bytes(_ name: String,_ ext: String) throws -> Data {try Data(contentsOf:XCTUnwrap(Bundle.module.url(forResource:name,withExtension:ext,subdirectory:"Fixtures/catalog")))}
-    return try BundledCatalogBytes(manifest:bytes("manifest","json"),entries:bytes("entries","json"),assets:["generic_plant":bytes("generic","png")])
+    let manifest = try bytes("manifest", "json")
+    let object = try XCTUnwrap(JSONSerialization.jsonObject(with: manifest) as? [String: Any])
+    let records = try XCTUnwrap(object["assets"] as? [[String: Any]])
+    var assets: [String: Data] = [:]
+    for record in records { let name = try XCTUnwrap(record["resourceName"] as? String); assets[name] = try bytes(name == "generic_plant" ? "generic" : name, "png") }
+    return try BundledCatalogBytes(manifest:manifest,entries:bytes("entries","json"),assets:assets)
 }
 final class CatalogTests: XCTestCase {
     func mutate(_ work: (inout [String:CanonicalValue],inout [CanonicalValue]) throws -> Void) throws -> BundledCatalogBytes {
@@ -19,6 +24,32 @@ final class CatalogTests: XCTestCase {
         XCTAssertEqual(try CatalogPackage(BundledCatalogBytes(manifest:Data(" \n".utf8)+bytes.manifest,entries:bytes.entries,assets:bytes.assets)).version,package.version)
         XCTAssertThrowsError(try CanonicalParser.package("{\"a\":1, \"a\":2}"))
         XCTAssertThrowsError(try CanonicalParser.parse(" {\"a\":1}"))
+    }
+    func testBotanicalMappingsAndMissingOrAlteredExportsReject() throws {
+        let original = try catalogBytes()
+        let manifest = try CoreSchema.object(CanonicalParser.package(String(decoding: original.manifest, as: UTF8.self)))
+        let mappings = try CoreSchema.array(manifest["speciesArt"]!)
+        XCTAssertEqual(mappings.count, 7)
+        XCTAssertEqual(original.assets.count, 8)
+        XCTAssertEqual(Set(mappings.compactMap { $0.object?["catalogId"]?.text }).count, 7)
+        for name in original.assets.keys where name != "generic_plant" {
+            var missing = original.assets
+            missing.removeValue(forKey: name)
+            XCTAssertThrowsError(try CatalogPackage(BundledCatalogBytes(manifest: original.manifest, entries: original.entries, assets: missing)), name)
+            var corrupt = original.assets
+            corrupt[name] = original.assets["generic_plant"]!
+            XCTAssertThrowsError(try CatalogPackage(BundledCatalogBytes(manifest: original.manifest, entries: original.entries, assets: corrupt)), name)
+        }
+        let pending = try mutate { manifest, _ in
+            var assets = manifest["assets"]!.array!
+            var record = assets[1].object!
+            var rights = record["rightsReview"]!.object!
+            rights["outcome"] = .string("pending")
+            record["rightsReview"] = .object(rights)
+            assets[1] = .object(record)
+            manifest["assets"] = .array(assets)
+        }
+        XCTAssertThrowsError(try CatalogPackage(pending))
     }
     func testInvalidReviewsPopularHashAndCorruptAssetReject() throws {
         for mutateEntry in ["review","toxicity","duplicate","popular","name"] {

@@ -1,0 +1,72 @@
+[
+  {
+    "name": "today",
+    "source": "verdi-figma-13-3506.txt",
+    "asset": "fd5d1.svg"
+  },
+  {
+    "name": "plants",
+    "source": "verdi-figma-13-3506.txt",
+    "asset": "33653.svg"
+  },
+  {
+    "name": "settings",
+    "source": "verdi-figma-13-3506.txt",
+    "asset": "c9d55.svg"
+  },
+  {
+    "name": "pro",
+    "source": "verdi-figma-settings-reference.txt",
+    "asset": "86c85.svg"
+  },
+  {
+    "name": "restore",
+    "source": "verdi-figma-settings-reference.txt",
+    "asset": "67d62.svg"
+  },
+  {
+    "name": "reminders",
+    "source": "verdi-figma-settings-reference.txt",
+    "asset": "70947.svg"
+  },
+  {
+    "name": "care-types",
+    "source": "verdi-figma-settings-reference.txt",
+    "asset": "f2da7.svg"
+  },
+  {
+    "name": "backup",
+    "source": "verdi-figma-settings-reference.txt",
+    "asset": "b9425.svg"
+  },
+  {
+    "name": "storage",
+    "source": "verdi-figma-settings-reference.txt",
+    "asset": "4bff2.svg"
+  },
+  {
+    "name": "help",
+    "source": "verdi-figma-settings-reference.txt",
+    "asset": "64478.svg"
+  },
+  {
+    "name": "privacy",
+    "source": "verdi-figma-settings-reference.txt",
+    "asset": "57477.svg"
+  },
+  {
+    "name": "licenses",
+    "source": "verdi-figma-settings-reference.txt",
+    "asset": "48d7e.svg"
+  },
+  {
+    "name": "chevron",
+    "source": "verdi-figma-settings-reference.txt",
+    "asset": "c4f30.svg"
+  },
+  {
+    "name": "water",
+    "source": "verdi-figma-13-1419.txt",
+    "asset": "3c82f.svg"
+  }
+]

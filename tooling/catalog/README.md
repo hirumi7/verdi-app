@@ -19,8 +19,12 @@ or pet safety and do not establish a full launch inventory.
 `generic-asset.json` identifies the existing unmodified Figma 11:407 illustration,
 its bytes/dimensions and user-confirmed commercial rights (SRC-011). The retained
 `artwork-evidence.txt` is the exact hashed evidence statement, not a new permission.
-No species-specific image mappings are supplied. The interface labels the generic
-illustration and preserves species identity/text when it uses that fallback.
+`species-assets.json` adds seven explicitly identified botanical exports from the
+same Figma file, with byte hashes, dimensions and the retained
+`species-art-evidence.txt` identity/rights evidence. Package version
+`verdi-2026-11-01.1` preserves all 24 entry bytes and Popular order. The interface
+resolves mappings only from validated catalog state; unknown/custom plants keep
+the generic fallback. User cover photos take precedence.
 
 Run `python3 tooling/catalog/build_catalog.py` from the app root. It deterministically
 writes the two bundled JSON files. The native `CatalogPackage` validator checks
@@ -32,6 +36,7 @@ bundle bytes. Rebuild those fixtures after a reviewed package change:
 ```sh
 cp apps/mobile/assets/catalog/*.json apps/mobile/packages/verdi_native/Tests/VerdiNativeTests/Fixtures/catalog/
 cp apps/mobile/assets/illustrations/empty-plants.png apps/mobile/packages/verdi_native/Tests/VerdiNativeTests/Fixtures/catalog/generic.png
+cp apps/mobile/assets/catalog_art/*.png apps/mobile/packages/verdi_native/Tests/VerdiNativeTests/Fixtures/catalog/
 swift test --package-path apps/mobile/packages/verdi_native --filter CatalogTests
 ```
 

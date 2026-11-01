@@ -2775,6 +2775,126 @@ abstract class AppStrings {
   /// In en, this message translates to:
   /// **'Development preview'**
   String get developmentShortNotice;
+
+  /// No description provided for @gridView.
+  ///
+  /// In en, this message translates to:
+  /// **'Grid view'**
+  String get gridView;
+
+  /// No description provided for @listView.
+  ///
+  /// In en, this message translates to:
+  /// **'List view'**
+  String get listView;
+
+  /// No description provided for @careTab.
+  ///
+  /// In en, this message translates to:
+  /// **'Care'**
+  String get careTab;
+
+  /// No description provided for @historyTab.
+  ///
+  /// In en, this message translates to:
+  /// **'History'**
+  String get historyTab;
+
+  /// No description provided for @statsTab.
+  ///
+  /// In en, this message translates to:
+  /// **'Stats'**
+  String get statsTab;
+
+  /// No description provided for @careAndReminders.
+  ///
+  /// In en, this message translates to:
+  /// **'Care & reminders'**
+  String get careAndReminders;
+
+  /// No description provided for @yourData.
+  ///
+  /// In en, this message translates to:
+  /// **'Your data'**
+  String get yourData;
+
+  /// No description provided for @supportSection.
+  ///
+  /// In en, this message translates to:
+  /// **'Support'**
+  String get supportSection;
+
+  /// No description provided for @artworkCredits.
+  ///
+  /// In en, this message translates to:
+  /// **'Artwork credits'**
+  String get artworkCredits;
+
+  /// No description provided for @artworkAttribution.
+  ///
+  /// In en, this message translates to:
+  /// **'Botanical illustrations and interface icons: Verdi design import. Used with permission confirmed by the owner.'**
+  String get artworkAttribution;
+
+  /// No description provided for @statsCareCount.
+  ///
+  /// In en, this message translates to:
+  /// **'Actual care recorded'**
+  String get statsCareCount;
+
+  /// No description provided for @statsExplanation.
+  ///
+  /// In en, this message translates to:
+  /// **'Counts include recorded actual care across all routines, including retired routines. Checks and skipped care are excluded.'**
+  String get statsExplanation;
+
+  /// No description provided for @checksDueSummary.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{One check to make.} other{{count} checks to make.}}'**
+  String checksDueSummary(int count);
+
+  /// No description provided for @checksDueBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Check your plants before recording care.'**
+  String get checksDueBody;
+
+  /// No description provided for @plantDetailsSection.
+  ///
+  /// In en, this message translates to:
+  /// **'Plant details'**
+  String get plantDetailsSection;
+
+  /// No description provided for @routineSection.
+  ///
+  /// In en, this message translates to:
+  /// **'Care routines'**
+  String get routineSection;
+
+  /// No description provided for @intervalDay.
+  ///
+  /// In en, this message translates to:
+  /// **'Every {count, plural, =1 {1 day} other {{count} days}}'**
+  String intervalDay(int count);
+
+  /// No description provided for @intervalWeek.
+  ///
+  /// In en, this message translates to:
+  /// **'Every {count, plural, =1 {1 week} other {{count} weeks}}'**
+  String intervalWeek(int count);
+
+  /// No description provided for @intervalMonth.
+  ///
+  /// In en, this message translates to:
+  /// **'Every {count, plural, =1 {1 month} other {{count} months}}'**
+  String intervalMonth(int count);
+
+  /// No description provided for @intervalYear.
+  ///
+  /// In en, this message translates to:
+  /// **'Every {count, plural, =1 {1 year} other {{count} years}}'**
+  String intervalYear(int count);
 }
 
 class _AppStringsDelegate extends LocalizationsDelegate<AppStrings> {

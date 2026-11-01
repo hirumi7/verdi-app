@@ -1,3 +1,4 @@
+export '../../../../core/theme/figma_components.dart';
 export '../../../../core/theme/app_layout.dart';
 
 import '../../../pro/presentation/pro_page.dart';
@@ -310,12 +311,7 @@ class _CommandReviewState extends State<_CommandReview> {
             if (command is CustomCareCommand && command is! CreateRoutine)
               Text(s.careTypeEffects(preview.effects.routines)),
             if (command is CreateRoutine) ...[
-              Text(
-                s.routineEvery(
-                  command.interval.count,
-                  unitLabel(s, command.interval.unit),
-                ),
-              ),
+              Text(careIntervalLabel(s, command.interval)),
               Text(
                 '${command.seedKind == SeedKind.known ? s.actualCareDate : s.firstCheck}: ${dateLabel(context, command.seedDate)}',
               ),
@@ -328,12 +324,7 @@ class _CommandReviewState extends State<_CommandReview> {
                 '${command is CheckNotNeeded ? s.checkDate : s.actualCareDate}: ${dateLabel(context, actualDate)}',
               ),
             if (command is SetInterval)
-              Text(
-                s.routineEvery(
-                  command.interval.count,
-                  unitLabel(s, command.interval.unit),
-                ),
-              ),
+              Text(careIntervalLabel(s, command.interval)),
             if (command is DeletePlant)
               Text(
                 s.deletionCounts(
@@ -447,3 +438,11 @@ class _CommandReviewState extends State<_CommandReview> {
     );
   }
 }
+
+String careIntervalLabel(AppStrings s, CareInterval interval) =>
+    switch (interval.unit) {
+      IntervalUnit.day => s.intervalDay(interval.count),
+      IntervalUnit.week => s.intervalWeek(interval.count),
+      IntervalUnit.month => s.intervalMonth(interval.count),
+      IntervalUnit.year => s.intervalYear(interval.count),
+    };

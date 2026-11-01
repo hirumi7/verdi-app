@@ -1556,4 +1556,106 @@ class AppStringsEn extends AppStrings {
 
   @override
   String get developmentShortNotice => 'Development preview';
+
+  @override
+  String get gridView => 'Grid view';
+
+  @override
+  String get listView => 'List view';
+
+  @override
+  String get careTab => 'Care';
+
+  @override
+  String get historyTab => 'History';
+
+  @override
+  String get statsTab => 'Stats';
+
+  @override
+  String get careAndReminders => 'Care & reminders';
+
+  @override
+  String get yourData => 'Your data';
+
+  @override
+  String get supportSection => 'Support';
+
+  @override
+  String get artworkCredits => 'Artwork credits';
+
+  @override
+  String get artworkAttribution =>
+      'Botanical illustrations and interface icons: Verdi design import. Used with permission confirmed by the owner.';
+
+  @override
+  String get statsCareCount => 'Actual care recorded';
+
+  @override
+  String get statsExplanation =>
+      'Counts include recorded actual care across all routines, including retired routines. Checks and skipped care are excluded.';
+
+  @override
+  String checksDueSummary(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count checks to make.',
+      one: 'One check to make.',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get checksDueBody => 'Check your plants before recording care.';
+
+  @override
+  String get plantDetailsSection => 'Plant details';
+
+  @override
+  String get routineSection => 'Care routines';
+
+  @override
+  String intervalDay(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count days',
+      one: '1 day',
+    );
+    return 'Every $_temp0';
+  }
+
+  @override
+  String intervalWeek(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count weeks',
+      one: '1 week',
+    );
+    return 'Every $_temp0';
+  }
+
+  @override
+  String intervalMonth(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count months',
+      one: '1 month',
+    );
+    return 'Every $_temp0';
+  }
+
+  @override
+  String intervalYear(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count years',
+      one: '1 year',
+    );
+    return 'Every $_temp0';
+  }
 }

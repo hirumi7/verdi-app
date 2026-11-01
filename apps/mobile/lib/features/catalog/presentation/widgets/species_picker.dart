@@ -110,7 +110,11 @@ class _SpeciesPickerState extends State<SpeciesPicker> {
           for (final entry in entries)
             ListTile(
               key: ValueKey('species-${entry.id}'),
-              leading: const GenericPlantImage(size: 48),
+              leading: SizedBox(
+                width: 48,
+                height: 48,
+                child: CatalogArtwork(speciesId: entry.id, catalogState: data),
+              ),
               title: Text(entry.commonName),
               subtitle: Text(
                 '${entry.scientificName}\n${s.difficulty}: ${entry.difficulty == 'unknown' ? s.unknown : entry.difficulty} · ${s.toxicity}: ${entry.toxicityLabel}${(entry.toxicity['animalScope'] as List).isEmpty ? '' : ' (${(entry.toxicity['animalScope'] as List).join(', ')})'}',
@@ -187,9 +191,19 @@ Future<void> showSpeciesInformation(
           padding: AppLayout.pagePadding,
           children: [
             AppScrollTitle(title: Text(s.speciesInformation)),
-            const Center(child: GenericPlantImage()),
+            Center(
+              child: SizedBox(
+                width: 160,
+                height: 180,
+                child: CatalogArtwork(speciesId: entry.id),
+              ),
+            ),
             Text(
-              s.genericIllustration,
+              (manifest?['speciesArt'] as List? ?? const []).any(
+                    (item) => (item as Map)['catalogId'] == entry.id,
+                  )
+                  ? s.artworkAttribution
+                  : s.genericIllustration,
               style: Theme.of(context).textTheme.labelSmall,
             ),
             Text(
@@ -215,7 +229,7 @@ Future<void> showSpeciesInformation(
             for (final suggestion in entry.selection.suggestions) ...[
               const SizedBox(height: 16),
               Text(
-                '${kindLabel(s, suggestion.careKind)} · ${s.routineEvery(suggestion.interval.count, unitLabel(s, suggestion.interval.unit))}',
+                '${kindLabel(s, suggestion.careKind)} · ${careIntervalLabel(s, suggestion.interval)}',
               ),
               Text(s.suggestionOnly),
               Text(suggestion.context),

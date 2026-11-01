@@ -37,6 +37,7 @@ class _PlantDetailPageState extends State<PlantDetailPage> {
   String? error;
   AddPastCare? historyAlternative;
   int sequence = 0;
+  int detailSection = 0;
 
   @override
   void initState() {
@@ -175,23 +176,25 @@ class _PlantDetailPageState extends State<PlantDetailPage> {
     final cubit = context.read<WorkspaceCubit>();
     final d = detail;
     return Scaffold(
-      appBar: AppPageBar(
-        context: context,
-        title: Text(s.plants),
-        actions: [
-          if (d != null)
-            IconButton(
-              tooltip: s.editPlant,
-              icon: const Icon(Icons.edit_outlined),
-              onPressed: () async {
-                await context.router.push(
-                  PlantEditorRoute(plantId: widget.plantId),
-                );
-                if (mounted) load();
-              },
-            ),
-        ],
-      ),
+      appBar: AppLayout.largeText(context) || d == null
+          ? AppPageBar(
+              context: context,
+              title: Text(s.plants),
+              actions: [
+                if (d != null)
+                  IconButton(
+                    tooltip: s.editPlant,
+                    icon: const Icon(Icons.edit_outlined),
+                    onPressed: () async {
+                      await context.router.push(
+                        PlantEditorRoute(plantId: widget.plantId),
+                      );
+                      if (mounted) load();
+                    },
+                  ),
+              ],
+            )
+          : null,
       body: RefreshIndicator(
         onRefresh: load,
         child: ListView(
@@ -206,11 +209,574 @@ class _PlantDetailPageState extends State<PlantDetailPage> {
                 child: Text(s.addPastCare),
               ),
             if (d != null) ...[
-              AppPageHeader(title: d.plant.name),
-              if (coverId != null) ...[
-                PhotoPreview(photoId: coverId!, revision: coverRevision),
+              Stack(
+                children: [
+                  SizedBox(
+                    width: double.infinity,
+                    child: PlantVisual(
+                      speciesId: d.plant.catalogSelection?.speciesId,
+                      photoId: coverId,
+                      photoRevision: coverRevision,
+                      height: AppLayout.largeText(context) ? 120 : 220,
+                    ),
+                  ),
+                  if (!AppLayout.largeText(context)) ...[
+                    Positioned(
+                      top: 8,
+                      left: 8,
+                      child: Material(
+                        color: Theme.of(context).colorScheme.surface,
+                        shape: const CircleBorder(),
+                        child: BackButton(
+                          onPressed: () => context.router.maybePop(),
+                        ),
+                      ),
+                    ),
+                    Positioned(
+                      top: 8,
+                      right: 8,
+                      child: Material(
+                        color: Theme.of(context).colorScheme.surface,
+                        shape: const CircleBorder(),
+                        child: IconButton(
+                          tooltip: s.editPlant,
+                          icon: const Icon(Icons.edit_outlined),
+                          onPressed: () async {
+                            await context.router.push(
+                              PlantEditorRoute(plantId: widget.plantId),
+                            );
+                            if (mounted) load();
+                          },
+                        ),
+                      ),
+                    ),
+                  ],
+                ],
+              ),
+              const SizedBox(height: 16),
+              AppPageHeader(
+                title: d.plant.name,
+                bottomGap: 4,
+                titleStyle: Theme.of(context).textTheme.headlineMedium,
+              ),
+              Text(
+                d.plant.speciesName,
+                style: Theme.of(context).textTheme.bodySmall!
+                    .copyWith(fontStyle: FontStyle.italic),
+              ),
+              const SizedBox(height: 16),
+              FigmaSegments(
+                labels: [s.careTab, s.historyTab, s.statsTab],
+                selected: detailSection,
+                onSelected: (value) => setState(() => detailSection = value),
+              ),
+              const SizedBox(height: 12),
+              if (detailSection == 2) ...[
+                Text(
+                  s.statsCareCount,
+                  style: Theme.of(context).textTheme.titleMedium,
+                ),
+                Text(
+                  '${d.routines.fold<int>(0, (total, r) => total + r.actualCareCount)}',
+                  style: Theme.of(context).textTheme.headlineLarge,
+                ),
+                Text(
+                  s.statsExplanation,
+                  style: Theme.of(context).textTheme.bodySmall,
+                ),
                 const SizedBox(height: 16),
+                for (final routine in d.routines)
+                  if (routine.latestActualCare != null)
+                    Padding(
+                      padding: const EdgeInsets.only(bottom: 8),
+                      child: Text(
+                        '${kindLabel(s, routine.careKind, customLabel: routine.routine.careLabel)} · ${s.lastCare}: ${dateLabel(context, routine.latestActualCare!)}',
+                      ),
+                    ),
+                const SizedBox(height: 24),
+                Text(
+                  d.plant.catalogSelection == null
+                      ? s.customIdentity
+                      : s.catalogIdentity,
+                ),
+                if (d.plant.catalogSelection case final selection?)
+                  TextButton.icon(
+                    icon: const Icon(Icons.info_outline),
+                    label: Text(s.speciesInformation),
+                    onPressed: () async {
+                      try {
+                        final catalog = await getIt<CollectionRepository>()
+                            .catalog();
+                        if (!context.mounted) return;
+                        final entry = catalog.entry(selection.speciesId);
+                        if (entry != null) {
+                          await showSpeciesInformation(
+                            context,
+                            entry,
+                            manifest: catalog.manifest,
+                          );
+                        } else {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(content: Text(s.catalogLimited)),
+                          );
+                        }
+                      } catch (_) {
+                        if (context.mounted) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(content: Text(s.catalogLimited)),
+                          );
+                        }
+                      }
+                    },
+                  ),
+                if (d.plant.location.isNotEmpty)
+                  Padding(
+                    padding: const EdgeInsets.only(top: 8),
+                    child: Text(d.plant.location),
+                  ),
+                if (d.plant.notes.isNotEmpty)
+                  Padding(
+                    padding: const EdgeInsets.symmetric(vertical: 16),
+                    child: Text(d.plant.notes),
+                  ),
+                if (d.plant.archived) Chip(label: Text(s.archived)),
               ],
+              if (detailSection == 0) ...[
+                for (final r in d.routines)
+                  Padding(
+                    padding: const EdgeInsets.only(bottom: 12),
+                    child: Card(
+                      child: Padding(
+                        padding: const EdgeInsets.all(16),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Row(
+                              children: [
+                                FigmaIconTile(
+                                  r.careKind == StandardCareKind.water
+                                      ? 'water'
+                                      : 'plants',
+                                ),
+                                const SizedBox(width: 10),
+                                Expanded(
+                                  child: Text(
+                                    kindLabel(
+                                      s,
+                                      r.careKind,
+                                      customLabel: r.routine.careLabel,
+                                    ),
+                                    style: Theme.of(context)
+                                        .textTheme
+                                        .titleMedium,
+                                  ),
+                                ),
+                              ],
+                            ),
+                            const SizedBox(height: 10),
+                            Text(
+                              r.routine.status == RoutineStatus.retired
+                                  ? s.retired
+                                  : r.routine.status == RoutineStatus.paused
+                                  ? s.paused
+                                  : s.nextAfter(
+                                      dateLabel(context, r.routine.nextCheck),
+                                    ),
+                            ),
+                            Text(
+                              careIntervalLabel(s, r.routine.interval),
+                              style: Theme.of(context).textTheme.titleLarge,
+                            ),
+                            for (final pair in [
+                              (
+                                s.originalSuggestion,
+                                r.routine.originalSuggestionId,
+                              ),
+                              (
+                                s.appliedSuggestion,
+                                r.routine.appliedSuggestionId,
+                              ),
+                            ])
+                              if (d.suggestions[pair.$2] case final snapshot?)
+                                ExpansionTile(
+                                  title: Text(pair.$1),
+                                  children: [
+                                    Text(
+                                      careIntervalLabel(
+                                        s,
+                                        snapshot.suggestion.interval,
+                                      ),
+                                    ),
+                                    Text(snapshot.suggestion.context),
+                                    Text(snapshot.suggestion.sourceLabel),
+                                  ],
+                                ),
+                            if (r.latestActualCare != null)
+                              Text(
+                                '${s.lastCare}: ${dateLabel(context, r.latestActualCare!)}',
+                              ),
+                            ExpansionTile(
+                              tilePadding: EdgeInsets.zero,
+                              title: Text(s.moreActions),
+                              children: [
+                                Wrap(
+                                  spacing: 8,
+                                  runSpacing: 8,
+                                  children: [
+                                    if (r.canEditSchedule)
+                                      TextButton(
+                                        onPressed: () => editInterval(r),
+                                        child: Text(s.editInterval),
+                                      ),
+                                    if (r.canEditSchedule &&
+                                        r.routine.overrideDate != null)
+                                      TextButton(
+                                        onPressed: () async {
+                                          final first =
+                                              r.latestActualCare == null
+                                              ? await chooseDate(
+                                                  context,
+                                                  helpText: s.firstCheck,
+                                                )
+                                              : null;
+                                          if (!mounted ||
+                                              (r.latestActualCare == null &&
+                                                  first == null)) {
+                                            return;
+                                          }
+                                          await perform(
+                                            ClearOverride(
+                                              r.target,
+                                              firstCheckDate: first,
+                                            ),
+                                            s.clearOverride,
+                                          );
+                                        },
+                                        child: Text(s.clearOverride),
+                                      ),
+                                    if (r.canComplete)
+                                      TextButton(
+                                        onPressed: () async {
+                                          final date = await chooseDate(
+                                            context,
+                                            latest: cubit.today,
+                                            helpText: s.actualCareDate,
+                                          );
+                                          if (date != null && mounted) {
+                                            await perform(
+                                              CompleteCurrent(r.target, date),
+                                              kindLabel(
+                                                s,
+                                                r.careKind,
+                                                actual: true,
+                                                customLabel:
+                                                    r.routine.careLabel,
+                                              ),
+                                            );
+                                          }
+                                        },
+                                        child: Text(
+                                          kindLabel(
+                                            s,
+                                            r.careKind,
+                                            actual: true,
+                                            customLabel: r.routine.careLabel,
+                                          ),
+                                        ),
+                                      ),
+                                    if (r.canComplete)
+                                      TextButton(
+                                        onPressed: () => perform(
+                                          PauseRoutine(r.target),
+                                          s.pause,
+                                        ),
+                                        child: Text(s.pause),
+                                      ),
+                                    if (r.routine.status ==
+                                            RoutineStatus.paused &&
+                                        !d.plant.archived)
+                                      TextButton(
+                                        onPressed: () => perform(
+                                          ResumeRoutine(r.target),
+                                          s.resume,
+                                        ),
+                                        child: Text(s.resume),
+                                      ),
+                                    TextButton(
+                                      onPressed: () async {
+                                        final date = await chooseDate(
+                                          context,
+                                          latest: cubit.today,
+                                        );
+                                        if (date != null && context.mounted) {
+                                          final outcome = await chooseOutcome(
+                                            context,
+                                            r.careKind,
+                                          );
+                                          if (outcome == null || !mounted) {
+                                            return;
+                                          }
+                                          perform(
+                                            AddPastCare(
+                                              r.target,
+                                              date,
+                                              outcome,
+                                            ),
+                                            s.addPastCare,
+                                          );
+                                        }
+                                      },
+                                      child: Text(s.addPastCare),
+                                    ),
+                                    if (r.canEditSchedule)
+                                      TextButton(
+                                        onPressed: () => perform(
+                                          RetireRoutine(r.target),
+                                          s.retire,
+                                          explanation: s.retired,
+                                        ),
+                                        child: Text(s.retire),
+                                      ),
+                                  ],
+                                ),
+                              ],
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ),
+              ],
+              if (detailSection == 1) ...[
+                const SizedBox(height: 16),
+                Text(s.history, style: Theme.of(context).textTheme.titleLarge),
+                SwitchListTile(
+                  contentPadding: EdgeInsets.zero,
+                  title: Text(s.audit),
+                  value: includeVoided,
+                  onChanged: (v) {
+                    setState(() => includeVoided = v);
+                    load();
+                  },
+                ),
+                if (entries.isEmpty) Text(s.historyEmpty),
+                for (final (index, entry) in entries.indexed) ...[
+                  if (index == 0 ||
+                      entries[index - 1].date.year != entry.date.year ||
+                      entries[index - 1].date.month != entry.date.month)
+                    Padding(
+                      padding: const EdgeInsets.symmetric(vertical: 12),
+                      child: Text(
+                        DateFormat.yMMMM().format(
+                          DateTime(entry.date.year, entry.date.month),
+                        ),
+                        style: Theme.of(context).textTheme.titleLarge,
+                      ),
+                    ),
+                  Card(
+                    child: Padding(
+                      padding: const EdgeInsets.all(12),
+                      child: entry is JournalTimelineEntry
+                          ? Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(dateLabel(context, entry.date)),
+                                if (entry.entry.text.isNotEmpty)
+                                  Text(entry.entry.text),
+                                for (final id in entry.entry.photoIds)
+                                  InkWell(
+                                    onTap: () async {
+                                      await context.router.push(
+                                        PhotosRoute(
+                                          plantId: widget.plantId,
+                                          photoId: id,
+                                        ),
+                                      );
+                                      if (mounted) load();
+                                    },
+                                    child: PhotoPreview(
+                                      photoId: id,
+                                      revision: photoRevisions[id] ?? 1,
+                                    ),
+                                  ),
+                                Wrap(
+                                  spacing: 8,
+                                  runSpacing: 8,
+                                  children: [
+                                    TextButton(
+                                      onPressed: () async {
+                                        await context.router.push(
+                                          JournalEditorRoute(
+                                            plantId: widget.plantId,
+                                            entryId: entry.id,
+                                          ),
+                                        );
+                                        if (mounted) load();
+                                      },
+                                      child: Text(s.editJournalEntry),
+                                    ),
+                                    TextButton(
+                                      onPressed: () => perform(
+                                        DeleteJournalEntry(
+                                          entry.id,
+                                          entry.entry.revision,
+                                        ),
+                                        s.deleteJournalEntry,
+                                        explanation: s.deleteJournalExplanation,
+                                      ),
+                                      child: Text(s.deleteJournalEntry),
+                                    ),
+                                  ],
+                                ),
+                              ],
+                            )
+                          : entry is CareTimelineEntry
+                          ? Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  dateLabel(context, entry.date),
+                                  style: Theme.of(context).textTheme.labelLarge,
+                                ),
+                                Text(
+                                  entry.event.effective.outcome ==
+                                          CareOutcome.actualCare
+                                      ? kindLabel(
+                                          s,
+                                          entry.careKind,
+                                          actual: true,
+                                          customLabel: entry.careLabel,
+                                        )
+                                      : entry.event.effective.outcome ==
+                                            CareOutcome.checkedNotNeeded
+                                      ? s.checkedNotNeeded
+                                      : s.skipCheck,
+                                ),
+                                if (entry.voided) Text(s.removed),
+                                if (entry.corrected) Text(s.corrected),
+                                Text(
+                                  s.recordedOn(
+                                    entry.event.recordedAt.toIso8601String(),
+                                  ),
+                                ),
+                                for (final correction
+                                    in entry.event.corrections)
+                                  Padding(
+                                    padding: const EdgeInsets.symmetric(
+                                      vertical: 8,
+                                    ),
+                                    child: Text(
+                                      '${dateLabel(context, correction.before.careDate)} · ${outcomeLabel(s, correction.before.outcome, entry.careKind)}${correction.before.voided ? ' · ${s.removed}' : ''}\n→ ${dateLabel(context, correction.after.careDate)} · ${outcomeLabel(s, correction.after.outcome, entry.careKind)}${correction.after.voided ? ' · ${s.removed}' : ''}\n${s.recordedOn(correction.correctedAt.toIso8601String())}',
+                                    ),
+                                  ),
+                                Text(s.historyOnly),
+                                Wrap(
+                                  spacing: 8,
+                                  runSpacing: 8,
+                                  children: [
+                                    TextButton(
+                                      onPressed: () async {
+                                        final date = await chooseDate(
+                                          context,
+                                          initial: entry.date,
+                                          latest: cubit.today,
+                                        );
+                                        if (date == null || !context.mounted) {
+                                          return;
+                                        }
+                                        final outcome = await chooseOutcome(
+                                          context,
+                                          entry.careKind,
+                                          initial:
+                                              entry.event.effective.outcome,
+                                        );
+                                        if (outcome == null || !mounted) return;
+                                        final target = d.routines
+                                            .firstWhere(
+                                              (r) =>
+                                                  r.routine.id ==
+                                                  entry.routineId,
+                                            )
+                                            .target;
+                                        await perform(
+                                          CorrectEvent(
+                                            target,
+                                            eventId: entry.id,
+                                            eventRevision: entry.event.revision,
+                                            careDate: date,
+                                            outcome: outcome,
+                                            restore: entry.voided,
+                                          ),
+                                          entry.voided
+                                              ? s.restoreCare
+                                              : s.correctCare,
+                                        );
+                                      },
+                                      child: Text(
+                                        entry.voided
+                                            ? s.restoreCare
+                                            : s.correctCare,
+                                      ),
+                                    ),
+                                    if (!entry.voided)
+                                      TextButton(
+                                        onPressed: () {
+                                          final target = d.routines
+                                              .firstWhere(
+                                                (r) =>
+                                                    r.routine.id ==
+                                                    entry.routineId,
+                                              )
+                                              .target;
+                                          perform(
+                                            VoidEvent(
+                                              target,
+                                              eventId: entry.id,
+                                              eventRevision:
+                                                  entry.event.revision,
+                                            ),
+                                            s.removeCare,
+                                          );
+                                        },
+                                        child: Text(s.removeCare),
+                                      ),
+                                  ],
+                                ),
+                              ],
+                            )
+                          : Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  s.scheduleChange,
+                                  style: Theme.of(context)
+                                      .textTheme
+                                      .titleMedium,
+                                ),
+                                Text(dateLabel(context, entry.date)),
+                                Text(
+                                  s.nextAfter(
+                                    dateLabel(
+                                      context,
+                                      (entry as ScheduleTimelineEntry)
+                                          .change
+                                          .after
+                                          .nextCheck,
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
+                    ),
+                  ),
+                ],
+                if (timeline?.nextCursor != null)
+                  OutlinedButton(
+                    onPressed: loadingMore ? null : moreHistory,
+                    child: Text(s.loadMore),
+                  ),
+              ],
+              const SizedBox(height: 16),
               Wrap(
                 spacing: 8,
                 runSpacing: 8,
@@ -234,7 +800,10 @@ class _PlantDetailPageState extends State<PlantDetailPage> {
                       await context.router.push(
                         JournalEditorRoute(plantId: widget.plantId),
                       );
-                      if (mounted) load();
+                      if (mounted) {
+                        setState(() => detailSection = 1);
+                        load();
+                      }
                     },
                     icon: const Icon(Icons.add),
                     label: Text(s.newJournalEntry),
@@ -251,457 +820,6 @@ class _PlantDetailPageState extends State<PlantDetailPage> {
                   ),
                 ],
               ),
-              const SizedBox(height: 16),
-              Text(
-                d.plant.speciesName,
-                style: Theme.of(context).textTheme.titleLarge,
-              ),
-              const SizedBox(height: 8),
-              Text(
-                d.plant.catalogSelection == null
-                    ? s.customIdentity
-                    : s.catalogIdentity,
-              ),
-              if (d.plant.catalogSelection case final selection?)
-                TextButton.icon(
-                  icon: const Icon(Icons.info_outline),
-                  label: Text(s.speciesInformation),
-                  onPressed: () async {
-                    try {
-                      final catalog = await getIt<CollectionRepository>()
-                          .catalog();
-                      if (!context.mounted) return;
-                      final entry = catalog.entry(selection.speciesId);
-                      if (entry != null) {
-                        await showSpeciesInformation(
-                          context,
-                          entry,
-                          manifest: catalog.manifest,
-                        );
-                      } else {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(content: Text(s.catalogLimited)),
-                        );
-                      }
-                    } catch (_) {
-                      if (context.mounted) {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(content: Text(s.catalogLimited)),
-                        );
-                      }
-                    }
-                  },
-                ),
-              if (d.plant.location.isNotEmpty)
-                Padding(
-                  padding: const EdgeInsets.only(top: 8),
-                  child: Text(d.plant.location),
-                ),
-              if (d.plant.notes.isNotEmpty)
-                Padding(
-                  padding: const EdgeInsets.symmetric(vertical: 16),
-                  child: Text(d.plant.notes),
-                ),
-              if (d.plant.archived) Chip(label: Text(s.archived)),
-              const SizedBox(height: 20),
-              for (final r in d.routines)
-                Padding(
-                  padding: const EdgeInsets.only(bottom: 12),
-                  child: Card(
-                    child: Padding(
-                      padding: const EdgeInsets.all(16),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            kindLabel(
-                              s,
-                              r.careKind,
-                              customLabel: r.routine.careLabel,
-                            ),
-                            style: Theme.of(context).textTheme.titleLarge,
-                          ),
-                          Text(
-                            r.routine.status == RoutineStatus.retired
-                                ? s.retired
-                                : r.routine.status == RoutineStatus.paused
-                                ? s.paused
-                                : s.nextAfter(
-                                    dateLabel(context, r.routine.nextCheck),
-                                  ),
-                          ),
-                          Text(
-                            s.routineEvery(
-                              r.routine.interval.count,
-                              unitLabel(s, r.routine.interval.unit),
-                            ),
-                          ),
-                          for (final pair in [
-                            (
-                              s.originalSuggestion,
-                              r.routine.originalSuggestionId,
-                            ),
-                            (
-                              s.appliedSuggestion,
-                              r.routine.appliedSuggestionId,
-                            ),
-                          ])
-                            if (d.suggestions[pair.$2] case final snapshot?)
-                              ExpansionTile(
-                                title: Text(pair.$1),
-                                children: [
-                                  Text(
-                                    s.routineEvery(
-                                      snapshot.suggestion.interval.count,
-                                      unitLabel(
-                                        s,
-                                        snapshot.suggestion.interval.unit,
-                                      ),
-                                    ),
-                                  ),
-                                  Text(snapshot.suggestion.context),
-                                  Text(snapshot.suggestion.sourceLabel),
-                                ],
-                              ),
-                          if (r.latestActualCare != null)
-                            Text(
-                              '${s.lastCare}: ${dateLabel(context, r.latestActualCare!)}',
-                            ),
-                          Wrap(
-                            spacing: 8,
-                            runSpacing: 8,
-                            children: [
-                              if (r.canEditSchedule)
-                                TextButton(
-                                  onPressed: () => editInterval(r),
-                                  child: Text(s.editInterval),
-                                ),
-                              if (r.canEditSchedule &&
-                                  r.routine.overrideDate != null)
-                                TextButton(
-                                  onPressed: () async {
-                                    final first = r.latestActualCare == null
-                                        ? await chooseDate(
-                                            context,
-                                            helpText: s.firstCheck,
-                                          )
-                                        : null;
-                                    if (!mounted ||
-                                        (r.latestActualCare == null &&
-                                            first == null)) {
-                                      return;
-                                    }
-                                    await perform(
-                                      ClearOverride(
-                                        r.target,
-                                        firstCheckDate: first,
-                                      ),
-                                      s.clearOverride,
-                                    );
-                                  },
-                                  child: Text(s.clearOverride),
-                                ),
-                              if (r.canComplete)
-                                TextButton(
-                                  onPressed: () async {
-                                    final date = await chooseDate(
-                                      context,
-                                      latest: cubit.today,
-                                      helpText: s.actualCareDate,
-                                    );
-                                    if (date != null && mounted) {
-                                      await perform(
-                                        CompleteCurrent(r.target, date),
-                                        kindLabel(
-                                          s,
-                                          r.careKind,
-                                          actual: true,
-                                          customLabel: r.routine.careLabel,
-                                        ),
-                                      );
-                                    }
-                                  },
-                                  child: Text(
-                                    kindLabel(
-                                      s,
-                                      r.careKind,
-                                      actual: true,
-                                      customLabel: r.routine.careLabel,
-                                    ),
-                                  ),
-                                ),
-                              if (r.canComplete)
-                                TextButton(
-                                  onPressed: () =>
-                                      perform(PauseRoutine(r.target), s.pause),
-                                  child: Text(s.pause),
-                                ),
-                              if (r.routine.status == RoutineStatus.paused &&
-                                  !d.plant.archived)
-                                TextButton(
-                                  onPressed: () => perform(
-                                    ResumeRoutine(r.target),
-                                    s.resume,
-                                  ),
-                                  child: Text(s.resume),
-                                ),
-                              TextButton(
-                                onPressed: () async {
-                                  final date = await chooseDate(
-                                    context,
-                                    latest: cubit.today,
-                                  );
-                                  if (date != null && context.mounted) {
-                                    final outcome = await chooseOutcome(
-                                      context,
-                                      r.careKind,
-                                    );
-                                    if (outcome == null || !mounted) return;
-                                    perform(
-                                      AddPastCare(r.target, date, outcome),
-                                      s.addPastCare,
-                                    );
-                                  }
-                                },
-                                child: Text(s.addPastCare),
-                              ),
-                              if (r.canEditSchedule)
-                                TextButton(
-                                  onPressed: () => perform(
-                                    RetireRoutine(r.target),
-                                    s.retire,
-                                    explanation: s.retired,
-                                  ),
-                                  child: Text(s.retire),
-                                ),
-                            ],
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
-                ),
-              const SizedBox(height: 16),
-              Text(s.history, style: Theme.of(context).textTheme.titleLarge),
-              SwitchListTile(
-                contentPadding: EdgeInsets.zero,
-                title: Text(s.audit),
-                value: includeVoided,
-                onChanged: (v) {
-                  setState(() => includeVoided = v);
-                  load();
-                },
-              ),
-              if (entries.isEmpty) Text(s.historyEmpty),
-              for (final (index, entry) in entries.indexed) ...[
-                if (index == 0 ||
-                    entries[index - 1].date.year != entry.date.year ||
-                    entries[index - 1].date.month != entry.date.month)
-                  Padding(
-                    padding: const EdgeInsets.symmetric(vertical: 12),
-                    child: Text(
-                      DateFormat.yMMMM().format(
-                        DateTime(entry.date.year, entry.date.month),
-                      ),
-                      style: Theme.of(context).textTheme.titleLarge,
-                    ),
-                  ),
-                Card(
-                  child: Padding(
-                    padding: const EdgeInsets.all(12),
-                    child: entry is JournalTimelineEntry
-                        ? Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(dateLabel(context, entry.date)),
-                              if (entry.entry.text.isNotEmpty)
-                                Text(entry.entry.text),
-                              for (final id in entry.entry.photoIds)
-                                InkWell(
-                                  onTap: () async {
-                                    await context.router.push(
-                                      PhotosRoute(
-                                        plantId: widget.plantId,
-                                        photoId: id,
-                                      ),
-                                    );
-                                    if (mounted) load();
-                                  },
-                                  child: PhotoPreview(
-                                    photoId: id,
-                                    revision: photoRevisions[id] ?? 1,
-                                  ),
-                                ),
-                              Wrap(
-                                spacing: 8,
-                                runSpacing: 8,
-                                children: [
-                                  TextButton(
-                                    onPressed: () async {
-                                      await context.router.push(
-                                        JournalEditorRoute(
-                                          plantId: widget.plantId,
-                                          entryId: entry.id,
-                                        ),
-                                      );
-                                      if (mounted) load();
-                                    },
-                                    child: Text(s.editJournalEntry),
-                                  ),
-                                  TextButton(
-                                    onPressed: () => perform(
-                                      DeleteJournalEntry(
-                                        entry.id,
-                                        entry.entry.revision,
-                                      ),
-                                      s.deleteJournalEntry,
-                                      explanation: s.deleteJournalExplanation,
-                                    ),
-                                    child: Text(s.deleteJournalEntry),
-                                  ),
-                                ],
-                              ),
-                            ],
-                          )
-                        : entry is CareTimelineEntry
-                        ? Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                dateLabel(context, entry.date),
-                                style: Theme.of(context).textTheme.labelLarge,
-                              ),
-                              Text(
-                                entry.event.effective.outcome ==
-                                        CareOutcome.actualCare
-                                    ? kindLabel(
-                                        s,
-                                        entry.careKind,
-                                        actual: true,
-                                        customLabel: entry.careLabel,
-                                      )
-                                    : entry.event.effective.outcome ==
-                                          CareOutcome.checkedNotNeeded
-                                    ? s.checkedNotNeeded
-                                    : s.skipCheck,
-                              ),
-                              if (entry.voided) Text(s.removed),
-                              if (entry.corrected) Text(s.corrected),
-                              Text(
-                                s.recordedOn(
-                                  entry.event.recordedAt.toIso8601String(),
-                                ),
-                              ),
-                              for (final correction in entry.event.corrections)
-                                Padding(
-                                  padding: const EdgeInsets.symmetric(
-                                    vertical: 8,
-                                  ),
-                                  child: Text(
-                                    '${dateLabel(context, correction.before.careDate)} · ${outcomeLabel(s, correction.before.outcome, entry.careKind)}${correction.before.voided ? ' · ${s.removed}' : ''}\n→ ${dateLabel(context, correction.after.careDate)} · ${outcomeLabel(s, correction.after.outcome, entry.careKind)}${correction.after.voided ? ' · ${s.removed}' : ''}\n${s.recordedOn(correction.correctedAt.toIso8601String())}',
-                                  ),
-                                ),
-                              Text(s.historyOnly),
-                              Wrap(
-                                spacing: 8,
-                                runSpacing: 8,
-                                children: [
-                                  TextButton(
-                                    onPressed: () async {
-                                      final date = await chooseDate(
-                                        context,
-                                        initial: entry.date,
-                                        latest: cubit.today,
-                                      );
-                                      if (date == null || !context.mounted) {
-                                        return;
-                                      }
-                                      final outcome = await chooseOutcome(
-                                        context,
-                                        entry.careKind,
-                                        initial: entry.event.effective.outcome,
-                                      );
-                                      if (outcome == null || !mounted) return;
-                                      final target = d.routines
-                                          .firstWhere(
-                                            (r) =>
-                                                r.routine.id == entry.routineId,
-                                          )
-                                          .target;
-                                      await perform(
-                                        CorrectEvent(
-                                          target,
-                                          eventId: entry.id,
-                                          eventRevision: entry.event.revision,
-                                          careDate: date,
-                                          outcome: outcome,
-                                          restore: entry.voided,
-                                        ),
-                                        entry.voided
-                                            ? s.restoreCare
-                                            : s.correctCare,
-                                      );
-                                    },
-                                    child: Text(
-                                      entry.voided
-                                          ? s.restoreCare
-                                          : s.correctCare,
-                                    ),
-                                  ),
-                                  if (!entry.voided)
-                                    TextButton(
-                                      onPressed: () {
-                                        final target = d.routines
-                                            .firstWhere(
-                                              (r) =>
-                                                  r.routine.id ==
-                                                  entry.routineId,
-                                            )
-                                            .target;
-                                        perform(
-                                          VoidEvent(
-                                            target,
-                                            eventId: entry.id,
-                                            eventRevision: entry.event.revision,
-                                          ),
-                                          s.removeCare,
-                                        );
-                                      },
-                                      child: Text(s.removeCare),
-                                    ),
-                                ],
-                              ),
-                            ],
-                          )
-                        : Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                s.scheduleChange,
-                                style: Theme.of(context).textTheme.titleMedium,
-                              ),
-                              Text(dateLabel(context, entry.date)),
-                              Text(
-                                s.nextAfter(
-                                  dateLabel(
-                                    context,
-                                    (entry as ScheduleTimelineEntry)
-                                        .change
-                                        .after
-                                        .nextCheck,
-                                  ),
-                                ),
-                              ),
-                            ],
-                          ),
-                  ),
-                ),
-              ],
-              if (timeline?.nextCursor != null)
-                OutlinedButton(
-                  onPressed: loadingMore ? null : moreHistory,
-                  child: Text(s.loadMore),
-                ),
               const SizedBox(height: 24),
               if (!d.plant.archived)
                 OutlinedButton(

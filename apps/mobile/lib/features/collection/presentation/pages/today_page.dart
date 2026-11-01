@@ -64,175 +64,152 @@ class _TodayPageState extends State<TodayPage> {
     }
   }
 
+  Future<void> careAction(String value, CheckRow row) async {
+    final s = strings(context), cubit = context.read<WorkspaceCubit>();
+    if (value == 'complete') {
+      final date = await chooseDate(
+        context,
+        initial: cubit.today,
+        latest: cubit.today,
+        helpText: s.actualCareDate,
+      );
+      if (date != null && mounted) {
+        await perform(
+          CompleteCurrent(row.target, date),
+          kindLabel(s, row.careKind, actual: true, customLabel: row.careLabel),
+        );
+      }
+    } else if (value == 'check') {
+      final checked = await chooseDate(
+        context,
+        latest: cubit.today,
+        helpText: s.checkDate,
+      );
+      if (checked == null || !mounted) return;
+      final next = await chooseDate(context, helpText: s.nextCheckDate);
+      if (next != null && mounted) {
+        await perform(
+          CheckNotNeeded(row.target, checked, next),
+          s.checkedNotNeeded,
+        );
+      }
+    } else if (value == 'skip') {
+      await perform(Skip(row.target), s.skipCheck);
+    } else {
+      final next = await chooseDate(
+        context,
+        earliest: cubit.today,
+        helpText: s.nextCheckDate,
+        initial: row.date.compareTo(cubit.today) < 0 ? cubit.today : row.date,
+      );
+      if (next != null && mounted) {
+        await perform(Snooze(row.target, next), s.moveCheck);
+      }
+    }
+  }
+
   Widget check(CheckRow row, WorkspaceState state) {
     final s = strings(context);
-    final cubit = context.read<WorkspaceCubit>();
     final compatible =
         selectedKind == null ||
         (selectedKind == row.careKind &&
             selectedCustomTypeId == row.customTypeId);
-    return Card(
-      child: Padding(
-        padding: AppLayout.cardPadding,
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                if (selecting)
-                  Checkbox(
-                    value: selected.containsKey(row.routineId),
-                    semanticLabel: s.plantNamed(
-                      row.plantName,
-                      kindLabel(s, row.careKind, customLabel: row.careLabel),
-                    ),
-                    onChanged: !compatible || state.busy
-                        ? null
-                        : (value) => setState(() {
-                            if (value == true) {
-                              selected[row.routineId] = row.target;
-                              selectedNames[row.routineId] = row.plantName;
-                              selectedKind = row.careKind;
-                              selectedCustomTypeId = row.customTypeId;
-                            } else {
-                              selected.remove(row.routineId);
-                              selectedNames.remove(row.routineId);
-                              if (selected.isEmpty) selectedKind = null;
-                            }
-                          }),
-                  ),
-                Expanded(
-                  child: TextButton(
-                    style: TextButton.styleFrom(
-                      alignment: Alignment.centerLeft,
-                      padding: EdgeInsets.zero,
-                    ),
-                    onPressed: () => context.router.push(
-                      PlantDetailRoute(plantId: row.target.plantId),
-                    ),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          row.plantName,
-                          style: Theme.of(context).textTheme.titleMedium,
-                        ),
-                        Text(
-                          kindLabel(
-                            s,
-                            row.careKind,
-                            customLabel: row.careLabel,
-                          ),
-                          style: Theme.of(context).textTheme.bodyMedium,
-                        ),
-                        Text(
-                          row.overdueDays > 0
-                              ? s.lateDays(row.overdueDays)
-                              : s.dueOn(dateLabel(context, row.date)),
-                          style: TextStyle(
-                            color: row.overdueDays > 0
-                                ? Theme.of(context).colorScheme.error
-                                : Theme.of(context)
-                                      .colorScheme
-                                      .onSurfaceVariant,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-                if (!selecting)
-                  PopupMenuButton<String>(
-                    tooltip: s.moreActions,
-                    onSelected: (value) async {
-                      if (value == 'skip') {
-                        await perform(Skip(row.target), s.skipCheck);
-                        return;
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(16, 8, 6, 8),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: [
+          if (selecting)
+            Checkbox(
+              value: selected.containsKey(row.routineId),
+              semanticLabel: s.plantNamed(
+                row.plantName,
+                kindLabel(s, row.careKind, customLabel: row.careLabel),
+              ),
+              onChanged: !compatible || state.busy
+                  ? null
+                  : (value) => setState(() {
+                      if (value == true) {
+                        selected[row.routineId] = row.target;
+                        selectedNames[row.routineId] = row.plantName;
+                        selectedKind = row.careKind;
+                        selectedCustomTypeId = row.customTypeId;
+                      } else {
+                        selected.remove(row.routineId);
+                        selectedNames.remove(row.routineId);
+                        if (selected.isEmpty) selectedKind = null;
                       }
-                      final next = await chooseDate(
-                        context,
-                        earliest: cubit.today,
-                        helpText: s.nextCheckDate,
-                        initial: row.date.compareTo(cubit.today) < 0
-                            ? cubit.today
-                            : row.date,
-                      );
-                      if (next != null && mounted) {
-                        perform(Snooze(row.target, next), s.moveCheck);
-                      }
-                    },
-                    itemBuilder: (_) => [
-                      PopupMenuItem(value: 'move', child: Text(s.moveCheck)),
-                      PopupMenuItem(value: 'skip', child: Text(s.skipCheck)),
-                    ],
-                  ),
-              ],
+                    }),
             ),
-            if (!selecting) const SizedBox(height: 12),
-            if (!selecting)
-              Wrap(
-                spacing: 8,
-                runSpacing: 8,
+          if (!AppLayout.largeText(context)) ...[
+            SizedBox(
+              width: 48,
+              child: PlantVisual(
+                height: 48,
+                radius: 10,
+                speciesId: row.speciesId,
+                photoId: row.coverPhotoId,
+                photoRevision: row.coverPhotoRevision ?? 1,
+              ),
+            ),
+            const SizedBox(width: 12),
+          ],
+          Expanded(
+            child: TextButton(
+              style: TextButton.styleFrom(
+                alignment: Alignment.centerLeft,
+                padding: EdgeInsets.zero,
+              ),
+              onPressed: () => context.router.push(
+                PlantDetailRoute(plantId: row.target.plantId),
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  FilledButton.tonal(
-                    onPressed: state.busy
-                        ? null
-                        : () async {
-                            final date = await chooseDate(
-                              context,
-                              initial: cubit.today,
-                              latest: cubit.today,
-                              helpText: s.actualCareDate,
-                            );
-                            if (date != null && mounted) {
-                              await perform(
-                                CompleteCurrent(row.target, date),
-                                kindLabel(
-                                  s,
-                                  row.careKind,
-                                  actual: true,
-                                  customLabel: row.careLabel,
-                                ),
-                              );
-                            }
-                          },
-                    child: Text(
-                      kindLabel(
-                        s,
-                        row.careKind,
-                        actual: true,
-                        customLabel: row.careLabel,
-                      ),
-                    ),
+                  Text(
+                    row.plantName,
+                    style: Theme.of(context).textTheme.titleMedium,
                   ),
-                  TextButton(
-                    onPressed: state.busy
-                        ? null
-                        : () async {
-                            final checked = await chooseDate(
-                              context,
-                              latest: cubit.today,
-                              helpText: s.checkDate,
-                            );
-                            if (checked == null || !mounted) return;
-                            final next = await chooseDate(
-                              context,
-                              helpText: s.nextCheckDate,
-                            );
-                            if (next != null && mounted) {
-                              perform(
-                                CheckNotNeeded(row.target, checked, next),
-                                s.checkedNotNeeded,
-                              );
-                            }
-                          },
-                    child: Text(s.checkedNotNeeded),
+                  const SizedBox(height: 2),
+                  Text(
+                    '${kindLabel(s, row.careKind, customLabel: row.careLabel)} · ${row.overdueDays > 0 ? s.lateDays(row.overdueDays) : s.dueOn(dateLabel(context, row.date))}',
+                    style: Theme.of(context).textTheme.bodySmall!.copyWith(
+                      color: row.overdueDays > 0
+                          ? Theme.of(context).colorScheme.error
+                          : Theme.of(context).colorScheme.onSurfaceVariant,
+                    ),
                   ),
                 ],
               ),
-          ],
-        ),
+            ),
+          ),
+          if (!selecting)
+            PopupMenuButton<String>(
+              tooltip: s.moreActions,
+              enabled: !state.busy,
+              icon: Icon(
+                Icons.radio_button_unchecked,
+                color: Theme.of(context).colorScheme.outline,
+              ),
+              onSelected: (value) => careAction(value, row),
+              itemBuilder: (_) => [
+                PopupMenuItem(
+                  value: 'complete',
+                  child: Text(
+                    kindLabel(
+                      s,
+                      row.careKind,
+                      actual: true,
+                      customLabel: row.careLabel,
+                    ),
+                  ),
+                ),
+                PopupMenuItem(value: 'check', child: Text(s.checkedNotNeeded)),
+                PopupMenuItem(value: 'move', child: Text(s.moveCheck)),
+                PopupMenuItem(value: 'skip', child: Text(s.skipCheck)),
+              ],
+            ),
+        ],
       ),
     );
   }
@@ -260,6 +237,8 @@ class _TodayPageState extends State<TodayPage> {
                 title: s.today,
                 subtitle: dateLabel(context, cubit.today),
               ),
+              if (summary != null && summary.activePlantCount > 0)
+                FigmaWeek(today: cubit.today),
               const ReminderTodayCard(),
               if (state.loading) const LinearProgressIndicator(),
               if (error != null || state.errorCode != null)
@@ -299,7 +278,17 @@ class _TodayPageState extends State<TodayPage> {
                   ),
                 ),
               ] else if (summary != null) ...[
-                const SizedBox(height: 20),
+                if (dueCount > 0) ...[
+                  Text(
+                    s.checksDueSummary(dueCount),
+                    style: Theme.of(context).textTheme.titleLarge,
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    s.checksDueBody,
+                    style: Theme.of(context).textTheme.bodySmall,
+                  ),
+                ],
                 if (dueCount == 0) ...[
                   Text(
                     s.noChecksDue,
@@ -381,13 +370,13 @@ class _TodayPageState extends State<TodayPage> {
                         style: Theme.of(context).textTheme.titleLarge,
                       ),
                     ),
-                    for (final row in cubit.todayRows(section).cast<CheckRow>())
-                      Padding(
-                        padding: const EdgeInsets.only(
-                          bottom: AppLayout.cardGap,
-                        ),
-                        child: check(row, state),
-                      ),
+                    FigmaGroup(
+                      children: [
+                        for (final row
+                            in cubit.todayRows(section).cast<CheckRow>())
+                          check(row, state),
+                      ],
+                    ),
                     if (cubit.todayCursor(section) != null)
                       OutlinedButton(
                         onPressed: state.loadingMore
@@ -401,16 +390,15 @@ class _TodayPageState extends State<TodayPage> {
                     tilePadding: EdgeInsets.zero,
                     title: Text(s.upcoming),
                     children: [
-                      for (final row
-                          in cubit
-                              .todayRows(TodaySection.upcoming)
-                              .cast<CheckRow>())
-                        Padding(
-                          padding: const EdgeInsets.only(
-                            bottom: AppLayout.cardGap,
-                          ),
-                          child: check(row, state),
-                        ),
+                      FigmaGroup(
+                        children: [
+                          for (final row
+                              in cubit
+                                  .todayRows(TodaySection.upcoming)
+                                  .cast<CheckRow>())
+                            check(row, state),
+                        ],
+                      ),
                       if (cubit.todayCursor(TodaySection.upcoming) != null)
                         OutlinedButton(
                           onPressed: state.loadingMore

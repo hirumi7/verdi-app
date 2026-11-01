@@ -17,10 +17,21 @@ final class CoreRepositoryBridge: CoreRepositoryHostApi {
         }
         return try Data(contentsOf: URL(fileURLWithPath: path))
       }
-      return try BundledCatalogBytes(
-        manifest: read("assets/catalog/manifest.json", limit: 1024*1024),
-        entries: read("assets/catalog/entries.json", limit: 32*1024*1024),
-        assets: ["generic_plant": read("assets/illustrations/empty-plants.png", limit: 8*1024*1024)])
+      let manifest = try read("assets/catalog/manifest.json", limit: 1024*1024)
+      guard let object = try JSONSerialization.jsonObject(with: manifest) as? [String: Any],
+            let records = object["assets"] as? [[String: Any]], records.count <= 10_000 else {
+        throw NSError(domain: "VerdiBundledCatalog", code: 1)
+      }
+      var assets: [String: Data] = [:]
+      for record in records {
+        guard let name = record["resourceName"] as? String,
+              name.range(of: "^[a-z][a-z0-9_]{0,63}$", options: .regularExpression) != nil,
+              assets[name] == nil else { throw NSError(domain: "VerdiBundledCatalog", code: 1) }
+        let path = name == "generic_plant" ? "assets/illustrations/empty-plants.png" : "assets/catalog_art/\(name).png"
+        assets[name] = try read(path, limit: 8*1024*1024)
+      }
+      return try BundledCatalogBytes(manifest: manifest,
+        entries: read("assets/catalog/entries.json", limit: 32*1024*1024), assets: assets)
     })
     repository.storeAuthority = StoreAuthority(configuration:.preview(bundleID:Bundle.main.bundleIdentifier ?? "dev.verdi.preview"),directory:support.appendingPathComponent("VerdiStore-local",isDirectory:true))
     observer = NotificationCenter.default.addObserver(forName: UIApplication.willResignActiveNotification, object: nil, queue: nil) { [weak self] _ in

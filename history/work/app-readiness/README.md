@@ -1632,3 +1632,56 @@ care overflow action. No native schema, domain or store behavior changed. Full
 physical accessibility, historical Figma product-copy reconciliation and previously
 recorded release gaps remain open. Accepted requirements/decisions and prior work
 are preserved; this presentation pass does not establish release readiness.
+
+## Figma-led UI refactor — 2026-11-01
+
+**Author:** Codex (AI assistant), independently reviewed by core_readiness_review.
+
+**Date:** 2026-11-01 (Asia/Jakarta).
+
+Implemented against published docs pin `45cf0537add91c525841a9bebc692288933de519`.
+Scope: REQ-003/005/016 artwork presentation and REQ-018 interface, preserving all
+accepted REQ-001–018 behavior and earlier work. Figma Light10:2/Dark10:3 now guide
+screen composition rather than only spacing. Today has week context and compact
+care rows with explicit action/date/confirmation; Plants has a lazy image-first
+shelf and list view; detail has a portrait with floating controls and Care/History/
+Stats tabs. Settings uses grouped rows and original icons. Species/editor identity,
+journal header actions, backup illustration and one-time Pro presentation follow
+the same visual language. Interval copy now uses correct localized plurals.
+
+Seven original botanical PNGs have reviewed catalog AssetRecords/mappings, actual
+hashes/dimensions and SRC-011 rights evidence. Version `verdi-2026-11-01.1` preserves
+all24 entry bytes and Popular IDs/order. Native validation remains authoritative;
+user covers win, unmapped catalog species use reviewed generic art, custom plants
+use a neutral symbol, and failed user photos retain Retry. No schema change.
+Artwork reads coalesce while in flight; picker reuses validated parent state.
+Today visuals come from its authoritative snapshot, independently of Plants query,
+archive filter and pagination. Whole history, corrections, retired care, failure
+recovery, guarded saves, backup and existing one-time Pro rules remain intact.
+
+Executed with Flutter3.47.8/Dart3.13.7, Xcode16.2/macOS14.6: localization and
+build_runner; clean mobile/core analyzers; Flutter98 and core135 tests passed.
+Native178 discovered,174 passed, four existing opt-in capacity/APFS tests skipped.
+Those skips are not passes or new release evidence. Format checks and diff checks
+passed. Catalog/custom native vectors were regenerated from Dart after the package
+version changed; stale hardcoded test versions were corrected without weakening
+corruption/preservation assertions. New tests cover actual botanical bytes,
+missing/corrupt/rights failures, artwork read coalescing/fallback/refresh, Today
+cover identity, grid/list/filter/navigation, menu cancellation and320% tab access.
+
+Ordinary retained iPhone16/iOS18.3.1 simulator build/run passed on
+`CD70BD52-1239-4C9E-A998-8D8962DA0354`. Read-only visual navigation inspected Today,
+its named care menu, Plants grid/list, detail Care/History/Stats, grouped Settings,
+Backup and unavailable-offer Pro. Final detail controls/Stats and Today were
+rechecked after refinements. Actual simulator visual inspection used its retained
+dark preference; light/dark large-text cases passed widget tests. All19 original
+content/settings/metadata table hashes and original photo hashes stayed unchanged.
+No collection reset; original user simulator untouched.
+
+Independent review fixed Plants eager row loading, Today filter-dependent covers,
+Stats missing dates and catalog fallback. The reviewer confirmed scoped closure.
+Full physical VoiceOver/accessibility, exhaustive screen/device/performance matrix,
+remaining personality/cosmetics/admin, public support/privacy configuration,
+production store/signing and compatible submission host remain open. Figma's
+obsolete subscription/fake-streak/generated-diagnosis examples were not adopted.
+This is a verified UI slice, not whole-app release readiness.

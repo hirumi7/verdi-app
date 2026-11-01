@@ -159,6 +159,9 @@ sealed class TodayRow {
 }
 
 final class CheckRow extends TodayRow {
+  final String? speciesId;
+  final String? coverPhotoId;
+  final int? coverPhotoRevision;
   final String? customTypeId;
   final CareTarget target;
   final TodaySection section;
@@ -169,7 +172,10 @@ final class CheckRow extends TodayRow {
     StandardCareKind kind,
     LocalDate today,
     this.customTypeId,
-  ) : target = _readTarget(plant, routine),
+    this.coverPhotoId,
+    this.coverPhotoRevision,
+  ) : speciesId = plant.catalogSelection?.speciesId,
+      target = _readTarget(plant, routine),
       section = routine.nextCheck.compareTo(today) < 0
           ? TodaySection.overdue
           : routine.nextCheck == today
@@ -488,6 +494,8 @@ extension CollectionReads on MemoryOperationCoordinator {
                 snapshot.careKinds[r.id]!,
                 today,
                 snapshot.customTypeIds[r.id],
+                snapshot.covers[r.plantId],
+                snapshot.photos[snapshot.covers[r.plantId]]?.revision,
               ),
             )
             .toList()
@@ -557,6 +565,8 @@ extension CollectionReads on MemoryOperationCoordinator {
                 snapshot.careKinds[r.id]!,
                 today,
                 snapshot.customTypeIds[r.id],
+                snapshot.covers[r.plantId],
+                snapshot.photos[snapshot.covers[r.plantId]]?.revision,
               ),
             )
             .toList()

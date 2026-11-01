@@ -172,6 +172,15 @@ class ReminderTodayCard extends StatelessWidget {
         if (!state.hasSchedule && state.error == null) {
           return const SizedBox.shrink();
         }
+        if (state.error == null &&
+            state.projection['state'] == 'complete' &&
+            const [
+              'authorized',
+              'provisional',
+              'ephemeral',
+            ].contains(state.permission)) {
+          return const SizedBox.shrink();
+        }
         return Card(
           child: ListTile(
             leading: const Icon(Icons.notifications_outlined),

@@ -214,10 +214,15 @@ class _ProPageState extends State<ProPage> with WidgetsBindingObserver {
               padding: AppLayout.pagePadding,
               children: [
                 AppScrollTitle(title: Text(s.proTitle)),
-                Icon(
-                  Icons.local_florist_outlined,
-                  size: 56,
-                  color: Theme.of(context).colorScheme.primary,
+                ExcludeSemantics(
+                  child: ClipRRect(
+                    borderRadius: BorderRadius.circular(14),
+                    child: Image.asset(
+                      'assets/illustrations/pro-shelf.png',
+                      height: 94,
+                      fit: BoxFit.contain,
+                    ),
+                  ),
                 ),
                 const SizedBox(height: 20),
                 Text(

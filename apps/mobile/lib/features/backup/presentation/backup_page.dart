@@ -101,14 +101,24 @@ class _BackupPageState extends State<BackupPage> {
         child: Scaffold(
           appBar: AppPageBar(
             context: context,
-            title: Text(s.backupTitle),
+            title: const SizedBox.shrink(),
             automaticallyImplyLeading: !state.replacing,
           ),
           body: SafeArea(
             child: ListView(
               padding: AppLayout.pagePadding,
               children: [
-                AppScrollTitle(title: Text(s.backupTitle)),
+                AppPageHeader(title: s.backupTitle),
+                ExcludeSemantics(
+                  child: ClipRRect(
+                    borderRadius: BorderRadius.circular(14),
+                    child: Image.asset(
+                      'assets/illustrations/backup.png',
+                      fit: BoxFit.fitWidth,
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 24),
                 Text(
                   s.backupExplanation,
                   style: Theme.of(context).textTheme.bodyLarge,

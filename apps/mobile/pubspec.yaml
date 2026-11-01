@@ -15,6 +15,7 @@ dependencies:
   injectable: 3.0.0
   auto_route: 11.2.0
   intl: ^0.20.3
+  flutter_svg: 2.3.2
   verdi_core:
     path: packages/verdi_core
 dev_dependencies:
@@ -33,4 +34,8 @@ flutter:
   assets:
     - assets/licenses/
     - assets/catalog/
+    - assets/catalog_art/
+    - assets/figma_icons/
+    - assets/illustrations/backup.png
+    - assets/illustrations/pro-shelf.png
     - assets/illustrations/empty-plants.png
