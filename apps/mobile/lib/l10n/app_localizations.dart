@@ -1432,6 +1432,18 @@ abstract class AppStrings {
   /// **'Original handed to the selected app.'**
   String get originalHandedToOS;
 
+  /// No description provided for @originalExportUnknown.
+  ///
+  /// In en, this message translates to:
+  /// **'The sharing result is uncertain. Check the selected app before sharing this original again.'**
+  String get originalExportUnknown;
+
+  /// No description provided for @originalExporting.
+  ///
+  /// In en, this message translates to:
+  /// **'Waiting for the sharing result…'**
+  String get originalExporting;
+
   /// No description provided for @shareCancelled.
   ///
   /// In en, this message translates to:

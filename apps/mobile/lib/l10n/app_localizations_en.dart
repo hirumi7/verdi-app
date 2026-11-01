@@ -763,6 +763,13 @@ class AppStringsEn extends AppStrings {
   String get originalHandedToOS => 'Original handed to the selected app.';
 
   @override
+  String get originalExportUnknown =>
+      'The sharing result is uncertain. Check the selected app before sharing this original again.';
+
+  @override
+  String get originalExporting => 'Waiting for the sharing result…';
+
+  @override
   String get shareCancelled => 'Sharing cancelled.';
 
   @override

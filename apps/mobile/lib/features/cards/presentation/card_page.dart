@@ -36,6 +36,7 @@ class CardPage extends StatefulWidget {
 }
 
 class _CardPageState extends State<CardPage> {
+  final scroll = ScrollController();
   late final cubit = CardCubit(
     widget.repository ?? getIt<CollectionRepository>(),
     widget.service ?? NativeCardService(),
@@ -50,6 +51,7 @@ class _CardPageState extends State<CardPage> {
 
   @override
   void dispose() {
+    scroll.dispose();
     cubit.close();
     super.dispose();
   }
@@ -78,6 +80,30 @@ class _CardPageState extends State<CardPage> {
         'cancelled' => s.cardCancelled,
         _ => null,
       };
+      final feedback = <Widget>[
+        if (error != null) Semantics(liveRegion: true, child: Text(error)),
+        if (outcome != null) Semantics(liveRegion: true, child: Text(outcome)),
+        if (state.error == 'PRO_REQUIRED')
+          OutlinedButton(
+            onPressed: state.busy
+                ? null
+                : () async {
+                    await openPro(context);
+                  },
+            child: Text(s.cardViewPro),
+          ),
+        if ([
+          'DATASET_CHANGED',
+          'STALE_TARGET',
+          'NOT_FOUND',
+          'MEDIA_MISSING',
+          'MEDIA_INVALID',
+        ].contains(state.error))
+          OutlinedButton(
+            onPressed: state.busy ? null : cubit.load,
+            child: Text(s.cardReload),
+          ),
+      ];
       return Scaffold(
         appBar: AppPageBar(
           context: context,
@@ -85,6 +111,7 @@ class _CardPageState extends State<CardPage> {
         ),
         body: SafeArea(
           child: ListView(
+            controller: scroll,
             padding: AppLayout.pagePadding,
             children: [
               AppScrollTitle(
@@ -93,6 +120,47 @@ class _CardPageState extends State<CardPage> {
                 ),
               ),
               if (state.busy) const LinearProgressIndicator(),
+              if (state.bytes == null) ...feedback,
+              if (state.bytes != null)
+                FigmaFormSection(
+                  children: [
+                    const SizedBox(height: 16),
+                    Text(
+                      state.name,
+                      style: Theme.of(context).textTheme.titleLarge,
+                    ),
+                    Text(state.species),
+                    for (final date in state.dates) Text(date),
+                    const SizedBox(height: 12),
+                    Image.memory(
+                      state.bytes!,
+                      excludeFromSemantics: true,
+                      fit: BoxFit.contain,
+                    ),
+                    const SizedBox(height: 16),
+                    Wrap(
+                      spacing: 8,
+                      runSpacing: 8,
+                      children: [
+                        FilledButton.icon(
+                          onPressed: state.busy
+                              ? null
+                              : () => cubit.handoff(save: true),
+                          icon: const Icon(Icons.save_alt),
+                          label: Text(s.cardSave),
+                        ),
+                        OutlinedButton.icon(
+                          onPressed: state.busy
+                              ? null
+                              : () => cubit.handoff(save: false),
+                          icon: const Icon(Icons.ios_share),
+                          label: Text(s.cardShare),
+                        ),
+                      ],
+                    ),
+                    ...feedback,
+                  ],
+                ),
               Text(s.cardPrivacy),
               const SizedBox(height: 16),
               if (widget.comparison) ...[
@@ -121,83 +189,40 @@ class _CardPageState extends State<CardPage> {
                     ),
                   ),
               ] else ...[
-                SwitchListTile(
-                  value: state.imageChoice == 'illustration',
-                  onChanged: state.busy || !state.hasCover
-                      ? null
-                      : (value) =>
-                            cubit.imageChoice(value ? 'illustration' : 'cover'),
-                  title: Text(s.cardUseIllustration),
+                FigmaSection(
+                  child: FigmaGroup(
+                    children: [
+                      SwitchListTile(
+                        value: state.imageChoice == 'illustration',
+                        onChanged: state.busy || !state.hasCover
+                            ? null
+                            : (value) => cubit.imageChoice(
+                                value ? 'illustration' : 'cover',
+                              ),
+                        title: Text(s.cardUseIllustration),
+                      ),
+                    ],
+                  ),
                 ),
               ],
-              if (error != null)
-                Semantics(liveRegion: true, child: Text(error)),
-              if (outcome != null)
-                Semantics(liveRegion: true, child: Text(outcome)),
-              if (state.error == 'PRO_REQUIRED')
-                OutlinedButton(
-                  onPressed: state.busy
-                      ? null
-                      : () async {
-                          await openPro(context);
-                        },
-                  child: Text(s.cardViewPro),
-                ),
-              if ([
-                'DATASET_CHANGED',
-                'STALE_TARGET',
-                'NOT_FOUND',
-                'MEDIA_MISSING',
-                'MEDIA_INVALID',
-              ].contains(state.error))
-                OutlinedButton(
-                  onPressed: state.busy ? null : cubit.load,
-                  child: Text(s.cardReload),
-                ),
               const SizedBox(height: 12),
               FilledButton(
                 onPressed:
                     state.busy ||
                         (widget.comparison && state.selected.length != 2)
                     ? null
-                    : cubit.prepare,
+                    : () async {
+                        await cubit.prepare();
+                        if (mounted &&
+                            cubit.state.bytes != null &&
+                            scroll.hasClients) {
+                          scroll.jumpTo(0);
+                        }
+                      },
                 child: Text(
                   state.token == null ? s.cardPreview : s.cardRefresh,
                 ),
               ),
-              if (state.bytes != null) ...[
-                const SizedBox(height: 16),
-                Text(state.name, style: Theme.of(context).textTheme.titleLarge),
-                Text(state.species),
-                for (final date in state.dates) Text(date),
-                const SizedBox(height: 12),
-                Image.memory(
-                  state.bytes!,
-                  excludeFromSemantics: true,
-                  fit: BoxFit.contain,
-                ),
-                const SizedBox(height: 16),
-                Wrap(
-                  spacing: 8,
-                  runSpacing: 8,
-                  children: [
-                    FilledButton.icon(
-                      onPressed: state.busy
-                          ? null
-                          : () => cubit.handoff(save: true),
-                      icon: const Icon(Icons.save_alt),
-                      label: Text(s.cardSave),
-                    ),
-                    OutlinedButton.icon(
-                      onPressed: state.busy
-                          ? null
-                          : () => cubit.handoff(save: false),
-                      icon: const Icon(Icons.ios_share),
-                      label: Text(s.cardShare),
-                    ),
-                  ],
-                ),
-              ],
             ],
           ),
         ),

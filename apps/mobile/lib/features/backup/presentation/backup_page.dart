@@ -138,94 +138,106 @@ class _BackupPageState extends State<BackupPage> {
                   label: Text(s.backupChoose),
                 ),
                 const SizedBox(height: 24),
-                if (state.busy || state.working || state.replacing) ...[
-                  const LinearProgressIndicator(),
-                  const SizedBox(height: 12),
-                  Text(
-                    state.replacing || state.committedBoundary
-                        ? s.backupReplacing
-                        : s.backupWorking,
-                  ),
-                ],
-                if (code != null) ...[
-                  Text(
-                    _error(context, code),
-                    style: TextStyle(
-                      color: Theme.of(context).colorScheme.error,
-                    ),
-                  ),
-                  const SizedBox(height: 12),
-                  if (state.replacing || state.committedBoundary)
-                    OutlinedButton(
-                      onPressed: state.busy ? null : cubit.poll,
-                      child: Text(s.backupCheckStatus),
-                    ),
-                ],
-                if (state.phase == 'preview_ready' && !state.replacing) ...[
-                  Text(
-                    s.backupPreview,
-                    style: Theme.of(context).textTheme.titleLarge,
-                  ),
-                  const SizedBox(height: 12),
-                  Text(
-                    s.backupCounts(
-                      '${counts['activePlants'] ?? 0}',
-                      '${counts['archivedPlants'] ?? 0}',
-                      '${counts['events'] ?? 0}',
-                      '${counts['journalEntries'] ?? 0}',
-                      '${counts['photos'] ?? 0}',
-                    ),
-                  ),
-                  const SizedBox(height: 12),
-                  Text(s.backupReplaceWarning),
-                  const SizedBox(height: 12),
-                  FilledButton(
-                    onPressed: state.busy ? null : _confirm,
-                    child: Text(s.backupReplace),
-                  ),
-                ],
-                if (state.fileCreated) ...[
-                  Text(
-                    state.shareResult == 'handedToOS' ||
-                            state.phase == 'handed_to_os'
-                        ? s.backupHanded
-                        : s.backupCreated,
-                    style: Theme.of(context).textTheme.titleLarge,
-                  ),
-                  const SizedBox(height: 12),
-                  Text(s.backupKeepOutside),
-                  if (state.shareResult == 'cancelled')
-                    Text(s.backupShareCancelled),
-                  if (state.shareResult == 'failed') Text(s.backupShareFailed),
-                  const SizedBox(height: 12),
-                  FilledButton(
-                    onPressed: disabled ? null : cubit.share,
-                    child: Text(s.backupShare),
-                  ),
-                ],
-                if (state.phase == 'complete') Text(s.backupRestored),
-                if (state.phase == 'cancelled' && !state.fileCreated)
-                  Text(s.backupCancelled),
-                if (state.phase == 'failed' &&
-                    state.result['recovery'] == 'open_recovery')
-                  FilledButton(
-                    onPressed: state.busy
-                        ? null
-                        : () => BackupHost.maybeOf(context)!.reopen(false),
-                    child: Text(s.retryOpening),
-                  ),
-                if (state.phase == 'failed' &&
-                    state.job['kind'] == 'import' &&
-                    state.result['recovery'] != 'open_recovery')
-                  OutlinedButton(
-                    onPressed: state.busy ? null : cubit.retry,
-                    child: Text(s.backupReviewAgain),
-                  ),
-                if ((state.working || state.phase == 'preview_ready') &&
-                    !state.committedBoundary)
-                  TextButton(
-                    onPressed: state.busy ? null : cubit.cancel,
-                    child: Text(s.cancel),
+                if (state.busy ||
+                    state.working ||
+                    state.replacing ||
+                    code != null ||
+                    state.phase != null)
+                  FigmaFormSection(
+                    children: [
+                      if (state.busy || state.working || state.replacing) ...[
+                        const LinearProgressIndicator(),
+                        const SizedBox(height: 12),
+                        Text(
+                          state.replacing || state.committedBoundary
+                              ? s.backupReplacing
+                              : s.backupWorking,
+                        ),
+                      ],
+                      if (code != null) ...[
+                        Text(
+                          _error(context, code),
+                          style: TextStyle(
+                            color: Theme.of(context).colorScheme.error,
+                          ),
+                        ),
+                        const SizedBox(height: 12),
+                        if (state.replacing || state.committedBoundary)
+                          OutlinedButton(
+                            onPressed: state.busy ? null : cubit.poll,
+                            child: Text(s.backupCheckStatus),
+                          ),
+                      ],
+                      if (state.phase == 'preview_ready' &&
+                          !state.replacing) ...[
+                        Text(
+                          s.backupPreview,
+                          style: Theme.of(context).textTheme.titleLarge,
+                        ),
+                        const SizedBox(height: 12),
+                        Text(
+                          s.backupCounts(
+                            '${counts['activePlants'] ?? 0}',
+                            '${counts['archivedPlants'] ?? 0}',
+                            '${counts['events'] ?? 0}',
+                            '${counts['journalEntries'] ?? 0}',
+                            '${counts['photos'] ?? 0}',
+                          ),
+                        ),
+                        const SizedBox(height: 12),
+                        Text(s.backupReplaceWarning),
+                        const SizedBox(height: 12),
+                        FilledButton(
+                          onPressed: state.busy ? null : _confirm,
+                          child: Text(s.backupReplace),
+                        ),
+                      ],
+                      if (state.fileCreated) ...[
+                        Text(
+                          state.shareResult == 'handedToOS' ||
+                                  state.phase == 'handed_to_os'
+                              ? s.backupHanded
+                              : s.backupCreated,
+                          style: Theme.of(context).textTheme.titleLarge,
+                        ),
+                        const SizedBox(height: 12),
+                        Text(s.backupKeepOutside),
+                        if (state.shareResult == 'cancelled')
+                          Text(s.backupShareCancelled),
+                        if (state.shareResult == 'failed')
+                          Text(s.backupShareFailed),
+                        const SizedBox(height: 12),
+                        FilledButton(
+                          onPressed: disabled ? null : cubit.share,
+                          child: Text(s.backupShare),
+                        ),
+                      ],
+                      if (state.phase == 'complete') Text(s.backupRestored),
+                      if (state.phase == 'cancelled' && !state.fileCreated)
+                        Text(s.backupCancelled),
+                      if (state.phase == 'failed' &&
+                          state.result['recovery'] == 'open_recovery')
+                        FilledButton(
+                          onPressed: state.busy
+                              ? null
+                              : () =>
+                                    BackupHost.maybeOf(context)!.reopen(false),
+                          child: Text(s.retryOpening),
+                        ),
+                      if (state.phase == 'failed' &&
+                          state.job['kind'] == 'import' &&
+                          state.result['recovery'] != 'open_recovery')
+                        OutlinedButton(
+                          onPressed: state.busy ? null : cubit.retry,
+                          child: Text(s.backupReviewAgain),
+                        ),
+                      if ((state.working || state.phase == 'preview_ready') &&
+                          !state.committedBoundary)
+                        TextButton(
+                          onPressed: state.busy ? null : cubit.cancel,
+                          child: Text(s.cancel),
+                        ),
+                    ],
                   ),
               ],
             ),

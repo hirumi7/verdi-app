@@ -252,7 +252,7 @@ class _JournalEditorPageState extends State<JournalEditorPage> {
                 if (fields != null) ...[
                   if (fields.selectedPhotoIds.isNotEmpty) ...[
                     for (final id in fields.selectedPhotoIds)
-                      Column(
+                      FigmaFormSection(
                         children: [
                           PhotoPreview(photoId: id),
                           TextButton.icon(
@@ -282,55 +282,60 @@ class _JournalEditorPageState extends State<JournalEditorPage> {
                     ],
                   ),
                   const SizedBox(height: 16),
-                  TextField(
-                    key: const ValueKey('journal-note'),
-                    controller: note,
-                    enabled: !busy,
-                    minLines: 4,
-                    maxLines: 10,
-                    decoration: InputDecoration(
-                      labelText: s.journalNote,
-                      errorText: state.errors['text'] == null
-                          ? null
-                          : s.journalNoteLimit,
-                      filled: true,
-                    ),
-                    onChanged: (v) => cubit.update(text: v),
-                  ),
-                  const SizedBox(height: 16),
-                  TextField(
-                    key: const ValueKey('journal-date'),
-                    controller: date,
-                    enabled: !busy,
-                    decoration: InputDecoration(
-                      labelText: s.observationDate,
-                      hintText: 'YYYY-MM-DD',
-                      errorText: state.errors['entryDate'] == null
-                          ? null
-                          : s.invalidObservationDate,
-                      suffixIcon: IconButton(
-                        tooltip: s.chooseObservationDate,
-                        onPressed: busy
-                            ? null
-                            : () async {
-                                final chosen = await chooseDate(
-                                  context,
-                                  initial: cubit.repository.today,
-                                  latest: cubit.repository.today,
-                                  helpText: s.observationDate,
-                                );
-                                if (chosen != null) {
-                                  date.text = chosen.toString();
-                                  cubit.update(date: date.text);
-                                }
-                              },
-                        icon: const Icon(Icons.calendar_today_outlined),
+                  FigmaFormSection(
+                    title: s.notes,
+                    children: [
+                      TextField(
+                        key: const ValueKey('journal-note'),
+                        controller: note,
+                        enabled: !busy,
+                        minLines: 4,
+                        maxLines: 10,
+                        decoration: InputDecoration(
+                          labelText: s.journalNote,
+                          errorText: state.errors['text'] == null
+                              ? null
+                              : s.journalNoteLimit,
+                          filled: true,
+                        ),
+                        onChanged: (v) => cubit.update(text: v),
                       ),
-                    ),
-                    onChanged: (v) => cubit.update(date: v),
+                      const SizedBox(height: 16),
+                      TextField(
+                        key: const ValueKey('journal-date'),
+                        controller: date,
+                        enabled: !busy,
+                        decoration: InputDecoration(
+                          labelText: s.observationDate,
+                          hintText: 'YYYY-MM-DD',
+                          errorText: state.errors['entryDate'] == null
+                              ? null
+                              : s.invalidObservationDate,
+                          suffixIcon: IconButton(
+                            tooltip: s.chooseObservationDate,
+                            onPressed: busy
+                                ? null
+                                : () async {
+                                    final chosen = await chooseDate(
+                                      context,
+                                      initial: cubit.repository.today,
+                                      latest: cubit.repository.today,
+                                      helpText: s.observationDate,
+                                    );
+                                    if (chosen != null) {
+                                      date.text = chosen.toString();
+                                      cubit.update(date: date.text);
+                                    }
+                                  },
+                            icon: const Icon(Icons.calendar_today_outlined),
+                          ),
+                        ),
+                        onChanged: (v) => cubit.update(date: v),
+                      ),
+                      const SizedBox(height: 16),
+                      Text(s.journalHint),
+                    ],
                   ),
-                  const SizedBox(height: 16),
-                  Text(s.journalHint),
                   if (state.attachmentFailed && fields.text.trim().isNotEmpty)
                     OutlinedButton(
                       onPressed: () async {

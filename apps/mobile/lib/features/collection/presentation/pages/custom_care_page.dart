@@ -244,9 +244,17 @@ class _CareTypesPageState extends State<CareTypesPage> {
           AppScrollTitle(title: Text(s.careTypes)),
           if (busy && types.isEmpty) const LinearProgressIndicator(),
           if (error != null) ErrorNotice(error!),
-          for (final kind in standardCareKinds)
-            ListTile(title: Text(kindLabel(s, kind))),
-          const Divider(),
+          FigmaSection(
+            child: FigmaGroup(
+              children: [
+                for (final kind in standardCareKinds)
+                  ListTile(
+                    leading: const Icon(Icons.spa_outlined),
+                    title: Text(kindLabel(s, kind)),
+                  ),
+              ],
+            ),
+          ),
           for (final type in types)
             Card(
               margin: const EdgeInsets.only(bottom: AppLayout.cardGap),
@@ -379,14 +387,19 @@ class _CareTypeFormState extends State<_CareTypeForm> {
                 widget.type == null ? s.addCustomCare : s.renameCareType,
               ),
             ),
-            TextField(
-              controller: input,
-              enabled: !busy,
-              autofocus: true,
-              decoration: InputDecoration(
-                labelText: s.careTypeLabel,
-                errorText: invalid ? s.careTypeLabelInvalid : null,
-              ),
+            FigmaFormSection(
+              title: s.careType,
+              children: [
+                TextField(
+                  controller: input,
+                  enabled: !busy,
+                  autofocus: true,
+                  decoration: InputDecoration(
+                    labelText: s.careTypeLabel,
+                    errorText: invalid ? s.careTypeLabelInvalid : null,
+                  ),
+                ),
+              ],
             ),
             if (error != null) ErrorNotice(error!),
             const SizedBox(height: 24),
@@ -550,92 +563,102 @@ class _AddCarePageState extends State<AddCarePage> {
             if (error != null) ErrorNotice(error!),
             if (state != null) ...[
               if (choices.isEmpty) Text(s.noCareChoices),
-              DropdownButtonFormField<String>(
-                initialValue: choice,
-                isExpanded: true,
-                decoration: InputDecoration(labelText: s.careType),
-                items: [
-                  for (final entry in choices.entries)
-                    DropdownMenuItem(
-                      value: entry.key,
-                      child: Text(entry.value),
-                    ),
+              FigmaFormSection(
+                title: s.interval,
+                children: [
+                  DropdownButtonFormField<String>(
+                    initialValue: choice,
+                    isExpanded: true,
+                    decoration: InputDecoration(labelText: s.careType),
+                    items: [
+                      for (final entry in choices.entries)
+                        DropdownMenuItem(
+                          value: entry.key,
+                          child: Text(entry.value),
+                        ),
+                    ],
+                    onChanged: busy
+                        ? null
+                        : (value) => setState(() => choice = value),
+                  ),
+                  const SizedBox(height: 16),
+                  TextField(
+                    controller: count,
+                    enabled: !busy,
+                    keyboardType: TextInputType.number,
+                    decoration: InputDecoration(labelText: s.interval),
+                  ),
+                  const SizedBox(height: 16),
+                  DropdownButtonFormField<IntervalUnit>(
+                    initialValue: unit,
+                    isExpanded: true,
+                    decoration: InputDecoration(labelText: s.intervalUnit),
+                    items: [
+                      for (final value in IntervalUnit.values)
+                        DropdownMenuItem(
+                          value: value,
+                          child: Text(unitLabel(s, value)),
+                        ),
+                    ],
+                    onChanged: busy
+                        ? null
+                        : (value) => setState(() => unit = value!),
+                  ),
                 ],
-                onChanged: busy
-                    ? null
-                    : (value) => setState(() => choice = value),
               ),
-              const SizedBox(height: 16),
-              TextField(
-                controller: count,
-                enabled: !busy,
-                keyboardType: TextInputType.number,
-                decoration: InputDecoration(labelText: s.interval),
-              ),
-              const SizedBox(height: 16),
-              DropdownButtonFormField<IntervalUnit>(
-                initialValue: unit,
-                isExpanded: true,
-                decoration: InputDecoration(labelText: s.intervalUnit),
-                items: [
-                  for (final value in IntervalUnit.values)
-                    DropdownMenuItem(
-                      value: value,
-                      child: Text(unitLabel(s, value)),
+              FigmaFormSection(
+                title: s.lastCare,
+                children: [
+                  RadioGroup<SeedKind>(
+                    groupValue: seed,
+                    onChanged: (value) {
+                      if (!busy) {
+                        setState(() {
+                          seed = value;
+                          date = null;
+                        });
+                      }
+                    },
+                    child: Column(
+                      children: [
+                        RadioListTile(
+                          value: SeedKind.known,
+                          title: Text(s.knownCare),
+                        ),
+                        RadioListTile(
+                          value: SeedKind.unknown,
+                          title: Text(s.unknownCare),
+                        ),
+                      ],
                     ),
+                  ),
+                  OutlinedButton.icon(
+                    onPressed: busy || seed == null
+                        ? null
+                        : () async {
+                            final result = await chooseDate(
+                              context,
+                              initial: date,
+                              latest: seed == SeedKind.known
+                                  ? context.read<WorkspaceCubit>().today
+                                  : null,
+                              helpText: seed == SeedKind.known
+                                  ? s.actualCareDate
+                                  : s.firstCheck,
+                            );
+                            if (result != null && mounted) {
+                              setState(() => date = result);
+                            }
+                          },
+                    icon: const Icon(Icons.calendar_today),
+                    label: Text(
+                      date == null ? s.chooseDate : dateLabel(context, date!),
+                    ),
+                  ),
+                  if (seed != null)
+                    Text(seed == SeedKind.known ? s.lastCare : s.firstCheck),
                 ],
-                onChanged: busy
-                    ? null
-                    : (value) => setState(() => unit = value!),
               ),
-              RadioGroup<SeedKind>(
-                groupValue: seed,
-                onChanged: (value) {
-                  if (!busy) {
-                    setState(() {
-                      seed = value;
-                      date = null;
-                    });
-                  }
-                },
-                child: Column(
-                  children: [
-                    RadioListTile(
-                      value: SeedKind.known,
-                      title: Text(s.knownCare),
-                    ),
-                    RadioListTile(
-                      value: SeedKind.unknown,
-                      title: Text(s.unknownCare),
-                    ),
-                  ],
-                ),
-              ),
-              OutlinedButton.icon(
-                onPressed: busy || seed == null
-                    ? null
-                    : () async {
-                        final result = await chooseDate(
-                          context,
-                          initial: date,
-                          latest: seed == SeedKind.known
-                              ? context.read<WorkspaceCubit>().today
-                              : null,
-                          helpText: seed == SeedKind.known
-                              ? s.actualCareDate
-                              : s.firstCheck,
-                        );
-                        if (result != null && mounted) {
-                          setState(() => date = result);
-                        }
-                      },
-                icon: const Icon(Icons.calendar_today),
-                label: Text(
-                  date == null ? s.chooseDate : dateLabel(context, date!),
-                ),
-              ),
-              if (seed != null)
-                Text(seed == SeedKind.known ? s.lastCare : s.firstCheck),
               if (invalid)
                 Text(
                   s.fieldInvalid,

@@ -1691,3 +1691,52 @@ reconciled docs `4a7407a9f60f5c52503dde2a7194173bc043ec0e` are published. The ap
 now adopts that delivery pin. Docs checks passed8/8 with268 tooling tests; accepted
 requirements/decisions remain byte-unchanged. Earlier design pin records the exact
 implementation authority; the new pin records verified delivery and open gates.
+
+## Figma secondary screens — 2026-11-01
+
+**Author:** Codex (AI assistant), independently reviewed by core_readiness_review.
+
+**Date:** 2026-11-01 (Asia/Jakarta).
+
+Continues app baseline `d4fcde9d92f6ea79276f3832c0cc5d257cea3d16` against published
+implementation-design pin `a49dd25cde4c2a8e1ddbb8ae335385b760fa70d1`.
+REQ-018 presentation spans plant/routine/custom-care forms, species information,
+journal, photos, cards/comparison, reminder preferences, backup states, optimization
+explanation and help/feedback. Accepted REQ-001–018 behavior and decisions remain
+preserved; REQ-019 remains proposed. Figma edit11:6340, care11:4389, photo11:7418,
+reminders11:9360 and prior journal11:7325/shared Settings patterns guide the changes.
+
+Shared inset groups retain field keys/controllers, raw drafts, explicit care seeds,
+species choices, attached media and recovery actions. Photo viewer puts originals
+first with icon/caption cover/compare/delete controls and dated gallery rows.
+Original export serializes attempts before metadata confirmation and retains
+cancelled/failed/OS-handoff/unknown outcomes with actionable known rejection codes.
+Transport loss never claims failed delivery. Results remain mounted beside their
+operation; disposed replies cannot update or retry. Card preview scrolls into view
+and keeps save/share feedback before the long selection inventory. Backup controls
+retain confirmation/reopen guards. No schema, catalog, native bridge, store or
+accepted-policy change; no new appearance/personality feature is implied.
+
+Verification: localization and build_runner passed; Flutter/core analyzers clean;
+full Flutter110 and core135 tests passed. Added twelve tests cover form raw-value
+round trips, duplicate export attempts, persistent native/transport outcomes,
+mounted live regions, disposed replies, long comparison inventories and explicit
+reminder saves. Targeted photo tests also cover320px/320% in light/dark. Existing
+backup tests now wait for actual scrolling and assert hit-testability before tapping.
+
+Independent review closed known-error classification, offscreen result placement,
+large-text confirmation overflow and busy-row identity findings. A fixed-height
+progress slot prevents a lazy-list child shift from unmounting the selected photo.
+The final confirmation remains scrollable without clamping text. Simulator and
+preservation results are recorded in the accompanying published docs delivery.
+Native package tests were not rerun: no native source/contract changed. Previous
+native evidence remains historical, including its four opt-in skips. Physical
+VoiceOver, full device matrix, real store/signing, submission host and other prior
+product/release gaps remain open. UI refactoring does not mark the app release-ready.
+
+Commands (Flutter3.47.8/Dart3.13.7): `flutter gen-l10n`,
+`dart run build_runner build`, `flutter analyze`, `flutter test`; core `dart analyze`
+and `dart test`; retained-simulator `flutter run -d CD70BD52-1239-4C9E-A998-8D8962DA0354
+-t lib/main_development.dart --no-resident`. Synthetic form renders inspected in
+both themes use an optional local test font; they are layout evidence, not native
+font/icon or VoiceOver proof.

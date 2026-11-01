@@ -16,20 +16,17 @@ Future<void> openHelp(BuildContext context) => Navigator.of(
   context,
   rootNavigator: true,
 ).push<void>(MaterialPageRoute(builder: (_) => const HelpPage()));
-Widget section(BuildContext context, String heading, String body) => Padding(
-  padding: const EdgeInsets.only(bottom: 24),
-  child: Column(
-    crossAxisAlignment: CrossAxisAlignment.start,
-    children: [
-      Semantics(
-        header: true,
-        child: Text(heading, style: Theme.of(context).textTheme.titleLarge),
-      ),
-      const SizedBox(height: 8),
-      Text(body),
-    ],
-  ),
-);
+Widget section(BuildContext context, String heading, String body) =>
+    FigmaFormSection(
+      children: [
+        Semantics(
+          header: true,
+          child: Text(heading, style: Theme.of(context).textTheme.titleMedium),
+        ),
+        const SizedBox(height: 12),
+        Text(body),
+      ],
+    );
 
 class PrivacyPage extends StatelessWidget {
   const PrivacyPage({super.key});
@@ -225,33 +222,38 @@ class _FeedbackPageState extends State<FeedbackPage> {
                     child: Text(s.retry),
                   ),
                 ],
-                TextField(
-                  controller: subject,
-                  enabled: state.ready && !state.busy,
-                  decoration: InputDecoration(
-                    labelText: s.feedbackSubject,
-                    errorText: state.subjectError == null
-                        ? null
-                        : s.feedbackSubjectError,
-                  ),
-                  onChanged: (value) => cubit!.edit(subject: value),
-                  maxLines: null,
+                FigmaFormSection(
+                  title: s.feedbackTitle,
+                  children: [
+                    TextField(
+                      controller: subject,
+                      enabled: state.ready && !state.busy,
+                      decoration: InputDecoration(
+                        labelText: s.feedbackSubject,
+                        errorText: state.subjectError == null
+                            ? null
+                            : s.feedbackSubjectError,
+                      ),
+                      onChanged: (value) => cubit!.edit(subject: value),
+                      maxLines: null,
+                    ),
+                    const SizedBox(height: 16),
+                    TextField(
+                      controller: body,
+                      enabled: state.ready && !state.busy,
+                      decoration: InputDecoration(
+                        labelText: s.feedbackMessage,
+                        errorText: state.bodyError == null
+                            ? null
+                            : s.feedbackBodyError,
+                      ),
+                      onChanged: (value) => cubit!.edit(body: value),
+                      minLines: 6,
+                      maxLines: null,
+                    ),
+                    const SizedBox(height: 16),
+                  ],
                 ),
-                const SizedBox(height: 16),
-                TextField(
-                  controller: body,
-                  enabled: state.ready && !state.busy,
-                  decoration: InputDecoration(
-                    labelText: s.feedbackMessage,
-                    errorText: state.bodyError == null
-                        ? null
-                        : s.feedbackBodyError,
-                  ),
-                  onChanged: (value) => cubit!.edit(body: value),
-                  minLines: 6,
-                  maxLines: null,
-                ),
-                const SizedBox(height: 16),
                 if (state.status == 'copied')
                   Semantics(liveRegion: true, child: Text(s.feedbackCopied)),
                 if (state.status == 'copyUnknown')

@@ -64,12 +64,17 @@ class RoutineFieldsEditor extends StatelessWidget {
                 );
               }
 
-              return Column(
+              return FigmaFormSection(
                 key: ValueKey(kind),
-                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   SwitchListTile(
                     contentPadding: EdgeInsets.zero,
+                    secondary: Icon(switch (kind) {
+                      StandardCareKind.water => Icons.water_drop_outlined,
+                      StandardCareKind.fertilize => Icons.grass_outlined,
+                      StandardCareKind.repot => Icons.yard_outlined,
+                      _ => Icons.spa_outlined,
+                    }),
                     title: Text(
                       kind == StandardCareKind.water
                           ? s.waterRoutine

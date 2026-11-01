@@ -38,8 +38,22 @@ class ReminderPage extends StatelessWidget {
 
         Widget clock(String key, String label) => ListTile(
           title: Text(label),
-          subtitle: Text(time(key)),
-          trailing: const Icon(Icons.schedule),
+          subtitle: AppLayout.largeText(context) ? Text(time(key)) : null,
+          trailing: AppLayout.largeText(context)
+              ? const Icon(Icons.schedule)
+              : DecoratedBox(
+                  decoration: BoxDecoration(
+                    color: Theme.of(context).scaffoldBackgroundColor,
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 12,
+                      vertical: 8,
+                    ),
+                    child: Text(time(key)),
+                  ),
+                ),
           onTap: locked
               ? null
               : () async {
@@ -59,48 +73,30 @@ class ReminderPage extends StatelessWidget {
             padding: AppLayout.pagePadding,
             children: [
               AppScrollTitle(title: Text(s.remindersTitle)),
-              Text(s.remindersBestEffort),
-              const SizedBox(height: 16),
-              Text(
-                s.remindersPermission(
-                  permissionLabel(context, state.permission),
+              FigmaSection(
+                footer: s.remindersBestEffort,
+                child: FigmaGroup(
+                  children: [
+                    SwitchListTile(
+                      title: Text(s.remindersEnable),
+                      value: state.draft['enabled'] == true,
+                      onChanged: locked || state.data == null
+                          ? null
+                          : (v) => cubit.edit('enabled', v),
+                    ),
+                    clock('preferredMinute', s.remindersPreferredTime),
+                  ],
                 ),
               ),
-              if (state.busy) const LinearProgressIndicator(),
-              if (state.error != null) ...[
-                ErrorNotice(state.error!),
-                Text(
-                  state.unresolved
-                      ? s.remindersUnknownSave
-                      : s.remindersUnavailable,
+              FigmaSection(
+                footer: s.remindersQuietExplanation,
+                child: FigmaGroup(
+                  children: [
+                    clock('quietStartMinute', s.remindersQuietStart),
+                    clock('quietEndMinute', s.remindersQuietEnd),
+                  ],
                 ),
-              ],
-              if (state.saved)
-                Semantics(liveRegion: true, child: Text(s.remindersSaved)),
-              if (state.permission == 'notDetermined')
-                FilledButton(
-                  onPressed: locked || !state.hasSchedule
-                      ? null
-                      : cubit.permission,
-                  child: Text(s.remindersAllow),
-                ),
-              if (!state.hasSchedule) Text(s.remindersNeedsSchedule),
-              if (state.permission != 'notDetermined')
-                OutlinedButton(
-                  onPressed: locked ? null : cubit.openSettings,
-                  child: Text(s.remindersSystemSettings),
-                ),
-              SwitchListTile(
-                title: Text(s.remindersEnable),
-                value: state.draft['enabled'] == true,
-                onChanged: locked || state.data == null
-                    ? null
-                    : (v) => cubit.edit('enabled', v),
               ),
-              clock('preferredMinute', s.remindersPreferredTime),
-              clock('quietStartMinute', s.remindersQuietStart),
-              clock('quietEndMinute', s.remindersQuietEnd),
-              Text(s.remindersQuietExplanation),
               const SizedBox(height: 16),
               FilledButton(
                 onPressed: state.busy || state.data == null ? null : cubit.save,
@@ -115,19 +111,59 @@ class ReminderPage extends StatelessWidget {
                       : () => cubit.refresh(reload: true),
                   child: Text(s.remindersReload),
                 ),
-              const Divider(height: 32),
-              Text(projectionLabel(context, state)),
-              Text(
-                s.remindersQueueCounts(
-                  (state.projection['pendingConfirmed'] as int?) ?? 0,
-                  (state.projection['omittedCapacity'] as int?) ?? 0,
-                  (state.projection['pastCount'] as int?) ?? 0,
-                ),
+              const SizedBox(height: 24),
+              FigmaFormSection(
+                children: [
+                  Text(
+                    s.remindersPermission(
+                      permissionLabel(context, state.permission),
+                    ),
+                  ),
+                  if (state.busy) const LinearProgressIndicator(),
+                  if (state.error != null) ...[
+                    ErrorNotice(state.error!),
+                    Text(
+                      state.unresolved
+                          ? s.remindersUnknownSave
+                          : s.remindersUnavailable,
+                    ),
+                  ],
+                  if (state.saved)
+                    Semantics(liveRegion: true, child: Text(s.remindersSaved)),
+                  if (state.permission == 'notDetermined')
+                    FilledButton(
+                      onPressed: locked || !state.hasSchedule
+                          ? null
+                          : cubit.permission,
+                      child: Text(s.remindersAllow),
+                    ),
+                  if (!state.hasSchedule) Text(s.remindersNeedsSchedule),
+                  if (state.permission != 'notDetermined')
+                    OutlinedButton(
+                      onPressed: locked ? null : cubit.openSettings,
+                      child: Text(s.remindersSystemSettings),
+                    ),
+                ],
               ),
-              Text(s.remindersTodayAuthority),
-              OutlinedButton(
-                onPressed: locked ? null : cubit.retryQueue,
-                child: Text(s.remindersRetryQueue),
+              FigmaFormSection(
+                children: [
+                  Text(
+                    projectionLabel(context, state),
+                    style: Theme.of(context).textTheme.titleMedium,
+                  ),
+                  Text(
+                    s.remindersQueueCounts(
+                      (state.projection['pendingConfirmed'] as int?) ?? 0,
+                      (state.projection['omittedCapacity'] as int?) ?? 0,
+                      (state.projection['pastCount'] as int?) ?? 0,
+                    ),
+                  ),
+                  Text(s.remindersTodayAuthority),
+                  OutlinedButton(
+                    onPressed: locked ? null : cubit.retryQueue,
+                    child: Text(s.remindersRetryQueue),
+                  ),
+                ],
               ),
             ],
           ),

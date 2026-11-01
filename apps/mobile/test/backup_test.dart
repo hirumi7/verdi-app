@@ -147,6 +147,9 @@ void main() {
       expect(tester.takeException(), isNull);
       final replace = find.text('Replace collection');
       await tester.scrollUntilVisible(replace, 300);
+      await Scrollable.ensureVisible(tester.element(replace), alignment: .5);
+      await tester.pumpAndSettle();
+      expect(replace.hitTestable(), findsOneWidget);
       await tester.tap(replace);
       await tester.pumpAndSettle();
       expect(find.text('Replace this collection?'), findsOneWidget);
@@ -195,6 +198,12 @@ void main() {
     );
     await tester.pumpAndSettle();
     await tester.scrollUntilVisible(find.text('Retry opening'), 250);
+    await Scrollable.ensureVisible(
+      tester.element(find.text('Retry opening')),
+      alignment: .5,
+    );
+    await tester.pumpAndSettle();
+    expect(find.text('Retry opening').hitTestable(), findsOneWidget);
     await tester.tap(find.text('Retry opening'));
     await tester.pumpAndSettle();
     expect(restored, isFalse);

@@ -210,22 +210,31 @@ Future<void> showSpeciesInformation(
               entry.commonName,
               style: Theme.of(context).textTheme.headlineMedium,
             ),
-            Text(entry.scientificName),
+            Text(
+              entry.scientificName,
+              style: Theme.of(context).textTheme.bodyLarge!
+                  .copyWith(fontStyle: FontStyle.italic),
+            ),
             if (entry.altNames.isNotEmpty) Text(entry.altNames.join(' · ')),
             const SizedBox(height: 20),
-            Text('${s.category}: ${entry.data['category']}'),
-            Text('${s.light}: ${light(entry.light)}'),
-            Text(
-              '${s.difficulty}: ${entry.difficulty == 'unknown' ? s.unknown : entry.difficulty}',
+            FigmaFormSection(
+              title: s.speciesInformation,
+              children: [
+                Text('${s.category}: ${entry.data['category']}'),
+                Text('${s.light}: ${light(entry.light)}'),
+                Text(
+                  '${s.difficulty}: ${entry.difficulty == 'unknown' ? s.unknown : entry.difficulty}',
+                ),
+                Text(
+                  '${s.toxicity}: ${entry.toxicity['value'] == 'unknown' ? s.unknown : entry.toxicityLabel}',
+                ),
+                if ((entry.toxicity['animalScope'] as List).isNotEmpty)
+                  Text((entry.toxicity['animalScope'] as List).join(', ')),
+                Text(entry.toxicity['qualification'] as String),
+              ],
             ),
-            Text(
-              '${s.toxicity}: ${entry.toxicity['value'] == 'unknown' ? s.unknown : entry.toxicityLabel}',
-            ),
-            if ((entry.toxicity['animalScope'] as List).isNotEmpty)
-              Text((entry.toxicity['animalScope'] as List).join(', ')),
-            Text(entry.toxicity['qualification'] as String),
             const SizedBox(height: 20),
-            Text(entry.careNotes),
+            FigmaFormSection(children: [Text(entry.careNotes)]),
             for (final suggestion in entry.selection.suggestions) ...[
               const SizedBox(height: 16),
               Text(
@@ -236,31 +245,39 @@ Future<void> showSpeciesInformation(
               Text(suggestion.sourceLabel),
             ],
             const SizedBox(height: 24),
-            Text(
-              s.sourcesCredits,
-              style: Theme.of(context).textTheme.titleMedium,
+            FigmaFormSection(
+              title: s.sourcesCredits,
+              children: [
+                Text(
+                  s.sourcesCredits,
+                  style: Theme.of(context).textTheme.titleMedium,
+                ),
+                for (final source in entry.sources) ...[
+                  Text(source['title'] as String),
+                  Text(source['publisherOrCreator'] as String),
+                  Text(source['locator'] as String),
+                  SelectableText(
+                    (source['publicUrl'] ?? source['retainedEvidenceRef'])
+                        as String,
+                  ),
+                ],
+                Text(
+                  '${s.contentReviewed}: ${(entry.data['contentReview'] as Map)['reviewedAt']}',
+                ),
+                Text(
+                  (entry.data['textRightsReview'] as Map)['attributionText']
+                      as String,
+                ),
+                for (final asset
+                    in (manifest?['assets'] as List? ?? const [])) ...[
+                  Text(
+                    (asset['rightsReview'] as Map)['attributionText'] as String,
+                  ),
+                  for (final source in asset['provenance'] as List)
+                    Text('${source['title']} · ${source['locator']}'),
+                ],
+              ],
             ),
-            for (final source in entry.sources) ...[
-              Text(source['title'] as String),
-              Text(source['publisherOrCreator'] as String),
-              Text(source['locator'] as String),
-              SelectableText(
-                (source['publicUrl'] ?? source['retainedEvidenceRef'])
-                    as String,
-              ),
-            ],
-            Text(
-              '${s.contentReviewed}: ${(entry.data['contentReview'] as Map)['reviewedAt']}',
-            ),
-            Text(
-              (entry.data['textRightsReview'] as Map)['attributionText']
-                  as String,
-            ),
-            for (final asset in (manifest?['assets'] as List? ?? const [])) ...[
-              Text((asset['rightsReview'] as Map)['attributionText'] as String),
-              for (final source in asset['provenance'] as List)
-                Text('${source['title']} · ${source['locator']}'),
-            ],
             Text(s.catalogCredits),
           ],
         ),

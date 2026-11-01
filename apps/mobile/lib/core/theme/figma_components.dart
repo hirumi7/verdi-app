@@ -352,3 +352,64 @@ class FigmaSegments extends StatelessWidget {
     );
   }
 }
+
+/// Inset content surface shared by the secondary forms and readable help groups.
+/// Natural height preserves raw errors and the user's full text scaling.
+class FigmaFormSection extends StatelessWidget {
+  const FigmaFormSection({
+    super.key,
+    this.title,
+    this.footer,
+    required this.children,
+  });
+  final String? title, footer;
+  final List<Widget> children;
+  @override
+  Widget build(BuildContext context) => FigmaSection(
+    title: title,
+    footer: footer,
+    child: FigmaGroup(
+      children: [
+        Padding(
+          padding: const EdgeInsets.all(16),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: children,
+          ),
+        ),
+      ],
+    ),
+  );
+}
+
+/// Photo viewer actions use an icon over a caption, as in the source toolbar.
+class FigmaPhotoAction extends StatelessWidget {
+  const FigmaPhotoAction({
+    super.key,
+    required this.icon,
+    required this.label,
+    required this.onPressed,
+    this.destructive = false,
+  });
+  final Widget icon, label;
+  final VoidCallback? onPressed;
+  final bool destructive;
+  @override
+  Widget build(BuildContext context) => SizedBox(
+    width: AppLayout.largeText(context)
+        ? double.infinity
+        : (MediaQuery.sizeOf(context).width - 80) / 3,
+    child: TextButton(
+      onPressed: onPressed,
+      style: destructive
+          ? TextButton.styleFrom(
+              foregroundColor: Theme.of(context).colorScheme.error,
+            )
+          : null,
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [icon, const SizedBox(height: 6), label],
+      ),
+    ),
+  );
+}

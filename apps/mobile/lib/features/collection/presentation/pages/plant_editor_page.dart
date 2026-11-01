@@ -337,7 +337,8 @@ class _PlantEditorPageState extends State<PlantEditorPage>
                             widget.plantId == null ? s.addPlant : s.editPlant,
                           ),
                         ),
-                        if (f.catalogSelection != null) ...[
+                        if (f.catalogSelection != null &&
+                            f.coverPhotoId == null) ...[
                           FigmaGroup(
                             children: [
                               Padding(
@@ -476,125 +477,146 @@ class _PlantEditorPageState extends State<PlantEditorPage>
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.stretch,
                             children: [
-                              TextFormField(
-                                enabled: !photoLocked,
-                                key: fieldKeys['name'],
-                                focusNode: fieldFocus['name'],
-                                initialValue: f.name,
-                                decoration: InputDecoration(
-                                  labelText: s.nickname,
-                                  errorText: state.errors.containsKey('name')
-                                      ? s.fieldInvalid
-                                      : null,
-                                ),
-                                textInputAction: TextInputAction.next,
-                                onChanged: (v) => editor.update(name: v),
-                              ),
-                              const SizedBox(height: 16),
-                              TextButton.icon(
-                                onPressed: photoLocked
-                                    ? null
-                                    : editor.openPicker,
-                                icon: const Icon(Icons.search),
-                                label: Text(s.changeSpecies),
-                              ),
-                              TextFormField(
-                                enabled: !photoLocked,
-                                readOnly: f.catalogSelection != null,
-                                key: fieldKeys['speciesName'],
-                                focusNode: fieldFocus['speciesName'],
-                                initialValue: f.speciesName,
-                                decoration: InputDecoration(
-                                  labelText: f.catalogSelection == null
-                                      ? s.species
-                                      : s.selectedSpecies,
-                                  errorText:
-                                      state.errors.containsKey(
-                                        'customSpeciesName',
-                                      )
-                                      ? s.fieldInvalid
-                                      : null,
-                                ),
-                                textInputAction: TextInputAction.next,
-                                onChanged: (v) => editor.update(species: v),
-                              ),
-                              const SizedBox(height: 16),
-                              TextFormField(
-                                enabled: !photoLocked,
-                                key: fieldKeys['location'],
-                                focusNode: fieldFocus['location'],
-                                initialValue: f.location,
-                                decoration: InputDecoration(
-                                  labelText: s.location,
-                                  errorText:
-                                      state.errors.containsKey('location')
-                                      ? s.fieldInvalid
-                                      : null,
-                                ),
-                                textInputAction: TextInputAction.next,
-                                onChanged: (v) => editor.update(location: v),
-                              ),
-                              const SizedBox(height: 16),
-                              TextFormField(
-                                enabled: !photoLocked,
-                                key: fieldKeys['notes'],
-                                focusNode: fieldFocus['notes'],
-                                initialValue: f.notes,
-                                minLines: 3,
-                                maxLines: 8,
-                                decoration: InputDecoration(
-                                  labelText: s.notes,
-                                  errorText: state.errors.containsKey('notes')
-                                      ? s.fieldInvalid
-                                      : null,
-                                ),
-                                onChanged: (v) => editor.update(notes: v),
-                              ),
-                              const SizedBox(height: 16),
-                              if (f.catalogSelection == null)
-                                DropdownButtonFormField<CustomLight>(
-                                  initialValue: f.light,
-                                  isExpanded: true,
-                                  decoration: InputDecoration(
-                                    labelText: s.light,
+                              FigmaFormSection(
+                                children: [
+                                  TextFormField(
+                                    enabled: !photoLocked,
+                                    key: fieldKeys['name'],
+                                    focusNode: fieldFocus['name'],
+                                    initialValue: f.name,
+                                    decoration: InputDecoration(
+                                      labelText: s.nickname,
+                                      errorText:
+                                          state.errors.containsKey('name')
+                                          ? s.fieldInvalid
+                                          : null,
+                                    ),
+                                    textInputAction: TextInputAction.next,
+                                    onChanged: (v) => editor.update(name: v),
                                   ),
-                                  items: [
-                                    for (final light in CustomLight.values)
-                                      DropdownMenuItem(
-                                        value: light,
-                                        child: Text(switch (light) {
-                                          CustomLight.unknown => s.unknown,
-                                          CustomLight.low => s.lowLight,
-                                          CustomLight.medium => s.mediumLight,
-                                          CustomLight.brightIndirect =>
-                                            s.brightIndirect,
-                                          CustomLight.direct => s.directLight,
-                                        }),
-                                      ),
-                                  ],
-                                  onChanged: (v) => editor.update(light: v),
-                                ),
-                              const SizedBox(height: 16),
-                              if (f.catalogSelection == null)
-                                DropdownButtonFormField<CustomToxicity>(
-                                  initialValue: f.toxicity,
-                                  isExpanded: true,
-                                  decoration: InputDecoration(
-                                    labelText: s.toxicity,
+                                  const SizedBox(height: 16),
+                                  TextButton.icon(
+                                    onPressed: photoLocked
+                                        ? null
+                                        : editor.openPicker,
+                                    icon: const Icon(Icons.search),
+                                    label: Text(s.changeSpecies),
                                   ),
-                                  items: [
-                                    for (final value in CustomToxicity.values)
-                                      DropdownMenuItem(
-                                        value: value,
-                                        child: Text(switch (value) {
-                                          CustomToxicity.unknown => s.unknown,
-                                          CustomToxicity.toxic => s.toxic,
-                                          CustomToxicity.nonToxic => s.nonToxic,
-                                        }),
+                                  TextFormField(
+                                    enabled: !photoLocked,
+                                    readOnly: f.catalogSelection != null,
+                                    key: fieldKeys['speciesName'],
+                                    focusNode: fieldFocus['speciesName'],
+                                    initialValue: f.speciesName,
+                                    decoration: InputDecoration(
+                                      labelText: f.catalogSelection == null
+                                          ? s.species
+                                          : s.selectedSpecies,
+                                      errorText:
+                                          state.errors.containsKey(
+                                            'customSpeciesName',
+                                          )
+                                          ? s.fieldInvalid
+                                          : null,
+                                    ),
+                                    textInputAction: TextInputAction.next,
+                                    onChanged: (v) => editor.update(species: v),
+                                  ),
+                                  const SizedBox(height: 16),
+                                ],
+                              ),
+                              FigmaFormSection(
+                                children: [
+                                  TextFormField(
+                                    enabled: !photoLocked,
+                                    key: fieldKeys['location'],
+                                    focusNode: fieldFocus['location'],
+                                    initialValue: f.location,
+                                    decoration: InputDecoration(
+                                      labelText: s.location,
+                                      errorText:
+                                          state.errors.containsKey('location')
+                                          ? s.fieldInvalid
+                                          : null,
+                                    ),
+                                    textInputAction: TextInputAction.next,
+                                    onChanged: (v) =>
+                                        editor.update(location: v),
+                                  ),
+                                  const SizedBox(height: 16),
+                                ],
+                              ),
+                              FigmaFormSection(
+                                children: [
+                                  TextFormField(
+                                    enabled: !photoLocked,
+                                    key: fieldKeys['notes'],
+                                    focusNode: fieldFocus['notes'],
+                                    initialValue: f.notes,
+                                    minLines: 3,
+                                    maxLines: 8,
+                                    decoration: InputDecoration(
+                                      labelText: s.notes,
+                                      errorText:
+                                          state.errors.containsKey('notes')
+                                          ? s.fieldInvalid
+                                          : null,
+                                    ),
+                                    onChanged: (v) => editor.update(notes: v),
+                                  ),
+                                  const SizedBox(height: 16),
+                                  if (f.catalogSelection == null)
+                                    DropdownButtonFormField<CustomLight>(
+                                      initialValue: f.light,
+                                      isExpanded: true,
+                                      decoration: InputDecoration(
+                                        labelText: s.light,
                                       ),
-                                  ],
-                                  onChanged: (v) => editor.update(toxicity: v),
-                                ),
+                                      items: [
+                                        for (final light in CustomLight.values)
+                                          DropdownMenuItem(
+                                            value: light,
+                                            child: Text(switch (light) {
+                                              CustomLight.unknown => s.unknown,
+                                              CustomLight.low => s.lowLight,
+                                              CustomLight.medium =>
+                                                s.mediumLight,
+                                              CustomLight.brightIndirect =>
+                                                s.brightIndirect,
+                                              CustomLight.direct =>
+                                                s.directLight,
+                                            }),
+                                          ),
+                                      ],
+                                      onChanged: (v) => editor.update(light: v),
+                                    ),
+                                  const SizedBox(height: 16),
+                                  if (f.catalogSelection == null)
+                                    DropdownButtonFormField<CustomToxicity>(
+                                      initialValue: f.toxicity,
+                                      isExpanded: true,
+                                      decoration: InputDecoration(
+                                        labelText: s.toxicity,
+                                      ),
+                                      items: [
+                                        for (final value
+                                            in CustomToxicity.values)
+                                          DropdownMenuItem(
+                                            value: value,
+                                            child: Text(switch (value) {
+                                              CustomToxicity.unknown =>
+                                                s.unknown,
+                                              CustomToxicity.toxic => s.toxic,
+                                              CustomToxicity.nonToxic =>
+                                                s.nonToxic,
+                                            }),
+                                          ),
+                                      ],
+                                      onChanged: (v) =>
+                                          editor.update(toxicity: v),
+                                    ),
+                                ],
+                              ),
                               if (widget.plantId == null)
                                 RoutineFieldsEditor(
                                   fieldKeys: routineKeys,

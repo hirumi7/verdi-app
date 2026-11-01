@@ -232,9 +232,12 @@ class _OptimizationPageState extends State<OptimizationPage> {
               padding: AppLayout.pagePadding,
               children: [
                 AppScrollTitle(title: Text(s.optimizePhotos)),
-                Text(s.optimizationIntro),
-                const SizedBox(height: 12),
-                Text(s.optimizationWarning),
+                FigmaFormSection(
+                  children: [
+                    Text(s.optimizationIntro),
+                    Text(s.optimizationWarning),
+                  ],
+                ),
                 if (state.busy || state.running)
                   const LinearProgressIndicator(),
                 if (error != null)
