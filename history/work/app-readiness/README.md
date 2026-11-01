@@ -1188,3 +1188,16 @@ Strict native `swift build -Xswiftc -warnings-as-errors` passed. The ordinary
 Flutter development app built and launched on the retained disposable QA simulator
 with `flutter run --debug -t lib/main_development.dart -d CD70BD52-1239-4C9E-A998-8D8962DA0354 --no-resident`.
 Logs: `/tmp/verdi-capacity-swift-build.log`, `verdi-capacity-normal-run.log`.
+
+### Filesystem/capacity evidence publication and final pin
+
+**Author:** Codex (AI assistant). **Date:** 2026-11-01 (Asia/Jakarta).
+
+Implementation `8bd977b9aafff65bbc44ac791922087931c0622a` is published. Docs
+`8afca3aaf2d2889bfa30f108b251316d797df28b` was published before this pin update.
+The final documentation aggregate passed 8/8 checks and 268 tooling tests
+(`/tmp/verdi-capacity-docs.log`); independent evidence review found no mismatch.
+Accepted requirement, decision and question files are byte-preserved. Consumer
+and gitlink checks pass for the exact published pin. Both task-created APFS images
+were detached and removed. REQ-012 remains partial, with full-limit end-to-end,
+physical-device and release gates explicitly open.
