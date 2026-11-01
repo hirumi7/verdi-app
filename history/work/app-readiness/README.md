@@ -1293,3 +1293,16 @@ counts, skips, input identities and unchanged accepted records; the observed OS
 notification is explicitly separate from automated logs. Staged consumer/gitlink
 checks pass for that exact published pin. REQ-010 remains partial; actual
 cold-launch notification tap and physical-device/release gates remain unverified.
+
+### Cold-launch reminder continuation — design checkpoint
+
+**Author:** Codex (AI assistant). **Date:** 2026-11-01 (Asia/Jakarta).
+
+The user requested continuation. REQ-010's remaining cold-launch tap is the next
+bounded check. Published docs `8a978d26b1c995413f6e981efdf4a8db3c446b62` refines
+native initialization: register the retained notification delegate before UIKit
+launch returns, reuse the same repository/coordinator at Flutter channel attachment,
+and defer core opening/validation to normal recovery. Independent design review
+found no blocker; docs8/8 and268 tooling tests plus consumer handoff passed. This
+changes no accepted behavior, schemas, permission policy or release status.
+Correct obsolete preview copy; test pre-open inbox retention and actual OS taps.
