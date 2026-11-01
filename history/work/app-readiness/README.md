@@ -1594,3 +1594,41 @@ Authored personality/cosmetics, internal admin, public support/policy and privac
 audit, full accessibility/traffic observation, production store/profile, compatible
 submission host and physical/full-limit tests remain open. All accepted requirements,
 decisions, inherited work and the development-only release guard are preserved.
+
+## Interface consistency — 2026-11-01
+
+**Author:** Codex (AI assistant), independently reviewed by core_readiness_review.
+
+**Date:** 2026-11-01 (Asia/Jakarta).
+
+Implemented against published design pin
+`7177852562c56fda2cd233dc75a81aabd19fa055`, bounded REQ-018 presentation.
+Shared page/form gutters16, card gap12, section gap24, explicit type roles and
+matched filled/outlined action geometry now apply across main Flutter pages.
+Navigation cards use horizontal16, minimum height64 and minimum vertical12 rather
+than freeform-card padding16 on every edge. Today overflow actions occupy the
+card header. Full plant names and accessibility-sized page headings scroll;
+the preview notice uses a compact visible label at large text with full semantics.
+
+Figma foundations repaired30 text nodes; each refined light/dark page normalized
+58 recurring containers, linked129 matching text nodes to styles and repaired
+seven mixed-text semantic color bindings (14 ranges). Three missing matching local
+styles were added. Original imported boards, artwork and historical product copy
+remain; obsolete subscription/generated-art examples are not current product rules.
+
+Executed: Flutter95 tests, core134 tests, both analyzers clean; localization and
+build_runner passed;96-file format check passed. Four layout regressions cover
+aligned tabs,64px Settings rows with12px gaps, light/dark large headings and a
+60-character name with reachable Photos at320px/320%. Existing tests preserve
+keyboard, care, recovery, purchase-cancellation and data-flow expectations.
+Ordinary development simulator build/run passed on retained iPhone16 QA/iOS18.3.1.
+Today, Plants, Settings and plant detail were visually inspected; Today/Settings
+were rechecked after final row/menu refinements. Hashes of all19 original QA
+content/settings/metadata tables and original photo bytes remain unchanged.
+
+Independent review found no remaining bounded blocker. Fixed clipped titles,
+preview-banner viewport consumption, touching/oversized Settings rows and a stranded
+care overflow action. No native schema, domain or store behavior changed. Full
+physical accessibility, historical Figma product-copy reconciliation and previously
+recorded release gaps remain open. Accepted requirements/decisions and prior work
+are preserved; this presentation pass does not establish release readiness.

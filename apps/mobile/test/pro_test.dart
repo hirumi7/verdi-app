@@ -316,6 +316,8 @@ void main() {
         200,
         scrollable: find.byType(Scrollable).last,
       );
+      // The scroll animates while the store future is intentionally pending.
+      await tester.pump(const Duration(milliseconds: 300));
       await tester.tap(exit);
       await tester.pump(const Duration(seconds: 1));
       expect(service.cancelledIntents, [prior['intentId']]);

@@ -172,7 +172,8 @@ class _JournalEditorPageState extends State<JournalEditorPage> {
           if (!didPop) close();
         },
         child: Scaffold(
-          appBar: AppBar(
+          appBar: AppPageBar(
+            context: context,
             leading: IconButton(
               tooltip: s.cancel,
               onPressed: busy ? null : close,
@@ -184,8 +185,15 @@ class _JournalEditorPageState extends State<JournalEditorPage> {
           ),
           body: SafeArea(
             child: ListView(
-              padding: const EdgeInsets.all(20),
+              padding: AppLayout.pagePadding,
               children: [
+                AppScrollTitle(
+                  title: Text(
+                    widget.entryId == null
+                        ? s.newJournalEntry
+                        : s.editJournalEntry,
+                  ),
+                ),
                 SizedBox(
                   height: 4,
                   child: state.loading || busy || state.saving

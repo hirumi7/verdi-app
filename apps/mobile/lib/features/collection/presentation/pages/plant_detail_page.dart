@@ -175,8 +175,9 @@ class _PlantDetailPageState extends State<PlantDetailPage> {
     final cubit = context.read<WorkspaceCubit>();
     final d = detail;
     return Scaffold(
-      appBar: AppBar(
-        title: Text(d?.plant.name ?? s.plants),
+      appBar: AppPageBar(
+        context: context,
+        title: Text(s.plants),
         actions: [
           if (d != null)
             IconButton(
@@ -194,8 +195,9 @@ class _PlantDetailPageState extends State<PlantDetailPage> {
       body: RefreshIndicator(
         onRefresh: load,
         child: ListView(
-          padding: const EdgeInsets.all(16),
+          padding: AppLayout.pagePadding,
           children: [
+            if (d == null) AppScrollTitle(title: Text(s.plants)),
             if (loading) const LinearProgressIndicator(),
             if (error != null) ErrorNotice(error!),
             if (historyAlternative != null)
@@ -204,10 +206,14 @@ class _PlantDetailPageState extends State<PlantDetailPage> {
                 child: Text(s.addPastCare),
               ),
             if (d != null) ...[
-              if (coverId != null)
+              AppPageHeader(title: d.plant.name),
+              if (coverId != null) ...[
                 PhotoPreview(photoId: coverId!, revision: coverRevision),
+                const SizedBox(height: 16),
+              ],
               Wrap(
                 spacing: 8,
+                runSpacing: 8,
                 children: [
                   OutlinedButton.icon(
                     onPressed: () => openCard(context, widget.plantId),
@@ -245,10 +251,12 @@ class _PlantDetailPageState extends State<PlantDetailPage> {
                   ),
                 ],
               ),
+              const SizedBox(height: 16),
               Text(
                 d.plant.speciesName,
                 style: Theme.of(context).textTheme.titleLarge,
               ),
+              const SizedBox(height: 8),
               Text(
                 d.plant.catalogSelection == null
                     ? s.customIdentity
@@ -361,6 +369,7 @@ class _PlantDetailPageState extends State<PlantDetailPage> {
                             ),
                           Wrap(
                             spacing: 8,
+                            runSpacing: 8,
                             children: [
                               if (r.canEditSchedule)
                                 TextButton(
@@ -525,6 +534,7 @@ class _PlantDetailPageState extends State<PlantDetailPage> {
                                 ),
                               Wrap(
                                 spacing: 8,
+                                runSpacing: 8,
                                 children: [
                                   TextButton(
                                     onPressed: () async {
@@ -594,6 +604,7 @@ class _PlantDetailPageState extends State<PlantDetailPage> {
                               Text(s.historyOnly),
                               Wrap(
                                 spacing: 8,
+                                runSpacing: 8,
                                 children: [
                                   TextButton(
                                     onPressed: () async {

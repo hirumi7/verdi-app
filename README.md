@@ -296,3 +296,11 @@ fixture and retains other plants. It covers partial results and lost-reply recov
 The schema6 additive operational ledger is excluded from content backup format3;
 formats2/3 and old switched-generation recovery remain supported. Device memory,
 protection and power-loss checks remain open.
+
+## Shared interface metrics
+
+`apps/mobile/lib/core/theme/app_layout.dart` owns page/card/action spacing and
+adaptive headings; `app_theme.dart` owns typography, colors and control geometry.
+Use these roles for new pages. Navigation rows use a 64px minimum height and grow
+with content; large titles move into scrollable content without reducing OS text
+scaling. See the pinned [interface owner](docs/technical/interface-consistency.md).

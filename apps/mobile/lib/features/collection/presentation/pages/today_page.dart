@@ -73,7 +73,7 @@ class _TodayPageState extends State<TodayPage> {
             selectedCustomTypeId == row.customTypeId);
     return Card(
       child: Padding(
-        padding: const EdgeInsets.all(12),
+        padding: AppLayout.cardPadding,
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -106,6 +106,7 @@ class _TodayPageState extends State<TodayPage> {
                   child: TextButton(
                     style: TextButton.styleFrom(
                       alignment: Alignment.centerLeft,
+                      padding: EdgeInsets.zero,
                     ),
                     onPressed: () => context.router.push(
                       PlantDetailRoute(plantId: row.target.plantId),
@@ -141,12 +142,38 @@ class _TodayPageState extends State<TodayPage> {
                     ),
                   ),
                 ),
+                if (!selecting)
+                  PopupMenuButton<String>(
+                    tooltip: s.moreActions,
+                    onSelected: (value) async {
+                      if (value == 'skip') {
+                        await perform(Skip(row.target), s.skipCheck);
+                        return;
+                      }
+                      final next = await chooseDate(
+                        context,
+                        earliest: cubit.today,
+                        helpText: s.nextCheckDate,
+                        initial: row.date.compareTo(cubit.today) < 0
+                            ? cubit.today
+                            : row.date,
+                      );
+                      if (next != null && mounted) {
+                        perform(Snooze(row.target, next), s.moveCheck);
+                      }
+                    },
+                    itemBuilder: (_) => [
+                      PopupMenuItem(value: 'move', child: Text(s.moveCheck)),
+                      PopupMenuItem(value: 'skip', child: Text(s.skipCheck)),
+                    ],
+                  ),
               ],
             ),
+            if (!selecting) const SizedBox(height: 12),
             if (!selecting)
               Wrap(
                 spacing: 8,
-                runSpacing: 4,
+                runSpacing: 8,
                 children: [
                   FilledButton.tonal(
                     onPressed: state.busy
@@ -202,30 +229,6 @@ class _TodayPageState extends State<TodayPage> {
                           },
                     child: Text(s.checkedNotNeeded),
                   ),
-                  PopupMenuButton<String>(
-                    tooltip: s.moreActions,
-                    onSelected: (value) async {
-                      if (value == 'skip') {
-                        await perform(Skip(row.target), s.skipCheck);
-                        return;
-                      }
-                      final next = await chooseDate(
-                        context,
-                        earliest: cubit.today,
-                        helpText: s.nextCheckDate,
-                        initial: row.date.compareTo(cubit.today) < 0
-                            ? cubit.today
-                            : row.date,
-                      );
-                      if (next != null && mounted) {
-                        perform(Snooze(row.target, next), s.moveCheck);
-                      }
-                    },
-                    itemBuilder: (_) => [
-                      PopupMenuItem(value: 'move', child: Text(s.moveCheck)),
-                      PopupMenuItem(value: 'skip', child: Text(s.skipCheck)),
-                    ],
-                  ),
                 ],
               ),
           ],
@@ -251,14 +254,12 @@ class _TodayPageState extends State<TodayPage> {
         body: RefreshIndicator(
           onRefresh: cubit.refresh,
           child: ListView(
-            padding: const EdgeInsets.all(16),
+            padding: AppLayout.pagePadding,
             children: [
-              Text(
-                dateLabel(context, cubit.today),
-                style: Theme.of(context).textTheme.labelLarge,
+              AppPageHeader(
+                title: s.today,
+                subtitle: dateLabel(context, cubit.today),
               ),
-              const SizedBox(height: 4),
-              Text(s.today, style: Theme.of(context).textTheme.headlineLarge),
               const ReminderTodayCard(),
               if (state.loading) const LinearProgressIndicator(),
               if (error != null || state.errorCode != null)
@@ -369,7 +370,10 @@ class _TodayPageState extends State<TodayPage> {
                 ])
                   if (read!.today[section]!.page.items.isNotEmpty) ...[
                     Padding(
-                      padding: const EdgeInsets.only(top: 20, bottom: 12),
+                      padding: const EdgeInsets.only(
+                        top: AppLayout.section,
+                        bottom: 12,
+                      ),
                       child: Text(
                         section == TodaySection.overdue
                             ? s.overdue
@@ -379,7 +383,9 @@ class _TodayPageState extends State<TodayPage> {
                     ),
                     for (final row in cubit.todayRows(section).cast<CheckRow>())
                       Padding(
-                        padding: const EdgeInsets.only(bottom: 8),
+                        padding: const EdgeInsets.only(
+                          bottom: AppLayout.cardGap,
+                        ),
                         child: check(row, state),
                       ),
                     if (cubit.todayCursor(section) != null)
@@ -400,7 +406,9 @@ class _TodayPageState extends State<TodayPage> {
                               .todayRows(TodaySection.upcoming)
                               .cast<CheckRow>())
                         Padding(
-                          padding: const EdgeInsets.only(bottom: 8),
+                          padding: const EdgeInsets.only(
+                            bottom: AppLayout.cardGap,
+                          ),
                           child: check(row, state),
                         ),
                       if (cubit.todayCursor(TodaySection.upcoming) != null)
@@ -460,9 +468,10 @@ class _TodayPageState extends State<TodayPage> {
                   child: Card(
                     color: Theme.of(context).colorScheme.inverseSurface,
                     child: Padding(
-                      padding: const EdgeInsets.all(12),
+                      padding: AppLayout.cardPadding,
                       child: Wrap(
                         spacing: 12,
+                        runSpacing: 8,
                         crossAxisAlignment: WrapCrossAlignment.center,
                         children: [
                           Text(

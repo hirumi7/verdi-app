@@ -33,6 +33,8 @@ class RootShellPage extends StatelessWidget {
             children: [
               Semantics(
                 liveRegion: false,
+                label: s.developmentNotice,
+                excludeSemantics: true,
                 child: Container(
                   width: double.infinity,
                   color: Theme.of(context).colorScheme.primaryContainer,
@@ -41,9 +43,11 @@ class RootShellPage extends StatelessWidget {
                     vertical: 6,
                   ),
                   child: Text(
-                    s.developmentNotice,
+                    AppLayout.largeText(context)
+                        ? s.developmentShortNotice
+                        : s.developmentNotice,
                     textAlign: TextAlign.center,
-                    style: TextStyle(
+                    style: Theme.of(context).textTheme.labelMedium!.copyWith(
                       color: Theme.of(context).colorScheme.onPrimaryContainer,
                     ),
                   ),

@@ -237,10 +237,11 @@ class _CareTypesPageState extends State<CareTypesPage> {
   Widget build(BuildContext context) {
     final s = strings(context);
     return Scaffold(
-      appBar: AppBar(title: Text(s.careTypes)),
+      appBar: AppPageBar(context: context, title: Text(s.careTypes)),
       body: ListView(
-        padding: const EdgeInsets.all(16),
+        padding: AppLayout.pagePadding,
         children: [
+          AppScrollTitle(title: Text(s.careTypes)),
           if (busy && types.isEmpty) const LinearProgressIndicator(),
           if (error != null) ErrorNotice(error!),
           for (final kind in standardCareKinds)
@@ -248,8 +249,9 @@ class _CareTypesPageState extends State<CareTypesPage> {
           const Divider(),
           for (final type in types)
             Card(
+              margin: const EdgeInsets.only(bottom: AppLayout.cardGap),
               child: Padding(
-                padding: const EdgeInsets.all(12),
+                padding: AppLayout.cardPadding,
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
@@ -360,7 +362,8 @@ class _CareTypeFormState extends State<_CareTypeForm> {
         if (!didPop) close();
       },
       child: Scaffold(
-        appBar: AppBar(
+        appBar: AppPageBar(
+          context: context,
           title: Text(widget.type == null ? s.addCustomCare : s.renameCareType),
           leading: IconButton(
             onPressed: busy ? null : close,
@@ -369,8 +372,13 @@ class _CareTypeFormState extends State<_CareTypeForm> {
           ),
         ),
         body: ListView(
-          padding: const EdgeInsets.all(16),
+          padding: AppLayout.pagePadding,
           children: [
+            AppScrollTitle(
+              title: Text(
+                widget.type == null ? s.addCustomCare : s.renameCareType,
+              ),
+            ),
             TextField(
               controller: input,
               enabled: !busy,
@@ -525,7 +533,8 @@ class _AddCarePageState extends State<AddCarePage> {
         if (!didPop) close();
       },
       child: Scaffold(
-        appBar: AppBar(
+        appBar: AppPageBar(
+          context: context,
           title: Text(s.addCare),
           leading: IconButton(
             onPressed: busy ? null : close,
@@ -534,8 +543,9 @@ class _AddCarePageState extends State<AddCarePage> {
           ),
         ),
         body: ListView(
-          padding: const EdgeInsets.all(16),
+          padding: AppLayout.pagePadding,
           children: [
+            AppScrollTitle(title: Text(s.addCare)),
             if (busy && state == null) const LinearProgressIndicator(),
             if (error != null) ErrorNotice(error!),
             if (state != null) ...[

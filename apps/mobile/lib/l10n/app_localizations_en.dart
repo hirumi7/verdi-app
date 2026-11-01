@@ -1553,4 +1553,7 @@ class AppStringsEn extends AppStrings {
   @override
   String get optimizationWriteFailure =>
       'The replacement file could not be saved. The prior photo was not replaced.';
+
+  @override
+  String get developmentShortNotice => 'Development preview';
 }

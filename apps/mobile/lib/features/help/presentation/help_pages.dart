@@ -37,11 +37,12 @@ class PrivacyPage extends StatelessWidget {
   Widget build(BuildContext context) {
     final s = strings(context);
     return Scaffold(
-      appBar: AppBar(title: Text(s.privacyTitle)),
+      appBar: AppPageBar(context: context, title: Text(s.privacyTitle)),
       body: SafeArea(
         child: ListView(
-          padding: const EdgeInsets.all(20),
+          padding: AppLayout.pagePadding,
           children: [
+            AppScrollTitle(title: Text(s.privacyTitle)),
             section(context, s.privacyLocalTitle, s.privacyLocalBody),
             section(context, s.privacyExternalTitle, s.privacyExternalBody),
             section(context, s.privacyBackupTitle, s.privacyBackupBody),
@@ -60,11 +61,12 @@ class HelpPage extends StatelessWidget {
   Widget build(BuildContext context) {
     final s = strings(context);
     return Scaffold(
-      appBar: AppBar(title: Text(s.helpTitle)),
+      appBar: AppPageBar(context: context, title: Text(s.helpTitle)),
       body: SafeArea(
         child: ListView(
-          padding: const EdgeInsets.all(20),
+          padding: AppLayout.pagePadding,
           children: [
+            AppScrollTitle(title: Text(s.helpTitle)),
             section(context, s.helpCareTitle, s.helpCareBody),
             section(context, s.helpHistoryTitle, s.helpHistoryBody),
             section(context, s.helpCatalogTitle, s.helpCatalogBody),
@@ -188,7 +190,8 @@ class _FeedbackPageState extends State<FeedbackPage> {
           if (!didPop) leave();
         },
         child: Scaffold(
-          appBar: AppBar(
+          appBar: AppPageBar(
+            context: context,
             title: Text(s.feedbackTitle),
             leading: Navigator.canPop(context)
                 ? BackButton(
@@ -204,8 +207,9 @@ class _FeedbackPageState extends State<FeedbackPage> {
           ),
           body: SafeArea(
             child: ListView(
-              padding: const EdgeInsets.all(20),
+              padding: AppLayout.pagePadding,
               children: [
+                AppScrollTitle(title: Text(s.feedbackTitle)),
                 Text(s.feedbackNoDestination),
                 const SizedBox(height: 12),
                 Text(s.feedbackPrivacy),

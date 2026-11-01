@@ -200,7 +200,8 @@ class _ProPageState extends State<ProPage> with WidgetsBindingObserver {
           if (!didPop) leave(false);
         },
         child: Scaffold(
-          appBar: AppBar(
+          appBar: AppPageBar(
+            context: context,
             title: Text(s.proTitle),
             leading: IconButton(
               onPressed: () => leave(false),
@@ -210,8 +211,9 @@ class _ProPageState extends State<ProPage> with WidgetsBindingObserver {
           ),
           body: SafeArea(
             child: ListView(
-              padding: const EdgeInsets.all(24),
+              padding: AppLayout.pagePadding,
               children: [
+                AppScrollTitle(title: Text(s.proTitle)),
                 Icon(
                   Icons.local_florist_outlined,
                   size: 56,

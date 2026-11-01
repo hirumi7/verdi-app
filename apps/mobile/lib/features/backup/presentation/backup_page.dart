@@ -99,14 +99,16 @@ class _BackupPageState extends State<BackupPage> {
       return PopScope(
         canPop: !state.replacing && !state.committedBoundary,
         child: Scaffold(
-          appBar: AppBar(
+          appBar: AppPageBar(
+            context: context,
             title: Text(s.backupTitle),
             automaticallyImplyLeading: !state.replacing,
           ),
           body: SafeArea(
             child: ListView(
-              padding: const EdgeInsets.all(20),
+              padding: AppLayout.pagePadding,
               children: [
+                AppScrollTitle(title: Text(s.backupTitle)),
                 Text(
                   s.backupExplanation,
                   style: Theme.of(context).textTheme.bodyLarge,

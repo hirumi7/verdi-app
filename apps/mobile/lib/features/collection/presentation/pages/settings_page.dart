@@ -17,12 +17,11 @@ class SettingsPage extends StatelessWidget {
     final s = strings(context);
     return Scaffold(
       body: ListView(
-        padding: const EdgeInsets.all(16),
+        padding: AppLayout.pagePadding,
         children: [
-          Text(s.settings, style: Theme.of(context).textTheme.headlineLarge),
-          const SizedBox(height: 24),
+          AppPageHeader(title: s.settings),
           if (ProHost.maybeOf(context) != null)
-            Card(
+            _SettingsCard(
               child: ListTile(
                 leading: const Icon(Icons.local_florist_outlined),
                 title: Text(s.proTitle),
@@ -30,7 +29,7 @@ class SettingsPage extends StatelessWidget {
                 onTap: () => openPro(context),
               ),
             ),
-          Card(
+          _SettingsCard(
             child: ListTile(
               leading: const Icon(Icons.checklist),
               title: Text(s.careTypes),
@@ -39,7 +38,7 @@ class SettingsPage extends StatelessWidget {
             ),
           ),
           if (ReminderHost.maybeOf(context) != null)
-            Card(
+            _SettingsCard(
               child: ListTile(
                 leading: const Icon(Icons.notifications_outlined),
                 title: Text(s.remindersTitle),
@@ -48,7 +47,7 @@ class SettingsPage extends StatelessWidget {
               ),
             ),
           if (BackupHost.maybeOf(context) != null)
-            Card(
+            _SettingsCard(
               child: ListTile(
                 leading: const Icon(Icons.backup_outlined),
                 title: Text(s.backupTitle),
@@ -58,7 +57,7 @@ class SettingsPage extends StatelessWidget {
                 ),
               ),
             ),
-          Card(
+          _SettingsCard(
             child: ListTile(
               leading: const Icon(Icons.privacy_tip_outlined),
               title: Text(s.privacyTitle),
@@ -66,7 +65,7 @@ class SettingsPage extends StatelessWidget {
               onTap: () => openPrivacy(context),
             ),
           ),
-          Card(
+          _SettingsCard(
             child: ListTile(
               leading: const Icon(Icons.help_outline),
               title: Text(s.helpTitle),
@@ -74,7 +73,7 @@ class SettingsPage extends StatelessWidget {
               onTap: () => openHelp(context),
             ),
           ),
-          Card(
+          _SettingsCard(
             child: ListTile(
               leading: const Icon(Icons.description_outlined),
               title: Text(s.licensesTitle),
@@ -85,9 +84,9 @@ class SettingsPage extends StatelessWidget {
               ),
             ),
           ),
-          Card(
+          _SettingsCard(
             child: Padding(
-              padding: const EdgeInsets.all(20),
+              padding: AppLayout.cardPadding,
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
@@ -105,4 +104,14 @@ class SettingsPage extends StatelessWidget {
       ),
     );
   }
+}
+
+class _SettingsCard extends StatelessWidget {
+  const _SettingsCard({required this.child});
+  final Widget child;
+  @override
+  Widget build(BuildContext context) => Padding(
+    padding: const EdgeInsets.only(bottom: AppLayout.cardGap),
+    child: Card(child: child),
+  );
 }

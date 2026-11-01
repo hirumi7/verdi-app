@@ -292,7 +292,8 @@ class _PlantEditorPageState extends State<PlantEditorPage>
             if (!didPop) back();
           },
           child: Scaffold(
-            appBar: AppBar(
+            appBar: AppPageBar(
+              context: context,
               leading: IconButton(
                 onPressed: back,
                 tooltip: s.cancel,
@@ -306,13 +307,20 @@ class _PlantEditorPageState extends State<PlantEditorPage>
                     : s.editPlant,
               ),
             ),
-            body: state.loading
-                ? const Center(child: CircularProgressIndicator())
-                : f == null
-                ? Center(
-                    child: ErrorNotice(
-                      state.errorCode ?? 'STORAGE_UNAVAILABLE',
-                    ),
+            body: state.loading || f == null
+                ? ListView(
+                    padding: AppLayout.pagePadding,
+                    children: [
+                      AppScrollTitle(
+                        title: Text(
+                          widget.plantId == null ? s.addPlant : s.editPlant,
+                        ),
+                      ),
+                      if (state.loading)
+                        const Center(child: CircularProgressIndicator())
+                      else
+                        ErrorNotice(state.errorCode ?? 'STORAGE_UNAVAILABLE'),
+                    ],
                   )
                 : state.picking
                 ? SpeciesPicker(editor: editor)
@@ -320,10 +328,15 @@ class _PlantEditorPageState extends State<PlantEditorPage>
                     key: const ValueKey('plant-editor-scroll'),
                     keyboardDismissBehavior:
                         ScrollViewKeyboardDismissBehavior.onDrag,
-                    padding: EdgeInsets.fromLTRB(16, 8, 16, 32),
+                    padding: AppLayout.formPadding,
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.stretch,
                       children: [
+                        AppScrollTitle(
+                          title: Text(
+                            widget.plantId == null ? s.addPlant : s.editPlant,
+                          ),
+                        ),
                         if (photoLocked) const LinearProgressIndicator(),
                         if (photoError != null ||
                             state.photoFailed ||

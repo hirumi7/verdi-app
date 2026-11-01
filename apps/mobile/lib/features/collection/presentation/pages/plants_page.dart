@@ -23,30 +23,19 @@ class PlantsPage extends StatelessWidget {
         body: RefreshIndicator(
           onRefresh: cubit.refresh,
           child: ListView(
-            padding: const EdgeInsets.all(16),
+            padding: AppLayout.pagePadding,
             children: [
-              if (page?.activeCount != null)
-                Text(
-                  s.plantCount(page!.activeCount!),
-                  style: Theme.of(context).textTheme.labelLarge,
+              AppPageHeader(
+                title: s.plants,
+                subtitle: page?.activeCount == null
+                    ? null
+                    : s.plantCount(page!.activeCount!),
+                action: FilledButton.tonalIcon(
+                  onPressed: () => context.router.push(PlantEditorRoute()),
+                  icon: const Icon(Icons.add),
+                  label: Text(s.addPlant),
                 ),
-              Wrap(
-                alignment: WrapAlignment.spaceBetween,
-                crossAxisAlignment: WrapCrossAlignment.center,
-                spacing: 20,
-                children: [
-                  Text(
-                    s.plants,
-                    style: Theme.of(context).textTheme.headlineLarge,
-                  ),
-                  FilledButton.tonalIcon(
-                    onPressed: () => context.router.push(PlantEditorRoute()),
-                    icon: const Icon(Icons.add),
-                    label: Text(s.addPlant),
-                  ),
-                ],
               ),
-              const SizedBox(height: 16),
               TextField(
                 decoration: InputDecoration(
                   labelText: s.searchPlants,
@@ -56,6 +45,7 @@ class PlantsPage extends StatelessWidget {
               ),
               const SizedBox(height: 12),
               Wrap(
+                runSpacing: 8,
                 spacing: 8,
                 children: [
                   ChoiceChip(

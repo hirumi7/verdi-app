@@ -641,5 +641,6 @@
   "optimizationPhotoUnavailable": "This photo is no longer available in this plant.",
   "optimizationOpenPhoto": "Open photo and replacement draft",
   "optimizationDiskFull": "Not enough storage to prepare this replacement. Free space, then review a new selection.",
-  "optimizationWriteFailure": "The replacement file could not be saved. The prior photo was not replaced."
+  "optimizationWriteFailure": "The replacement file could not be saved. The prior photo was not replaced.",
+  "developmentShortNotice": "Development preview"
 }

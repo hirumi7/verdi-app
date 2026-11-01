@@ -283,6 +283,12 @@ void main() {
       await press(tester, 'Delete forever');
       expect(find.textContaining('This removes 0 routines'), findsOneWidget);
       await press(tester, 'Cancel');
+      // Full names now live in scrollable content rather than a clipped toolbar.
+      await tester.scrollUntilVisible(
+        find.text('Renamed fern'),
+        -300,
+        scrollable: find.byType(Scrollable).first,
+      );
       expect(find.text('Renamed fern'), findsOneWidget);
       await press(tester, 'Delete forever');
       await press(tester, 'Confirm');

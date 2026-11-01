@@ -144,11 +144,12 @@ class _PhotosPageState extends State<PhotosPage> {
           photo = state.photos.where((p) => p.id == selected).firstOrNull,
           busy = state.busy || picking;
       return Scaffold(
-        appBar: AppBar(title: Text(s.photos)),
+        appBar: AppPageBar(context: context, title: Text(s.photos)),
         body: SafeArea(
           child: ListView(
-            padding: const EdgeInsets.all(16),
+            padding: AppLayout.pagePadding,
             children: [
+              AppScrollTitle(title: Text(s.photos)),
               OutlinedButton.icon(
                 onPressed: busy
                     ? null
@@ -156,6 +157,7 @@ class _PhotosPageState extends State<PhotosPage> {
                 icon: const Icon(Icons.compare),
                 label: Text(s.comparePhotos),
               ),
+              const SizedBox(height: 8),
               OutlinedButton.icon(
                 onPressed: busy
                     ? null

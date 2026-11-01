@@ -2769,6 +2769,12 @@ abstract class AppStrings {
   /// In en, this message translates to:
   /// **'The replacement file could not be saved. The prior photo was not replaced.'**
   String get optimizationWriteFailure;
+
+  /// No description provided for @developmentShortNotice.
+  ///
+  /// In en, this message translates to:
+  /// **'Development preview'**
+  String get developmentShortNotice;
 }
 
 class _AppStringsDelegate extends LocalizationsDelegate<AppStrings> {

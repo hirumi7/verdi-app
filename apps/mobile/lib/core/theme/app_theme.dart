@@ -1,3 +1,5 @@
+import 'app_layout.dart';
+
 import 'package:flutter/material.dart';
 
 abstract final class AppTheme {
@@ -30,16 +32,92 @@ abstract final class AppTheme {
     return base.copyWith(
       scaffoldBackgroundColor: paper,
       textTheme: text.copyWith(
-        headlineLarge: text.headlineLarge!.copyWith(
+        displayLarge: text.displayLarge!.copyWith(
+          fontSize: 40,
+          height: 44 / 40,
+          fontWeight: FontWeight.w700,
+          letterSpacing: 0,
+        ),
+        displayMedium: text.displayMedium!.copyWith(
           fontSize: 34,
+          height: 41 / 34,
           fontWeight: FontWeight.w700,
           letterSpacing: .34,
         ),
+        displaySmall: text.displaySmall!.copyWith(
+          fontSize: 28,
+          height: 34 / 28,
+          fontWeight: FontWeight.w700,
+          letterSpacing: 0,
+        ),
+        headlineLarge: text.headlineLarge!.copyWith(
+          fontSize: 34,
+          height: 41 / 34,
+          fontWeight: FontWeight.w700,
+          letterSpacing: .34,
+        ),
+        headlineMedium: text.headlineMedium!.copyWith(
+          fontSize: 28,
+          height: 34 / 28,
+          fontWeight: FontWeight.w700,
+          letterSpacing: 0,
+        ),
+        headlineSmall: text.headlineSmall!.copyWith(
+          fontSize: 20,
+          height: 25 / 20,
+          fontWeight: FontWeight.w600,
+          letterSpacing: 0,
+        ),
         titleLarge: text.titleLarge!.copyWith(
           fontSize: 22,
+          height: 28 / 22,
           fontWeight: FontWeight.w700,
+          letterSpacing: 0,
         ),
-        bodyLarge: text.bodyLarge!.copyWith(fontSize: 17, height: 1.3),
+        titleMedium: text.titleMedium!.copyWith(
+          fontSize: 17,
+          height: 22 / 17,
+          fontWeight: FontWeight.w600,
+          letterSpacing: 0,
+        ),
+        titleSmall: text.titleSmall!.copyWith(
+          fontSize: 15,
+          height: 20 / 15,
+          fontWeight: FontWeight.w600,
+          letterSpacing: 0,
+        ),
+        bodyLarge: text.bodyLarge!.copyWith(
+          fontSize: 17,
+          height: 22 / 17,
+          letterSpacing: 0,
+        ),
+        bodyMedium: text.bodyMedium!.copyWith(
+          fontSize: 17,
+          height: 22 / 17,
+          letterSpacing: 0,
+        ),
+        bodySmall: text.bodySmall!.copyWith(
+          fontSize: 15,
+          height: 20 / 15,
+          letterSpacing: 0,
+        ),
+        labelLarge: text.labelLarge!.copyWith(
+          fontSize: 15,
+          height: 20 / 15,
+          fontWeight: FontWeight.w600,
+          letterSpacing: 0,
+        ),
+        labelMedium: text.labelMedium!.copyWith(
+          fontSize: 13,
+          height: 18 / 13,
+          fontWeight: FontWeight.w600,
+          letterSpacing: 0,
+        ),
+        labelSmall: text.labelSmall!.copyWith(
+          fontSize: 12,
+          height: 16 / 12,
+          letterSpacing: 0,
+        ),
       ),
       appBarTheme: AppBarTheme(
         backgroundColor: paper,
@@ -58,15 +136,45 @@ abstract final class AppTheme {
         filled: true,
         fillColor: surface,
         border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
-        contentPadding: const EdgeInsets.all(16),
+        contentPadding: AppLayout.cardPadding,
       ),
       filledButtonTheme: FilledButtonThemeData(
         style: FilledButton.styleFrom(
           minimumSize: const Size(48, 48),
-          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 14),
+          padding: AppLayout.actionPadding,
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(12),
           ),
+        ),
+      ),
+      outlinedButtonTheme: OutlinedButtonThemeData(
+        style: OutlinedButton.styleFrom(
+          minimumSize: const Size(48, 48),
+          padding: AppLayout.actionPadding,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(12),
+          ),
+        ),
+      ),
+      listTileTheme: ListTileThemeData(
+        contentPadding: const EdgeInsets.symmetric(
+          horizontal: AppLayout.gutter,
+        ),
+        minTileHeight: 64,
+        horizontalTitleGap: 12,
+        minVerticalPadding: 12,
+        titleTextStyle: text.titleMedium!.copyWith(
+          fontSize: 17,
+          height: 22 / 17,
+          fontWeight: FontWeight.w600,
+          color: ink,
+          letterSpacing: 0,
+        ),
+        subtitleTextStyle: text.bodySmall!.copyWith(
+          fontSize: 15,
+          height: 20 / 15,
+          color: muted,
+          letterSpacing: 0,
         ),
       ),
       textButtonTheme: TextButtonThemeData(

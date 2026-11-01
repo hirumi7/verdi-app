@@ -54,10 +54,11 @@ class ReminderPage extends StatelessWidget {
                 },
         );
         return Scaffold(
-          appBar: AppBar(title: Text(s.remindersTitle)),
+          appBar: AppPageBar(context: context, title: Text(s.remindersTitle)),
           body: ListView(
-            padding: const EdgeInsets.all(16),
+            padding: AppLayout.pagePadding,
             children: [
+              AppScrollTitle(title: Text(s.remindersTitle)),
               Text(s.remindersBestEffort),
               const SizedBox(height: 16),
               Text(

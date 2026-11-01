@@ -158,7 +158,7 @@ class _OptimizationPageState extends State<OptimizationPage> {
     return Card(
       key: ValueKey('optimization-result-${result['photoId']}'),
       child: Padding(
-        padding: const EdgeInsets.all(12),
+        padding: AppLayout.cardPadding,
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
@@ -222,14 +222,16 @@ class _OptimizationPageState extends State<OptimizationPage> {
           if (!didPop) leave();
         },
         child: Scaffold(
-          appBar: AppBar(
+          appBar: AppPageBar(
+            context: context,
             title: Text(s.optimizePhotos),
             leading: BackButton(onPressed: leave),
           ),
           body: SafeArea(
             child: ListView(
-              padding: const EdgeInsets.all(16),
+              padding: AppLayout.pagePadding,
               children: [
+                AppScrollTitle(title: Text(s.optimizePhotos)),
                 Text(s.optimizationIntro),
                 const SizedBox(height: 12),
                 Text(s.optimizationWarning),
@@ -293,6 +295,7 @@ class _OptimizationPageState extends State<OptimizationPage> {
                   Text(s.optimizationNoPhotos),
                 for (final photo in state.photos)
                   Card(
+                    margin: const EdgeInsets.only(bottom: AppLayout.cardGap),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.stretch,
                       children: [

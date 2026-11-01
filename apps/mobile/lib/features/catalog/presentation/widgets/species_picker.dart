@@ -48,6 +48,11 @@ class _SpeciesPickerState extends State<SpeciesPicker> {
         key: const ValueKey('species-results'),
         keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
         children: [
+          if (AppLayout.largeText(context))
+            Padding(
+              padding: const EdgeInsets.fromLTRB(16, 16, 16, 0),
+              child: AppScrollTitle(title: Text(s.chooseSpecies)),
+            ),
           Padding(
             padding: const EdgeInsets.all(16),
             child: TextField(
@@ -177,10 +182,11 @@ Future<void> showSpeciesInformation(
     };
     return Dialog.fullscreen(
       child: Scaffold(
-        appBar: AppBar(title: Text(s.speciesInformation)),
+        appBar: AppPageBar(context: context, title: Text(s.speciesInformation)),
         body: ListView(
-          padding: const EdgeInsets.all(20),
+          padding: AppLayout.pagePadding,
           children: [
+            AppScrollTitle(title: Text(s.speciesInformation)),
             const Center(child: GenericPlantImage()),
             Text(
               s.genericIllustration,

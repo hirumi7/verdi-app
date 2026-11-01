@@ -79,13 +79,19 @@ class _CardPageState extends State<CardPage> {
         _ => null,
       };
       return Scaffold(
-        appBar: AppBar(
+        appBar: AppPageBar(
+          context: context,
           title: Text(widget.comparison ? s.comparePhotos : s.sharePlantCard),
         ),
         body: SafeArea(
           child: ListView(
-            padding: const EdgeInsets.all(16),
+            padding: AppLayout.pagePadding,
             children: [
+              AppScrollTitle(
+                title: Text(
+                  widget.comparison ? s.comparePhotos : s.sharePlantCard,
+                ),
+              ),
               if (state.busy) const LinearProgressIndicator(),
               Text(s.cardPrivacy),
               const SizedBox(height: 16),
@@ -94,6 +100,7 @@ class _CardPageState extends State<CardPage> {
                 if (state.photos.length < 2) Text(s.cardNeedsTwo),
                 for (final photo in state.photos)
                   Card(
+                    margin: const EdgeInsets.only(bottom: AppLayout.cardGap),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.stretch,
                       children: [
