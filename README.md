@@ -200,3 +200,39 @@ that fixture, and never silently resets another collection. Generate it with
 `VERDI_BACKUP_FIXTURE_OUTPUT=/tmp/verdi-backup-rich.zip swift test --filter
  testBackupRich` in the native package; use the OS Files picker to import it.
 The handoff records actual simulator IDs, results and remaining release checks.
+
+## One-time Pro verification
+
+The development preview uses native StoreKit2 with the Xcode-only non-consumable
+`dev.verdi.preview.pro.local`. Settings → Verdi Pro and the add/restore limit offer
+unlimited plants, explicit Restore, and Free exit. No real store product is
+registered. Without an active local StoreKit session the offer is unavailable;
+core care, existing content and backup remain usable. Entitlements and purchase
+attempts stay outside content backups. A purchase never saves a plant automatically.
+
+Run hosted tests on a **disposable simulator**, separate from retained user data:
+
+```sh
+cd apps/mobile/ios
+LANG=en_US.UTF-8 LC_ALL=en_US.UTF-8 xcodebuild \
+  -workspace Runner.xcworkspace -scheme Runner -configuration Debug \
+  -destination 'platform=iOS Simulator,id=DEVICE_ID' \
+  -parallel-testing-enabled NO -derivedDataPath /tmp/verdi-hosted-store-build \
+  -only-testing:RunnerTests/StoreKitIntegrationTests \
+  FLUTTER_TARGET=lib/main_development.dart test
+```
+
+The TestAction isolates the hosted coordinator with `VERDI_NATIVE_STORE_TESTS=1`;
+ordinary launches and Flutter integration retain the real platform bridge.
+`RunnerTests/Verdi.storekit` supplies simulated purchases with no real charge.
+Hosted tests exercise purchase/restore/refund, pending approval/decline/retry,
+late approval, restart, cancellation and failed cache writes. Native authority
+fault tests use `swift test --filter 'Store|ProGate'` in the native package.
+
+`flutter test integration_test/pro_test.dart -d DEVICE_ID --no-uninstall` from
+`apps/mobile` requires the retained rich **QA** collection with at least five
+active plants and an archived plant. It exercises Settings and the restore gate,
+then checks that existing plants/history/photos/drafts are preserved. It never
+resets a collection or initiates a purchase. Flutter widget tests separately
+verify same-command fresh confirmation after upgrade and delayed store/UI races.
+Physical StoreKit/account/protection and production configuration remain open.

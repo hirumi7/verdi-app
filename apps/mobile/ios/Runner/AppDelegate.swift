@@ -8,6 +8,7 @@ import UIKit
   private var coreBridge: CoreRepositoryBridge?
   private var mediaBridge: MediaPlatformBridge?
   private var backupBridge: BackupPlatformBridge?
+  private var storeBridge: StorePlatformBridge?
   private var reminderBridge: ReminderPlatformBridge?
   #endif
 
@@ -26,6 +27,9 @@ import UIKit
   #if DEBUG
   private func prepareNativeOwners() throws {
     if coreBridge == nil { coreBridge = try CoreRepositoryBridge() }
+    if ProcessInfo.processInfo.environment["VERDI_NATIVE_STORE_TESTS"] != "1", storeBridge == nil, let coreBridge, let authority=coreBridge.repository.storeAuthority {
+      storeBridge=StorePlatformBridge(core:coreBridge.repository,authority:authority)
+    }
     if reminderBridge == nil, let coreBridge {
       reminderBridge = ReminderPlatformBridge(repository: coreBridge.repository)
     }
@@ -39,6 +43,10 @@ import UIKit
       do {
         try prepareNativeOwners()
         guard let bridge = coreBridge, let reminders = reminderBridge else { return }
+        if let storeBridge {
+          storeBridge.attach(registrar.messenger())
+          StorePlatformHostApiSetup.setUp(binaryMessenger:registrar.messenger(),api:storeBridge)
+        }
         reminders.attach(registrar.messenger())
         ReminderPlatformHostApiSetup.setUp(binaryMessenger:registrar.messenger(),api:reminders)
         let media = MediaPlatformBridge(repository:bridge.repository)

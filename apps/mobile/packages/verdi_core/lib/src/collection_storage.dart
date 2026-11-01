@@ -37,6 +37,14 @@ final class CoreStorageProjection {
       clock: () => ClockReading(clock, _elapsed.elapsed),
     );
   }
+
+  /// Read-only native summary for preview planning; native rechecks at commit.
+  void hydrateAccess({required bool pro, required int revision}) {
+    _revision(revision);
+    _store._pro = pro;
+    _store._capabilityRevision = revision;
+  }
+
   String get datasetId => _store._state.collection.datasetId;
   CollectionSnapshot get snapshot => _store._state.collection;
 
@@ -578,7 +586,7 @@ final class CoreStorageProjection {
           command is RestorePlant ||
               (command is SavePlant &&
                   snapshot.drafts[command.draftId]?.mode == DraftMode.add)
-          ? 1
+          ? _store._capabilityRevision
           : null,
       'expectedToday': _draftOnly(command) ? null : clock.today.toString(),
       'effectsHash': command._needsPreview ? canonicalValueHash(effects) : null,

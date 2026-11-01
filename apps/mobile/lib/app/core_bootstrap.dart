@@ -1,3 +1,5 @@
+import '../features/pro/presentation/pro_page.dart';
+import '../features/pro/data/store_service.dart';
 import '../features/reminders/data/reminder_service.dart';
 
 import 'package:flutter/material.dart';
@@ -28,6 +30,7 @@ class _CoreBootstrapState extends State<CoreBootstrap>
     with WidgetsBindingObserver {
   NativeCollectionRepository? repository;
   ReminderService? reminderService;
+  late final StoreService storeService = NativeStoreService();
   WorkspaceCubit? recoveryWorkspace;
   List<PendingCoreAction> pending = [];
   bool busy = true, ready = false;
@@ -49,6 +52,7 @@ class _CoreBootstrapState extends State<CoreBootstrap>
   @override
   void dispose() {
     WidgetsBinding.instance.removeObserver(this);
+    storeService.dispose();
     recoveryWorkspace?.close();
     super.dispose();
   }
@@ -172,6 +176,15 @@ class _CoreBootstrapState extends State<CoreBootstrap>
     if (mounted) await _open();
   }
 
+  Widget _storeHost(Widget child) => repository == null
+      ? child
+      : ProHost(
+          service: storeService,
+          datasetId: repository!.datasetId,
+          newId: repository!.newId,
+          child: child,
+        );
+
   @override
   Widget build(BuildContext context) {
     if (ready) {
@@ -179,29 +192,31 @@ class _CoreBootstrapState extends State<CoreBootstrap>
       final locale = settings['localeOverride'] as String?;
       final supported =
           locale == null || const ['en', 'en-US', 'en-GB'].contains(locale);
-      return BackupHost(
-        datasetId: repository!.datasetId,
-        newId: repository!.newId,
-        reopen: _reopenAfterRestore,
-        child: VerdiApp(
-          key: ValueKey(repository!.datasetId),
-          reminderService: reminderService,
-          reminderNewId: repository!.newId,
-          restored: restored,
-          localeFallback: !supported,
-          locale: supported && locale != null
-              ? Locale.fromSubtags(
-                  languageCode: 'en',
-                  countryCode: locale.contains('-')
-                      ? locale.split('-').last
-                      : null,
-                )
-              : null,
-          themeMode: settings['theme'] == 'dark'
-              ? ThemeMode.dark
-              : settings['theme'] == 'light'
-              ? ThemeMode.light
-              : ThemeMode.system,
+      return _storeHost(
+        BackupHost(
+          datasetId: repository!.datasetId,
+          newId: repository!.newId,
+          reopen: _reopenAfterRestore,
+          child: VerdiApp(
+            key: ValueKey(repository!.datasetId),
+            reminderService: reminderService,
+            reminderNewId: repository!.newId,
+            restored: restored,
+            localeFallback: !supported,
+            locale: supported && locale != null
+                ? Locale.fromSubtags(
+                    languageCode: 'en',
+                    countryCode: locale.contains('-')
+                        ? locale.split('-').last
+                        : null,
+                  )
+                : null,
+            themeMode: settings['theme'] == 'dark'
+                ? ThemeMode.dark
+                : settings['theme'] == 'light'
+                ? ThemeMode.light
+                : ThemeMode.system,
+          ),
         ),
       );
     }
@@ -289,13 +304,15 @@ class _CoreBootstrapState extends State<CoreBootstrap>
     if (recoveryWorkspace != null) {
       page = BlocProvider.value(value: recoveryWorkspace!, child: page);
     }
-    return MaterialApp(
-      title: 'Verdi',
-      theme: AppTheme.build(Brightness.light),
-      darkTheme: AppTheme.build(Brightness.dark),
-      localizationsDelegates: AppStrings.localizationsDelegates,
-      supportedLocales: const [Locale('en')],
-      home: page,
+    return _storeHost(
+      MaterialApp(
+        title: 'Verdi',
+        theme: AppTheme.build(Brightness.light),
+        darkTheme: AppTheme.build(Brightness.dark),
+        localizationsDelegates: AppStrings.localizationsDelegates,
+        supportedLocales: const [Locale('en')],
+        home: page,
+      ),
     );
   }
 }

@@ -1,0 +1,16 @@
+{
+  "identifier" : "E12544B7-5118-4805-9D03-0CB371D9B32D",
+  "nonRenewingSubscriptions" : [],
+  "products" : [{
+    "displayPrice" : "29.99",
+    "familyShareable" : false,
+    "internalID" : "914001",
+    "localizations" : [{"description" : "Unlimited active plants in the development preview.", "displayName" : "Verdi Pro — Local Test", "locale" : "en_US"}],
+    "productID" : "dev.verdi.preview.pro.local",
+    "referenceName" : "Verdi Pro Local Test",
+    "type" : "NonConsumable"
+  }],
+  "settings" : {"_applicationInternalID" : "", "_developerTeamID" : "", "_failTransactionsEnabled" : false, "_locale" : "en_US", "_storefront" : "USA", "_storeKitErrors" : []},
+  "subscriptionGroups" : [],
+  "version" : {"major" : 3, "minor" : 0}
+}

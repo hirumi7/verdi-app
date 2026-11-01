@@ -24,6 +24,11 @@ struct CoreUndoGrant {
 /// One serialized native owner for the permanent custom_core_v1 installation.
 /// JSON envelopes contain bounded typed protocol values, never arbitrary SQL.
 public final class CoreRepository {
+    public var storeAuthority: StoreAuthority?
+    func withCapability<T>(_ body:(StoreCapability)throws->T) rethrows -> T {
+        if let authority=storeAuthority {return try authority.withCapability(body)}
+        return try body(.free)
+    }
     public var reminderInvalidated: (() -> Void)?
     var reminderRecoveryRequired=false
     let installationDirectory: URL
@@ -85,8 +90,8 @@ public final class CoreRepository {
                 case "metadata": value = try db.read { try metadata($0) }
                 case "readRows": value = try db.read { try readRows($0, args) }
                 case "freeze": value = try db.transaction { try freeze($0, CoreSchema.object(args["intent"])) }
-                case "preview": value = try preview(args, db)
-                case "commit": value = try commit(args, db)
+                case "preview": value = try withCapability { try preview(args, db, access: $0) }
+                case "commit": value = try withCapability { try commit(args, db, access: $0) }
                 case "resolve", "abandon":
                     let id = try CoreSchema.string(args["commandId"]); try CoreSchema.uuid(id)
                     let work: (SQLiteSession) throws -> CanonicalValue = { sql in
@@ -104,6 +109,7 @@ public final class CoreRepository {
                         return .null
                     }
                     value = try operation == "abandon" ? db.transaction(work) : db.read(work)
+                case "capabilities": value = withCapability { $0.value }
                 case "pending": value = try db.read { try pending($0, args) }
                 case "pendingBody": value = try db.read { sql in
                     let id = try CoreSchema.string(args["commandId"]); try CoreSchema.uuid(id)
@@ -170,7 +176,7 @@ public final class CoreRepository {
             var result = try CoreSchema.object(db.read { try metadata($0) })
             result["sessionId"] = .string(sessionID); result["profile"] = .string("custom_core_v1"); result["schemaVersion"] = .integer(4)
             result["fileProtectionVerified"] = .boolean(Self.deviceProtectionRequired)
-            result["clock"] = CoreClockFrame.capture(now(), zone: zone()).value; result["capabilityRevision"] = .integer(1); result["access"] = .string("free")
+            result["clock"] = CoreClockFrame.capture(now(), zone: zone()).value; let access=withCapability{$0}; result["capabilityRevision"] = .integer(access.revision); result["access"] = .string(access.pro ? "pro":"free")
             return .object(result)
         } catch { try? db.close(); throw error }
     }
@@ -265,11 +271,11 @@ public final class CoreRepository {
         return .object(["items": .array(rows.prefix(200).map { .object(["commandId":CoreSchema.canonical($0[0]),"commandType":CoreSchema.canonical($0[1]),"payloadHash":CoreSchema.canonical($0[2])]) }),
             "nextCursor": rows.count > 200 ? CoreSchema.canonical(rows[199][0]) : .null])
     }
-    private func preview(_ args: [String: CanonicalValue], _ db: SQLiteDatabase) throws -> CanonicalValue {
+    private func preview(_ args: [String: CanonicalValue], _ db: SQLiteDatabase, access: StoreCapability) throws -> CanonicalValue {
         let plan = try CoreSchema.object(args["plan"]); let parsed = try CoreRegistry.parse(plan, session: sessionID, dataset: datasetID)
         guard CoreRegistry.needsPreview(parsed.type) else { throw CoreRepositoryError("PLAN_INVALID") }
         let mediaFingerprint = try db.read { sql -> String in
-            let changes = try CoreRegistry.validate(sql, parsed, clock: CoreClockFrame.capture(now(), zone: zone()), grants: grants, elapsed: elapsed())
+            let changes = try CoreRegistry.validate(sql, parsed, clock: CoreClockFrame.capture(now(), zone: zone()), grants: grants, elapsed: elapsed(), access:access)
             try validateNewPhotoLinks(sql,parsed,changes)
             return try CoreRegistry.mediaPreviewFingerprint(sql,parsed)
         }
@@ -278,7 +284,7 @@ public final class CoreRepository {
         previews[token] = CorePreview(command: parsed.id, hash: parsed.hash, created: elapsed(), mediaFingerprint:mediaFingerprint)
         return .object(["previewToken": .string(token),"expiresAt": .string(CoreClockFrame.capture(now().addingTimeInterval(600), zone: zone()).instant)])
     }
-    private func commit(_ args: [String: CanonicalValue], _ db: SQLiteDatabase) throws -> CanonicalValue {
+    private func commit(_ args: [String: CanonicalValue], _ db: SQLiteDatabase, access: StoreCapability) throws -> CanonicalValue {
         let parsed = try CoreRegistry.parse(CoreSchema.object(args["plan"]), session: sessionID, dataset: datasetID)
         var undo: CanonicalValue?
         let result = try db.transaction { sql -> CanonicalValue in
@@ -289,7 +295,7 @@ public final class CoreRepository {
                       elapsed() >= p.created, elapsed() - p.created < 600,
                       try CoreRegistry.mediaPreviewFingerprint(sql,parsed)==p.mediaFingerprint else { throw CoreRepositoryError("PREVIEW_STALE") }
             }
-            let changes = try CoreRegistry.validate(sql, parsed, clock: clock, grants: grants, elapsed: elapsed())
+            let changes = try CoreRegistry.validate(sql, parsed, clock: clock, grants: grants, elapsed: elapsed(), access:access)
             for change in changes where change.table=="photos" && change.action=="update" {
                 if change.before?[2] != .null || change.values[4] != change.before?[4] {
                     guard let files=mediaFiles,files.exists(try CoreSchema.text(change.values[4])) else{throw CoreRepositoryError("MEDIA_MISSING")}

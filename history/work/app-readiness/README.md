@@ -1363,3 +1363,39 @@ REQ-010 stays partial and all accepted records stay unchanged. Next concrete
 reminder check is actual terminated/locked notification-tap navigation with
 observable delegate receipt and no care mutation, followed by physical-device
 and release verification. No simulator interaction attempt is counted as a pass.
+
+## One-time Pro integration — 2026-11-01
+
+**Author:** Codex (AI assistant), with independent review by core_readiness_review.
+
+**Date:** 2026-11-01 (Asia/Jakarta).
+
+Implemented against published docs pin
+`6472a7131b71faf9800b6c62a20a001ec67fcafc`: native StoreKit2 authority, separate
+installation-bound Keychain/attempt persistence, Settings and active-limit offers,
+Restore, revocation, explicit pending retry and same-command fresh confirmation.
+REQ-014 remains partial; preserve REQ-006/007/012/015/018 and every accepted decision.
+Only unlimited plants is advertised. Local `dev.verdi.preview.pro.local` is an
+Xcode test product, with no real charge or production store registration.
+
+Checks: core127 passed; native full147 passed/4 opt-in backup probes skipped;
+final affected native7 passed; hosted iOS StoreKit9 passed; Flutter67 passed;
+Pigeon/localization/build_runner/73-file format/analyzer passed. Native build with
+warnings-as-errors and ordinary iOS simulator build/launch passed. Main UI
+integration passes on the retained rich QA simulator with existing plant/history/
+photo/draft preservation. Manual dark-mode Settings → Pro → scroll → Continue Free
+returns correctly; no purchase was attempted through the unconfigured ordinary app.
+User's original retained simulator was not reset.
+
+Independent review closed failed-write revocation replay, storage/status recovery,
+restart intent and prior-pending preservation, pre-sheet cancellation, late approval
+during confirmation, and changed-context cancellation. Hosted tests also inject
+StoreKit user-cancel/network failures after interrupted retry. Initial test/build
+failures were corrected and affected checks rerun; full evidence is in the docs
+delivery record. No production readiness is inferred.
+
+Remaining: production store configuration and physical purchase/account/protection,
+custom-care premium UI, comparison/cosmetics, internal admin, full accessibility,
+reminder locked/terminated tap evidence, and full-limit backup/performance checks.
+Next bounded build scope is custom-care integration, then photo comparison/share
+cards, while device/store release evidence stays separate. Follow the same workflow.

@@ -196,3 +196,27 @@ abstract class ReminderPlatformHostApi {
 abstract class ReminderPlatformEventsApi {
   void changed();
 }
+
+@HostApi()
+abstract class StorePlatformHostApi {
+  @async
+  String readState();
+  @async
+  String refresh();
+  @async
+  String loadOffer();
+  @async
+  String purchase(String request);
+  @async
+  String restorePurchases();
+  @async
+  String cancelIntent(String intentId);
+
+  @async
+  String retryPendingPurchase(String intentId);
+}
+
+@FlutterApi()
+abstract class StorePlatformEventsApi {
+  void changed();
+}

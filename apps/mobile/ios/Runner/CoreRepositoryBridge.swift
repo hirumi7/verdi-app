@@ -22,6 +22,7 @@ final class CoreRepositoryBridge: CoreRepositoryHostApi {
         entries: read("assets/catalog/entries.json", limit: 32*1024*1024),
         assets: ["generic_plant": read("assets/illustrations/empty-plants.png", limit: 8*1024*1024)])
     })
+    repository.storeAuthority = StoreAuthority(configuration:.preview(bundleID:Bundle.main.bundleIdentifier ?? "dev.verdi.preview"),directory:support.appendingPathComponent("VerdiStore-local",isDirectory:true))
     observer = NotificationCenter.default.addObserver(forName: UIApplication.willResignActiveNotification, object: nil, queue: nil) { [weak self] _ in
       self?.repository.invalidateUndo()
     }

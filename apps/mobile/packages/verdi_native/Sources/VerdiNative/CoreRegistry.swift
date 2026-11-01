@@ -39,7 +39,7 @@ enum CoreRegistry {
         try require(needsPreview(type) ? p["effectsHash"]?.text?.count == 64 : p["effectsHash"]?.isNull == true)
         return CorePlan(body:p,id:id,type:type,payload:payload,payloadHash:payloadHash,hash:hash)
     }
-    static func validate(_ sql: SQLiteSession, _ p: CorePlan, clock: CoreClockFrame, grants: [String:CoreUndoGrant], elapsed: TimeInterval) throws -> [CoreDelta] {
+    static func validate(_ sql: SQLiteSession, _ p: CorePlan, clock: CoreClockFrame, grants: [String:CoreUndoGrant], elapsed: TimeInterval, access: StoreCapability = .free) throws -> [CoreDelta] {
         guard let frozenRow = try sql.query("SELECT hash,body,status FROM intents WHERE id=?", [.text(p.id)]).first else { throw CoreRepositoryError("NOT_FOUND") }
         try require(frozenRow[0] == .text(p.payloadHash), "COMMAND_ID_REUSED"); try require(frozenRow[2] == .text("pending"), "NOT_ELIGIBLE")
         let frozen = try CoreSchema.object(CanonicalParser.parse(CoreSchema.text(frozenRow[1])))
@@ -111,7 +111,7 @@ enum CoreRegistry {
             changes.append(CoreDelta(table:table,action:action,id:id,before:before,values:values,raw:raw))
         }
         try require(inserted.subtracting(changes.filter{draftTables.contains($0.table)}.map(\.id)) == Set(allocated))
-        try commandScope(sql,p,changes,allocated:allocated,guards:guards,clock:clock,grants:grants,elapsed:elapsed)
+        try commandScope(sql,p,changes,allocated:allocated,guards:guards,clock:clock,grants:grants,elapsed:elapsed,access:access)
         return changes
     }
     static func requiredRow(_ sql: SQLiteSession, _ table: String, _ id: String) throws -> [SQLValue] {
@@ -124,7 +124,7 @@ enum CoreRegistry {
         try require(plant[1] == .integer(try CoreSchema.number(t["plantRevision"])) && routine[2] == .integer(try CoreSchema.number(t["routineRevision"])) && head[2] == .integer(try CoreSchema.number(t["headRevision"])), "STALE_TARGET")
         return (plant,routine,head)
     }
-    static func commandScope(_ sql: SQLiteSession, _ p: CorePlan, _ d: [CoreDelta], allocated: [String], guards: [CanonicalValue], clock: CoreClockFrame, grants: [String:CoreUndoGrant], elapsed: TimeInterval) throws {
+    static func commandScope(_ sql: SQLiteSession, _ p: CorePlan, _ d: [CoreDelta], allocated: [String], guards: [CanonicalValue], clock: CoreClockFrame, grants: [String:CoreUndoGrant], elapsed: TimeInterval, access: StoreCapability = .free) throws {
         func of(_ table: String, _ action: String? = nil) -> [CoreDelta] { d.filter { $0.table == table && (action == nil || $0.action == action) } }
         func only(_ tables: Set<String>) throws { try require(d.allSatisfy { tables.contains($0.table) }) }
         func guardDraft(_ id: String, _ revision: CanonicalValue?) throws {
@@ -325,9 +325,9 @@ enum CoreRegistry {
             try require(of("care_events").count == expectedEvents + expectedCorrections && of("event_corrections").count == expectedCorrections && of("routine_changes").count == expectedAudits && Set(of("heads").map(\.id)) == expectedHeads)
         }
         if requiresAccess {
-            try require(p.body["accessRevision"]?.integer == 1,"PREVIEW_STALE")
+            try require(p.body["accessRevision"]?.integer == access.revision,"PREVIEW_STALE")
             let count = try CoreSchema.integer(sql.query("SELECT count(*) FROM plants WHERE archived=0")[0][0])
-            try require(count < 5,"ACTIVE_LIMIT")
+            try require(access.pro || count < 5,"ACTIVE_LIMIT")
         } else { try require(p.body["accessRevision"]?.isNull == true) }
     }
     // Native field-scope checks bind transitions to the immutable payload.

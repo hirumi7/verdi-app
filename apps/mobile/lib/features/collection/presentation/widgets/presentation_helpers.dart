@@ -1,3 +1,5 @@
+import '../../../pro/presentation/pro_page.dart';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:intl/intl.dart';
@@ -232,13 +234,41 @@ class _CommandReview extends StatefulWidget {
 }
 
 class _CommandReviewState extends State<_CommandReview> {
+  late PreparedCommand currentPreview = widget.preview;
+  Future<void> upgrade() async {
+    final workspace = context.read<WorkspaceCubit>();
+    setState(() {
+      busy = true;
+      error = null;
+    });
+    try {
+      final purchased = await openPro(context, command: currentPreview.intent);
+      if (!mounted) return;
+      if (purchased) {
+        final old = currentPreview.intent;
+        final resolution = await workspace.resolveCommand(old.commandId);
+        if (resolution.committed) {
+          if (mounted) Navigator.of(context).pop(resolution.result);
+          return;
+        }
+        currentPreview = await workspace.prepare(
+          old.command,
+          commandId: old.commandId,
+        );
+      }
+    } catch (e) {
+      error = WorkspaceCubit.code(e);
+    }
+    if (mounted) setState(() => busy = false);
+  }
+
   bool busy = false;
   String? error;
   Set<String> affected = {};
   @override
   Widget build(BuildContext context) {
     final s = strings(context);
-    final preview = widget.preview;
+    final preview = currentPreview;
     final command = preview.intent.command;
     final stale = const {
       'STALE_TARGET',
@@ -321,6 +351,12 @@ class _CommandReviewState extends State<_CommandReview> {
           ],
         ),
         actions: [
+          if (preview.effects.gate == PreviewGate.activeLimit &&
+              ProHost.maybeOf(context) != null)
+            FilledButton(
+              onPressed: busy ? null : upgrade,
+              child: Text(s.proTitle),
+            ),
           TextButton(
             onPressed: busy
                 ? null

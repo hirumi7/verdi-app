@@ -546,6 +546,11 @@ final class _Worker {
     } else {
       intent = projection.freeze(command, newCommandId: id);
     }
+    final access = _map(await native('capabilities'));
+    projection.hydrateAccess(
+      pro: access['access'] == 'pro',
+      revision: access['capabilityRevision'] as int,
+    );
     final plan = projection.plan(intent, session);
     // Validate locally before freezing. A failed validation keeps no unreachable
     // new native intent. Once frozen, unknown outcomes retain the original ID.
@@ -555,9 +560,12 @@ final class _Worker {
       await native('freeze', {'intent': projection.frozenJson(intent)});
       frozen = true;
       pending[id] = intent;
-      if (plan.needsPreview) {
+      if (plan.needsPreview && plan.effects.gate == PreviewGate.allowed) {
         final preview = _map(await native('preview', {'plan': plan.body()}));
         tokens[id] = preview['previewToken'] as String;
+      } else if (plan.needsPreview) {
+        // UI-only gated preview. Native never issued this as a commit token.
+        tokens[id] = id;
       }
       plans[id] = plan;
       unresolved = null;

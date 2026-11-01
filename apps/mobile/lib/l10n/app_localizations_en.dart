@@ -26,7 +26,7 @@ class AppStringsEn extends AppStrings {
 
   @override
   String get developmentDetails =>
-      'Plants, care history, journals, photos and drafts stay on this device between launches. Local reminders are best-effort and depend on notification permission and system settings. Purchases are not connected yet.';
+      'Plants, care history, journals, photos and drafts stay on this device between launches. Local reminders depend on notification permission and system settings. Pro purchases use local StoreKit testing in this preview.';
 
   @override
   String get noPlants => 'No plants yet';
@@ -343,7 +343,7 @@ class AppStringsEn extends AppStrings {
 
   @override
   String get activeLimit =>
-      'The development Free limit is reached. Archive a plant to free a place; existing history stays available.';
+      'Free includes five active plants. Get Pro to add or restore more, or archive a plant. Your existing records stay available.';
 
   @override
   String get fieldInvalid => 'Review the highlighted fields and date choices.';
@@ -1087,4 +1087,80 @@ class AppStringsEn extends AppStrings {
 
   @override
   String get remindersOpenToday => 'Open Today';
+
+  @override
+  String get proTitle => 'Verdi Pro';
+
+  @override
+  String get proActive => 'Room to grow';
+
+  @override
+  String get proRoom => 'Make room for every plant';
+
+  @override
+  String get proBenefit =>
+      'Pro gives you unlimited active plants in this preview.';
+
+  @override
+  String get proFree =>
+      'Free includes five active plants, standard care, all history, reminders and backup. Your existing plants and records stay yours.';
+
+  @override
+  String get proTestNotice =>
+      'Local StoreKit test · simulated purchase, no real charge.';
+
+  @override
+  String get proCached => 'Your verified purchase is available offline.';
+
+  @override
+  String get proOneTime => 'One-time purchase';
+
+  @override
+  String get proUnavailable =>
+      'The store offer is unavailable. You can still restore purchases or continue using Free.';
+
+  @override
+  String get proBuy => 'Get Pro';
+
+  @override
+  String get restorePurchases => 'Restore purchases';
+
+  @override
+  String get proContinue => 'Continue';
+
+  @override
+  String get proContinueFree => 'Continue Free';
+
+  @override
+  String get proRecovery =>
+      'The purchase result could not be confirmed. Your data is safe. Retry the status check or restore purchases before trying again.';
+
+  @override
+  String get proPending =>
+      'Approval is pending. You can continue using Free; approval will not save a plant automatically.';
+
+  @override
+  String get proWorking => 'Checking with the store…';
+
+  @override
+  String get proCancelled => 'Purchase cancelled. Your draft is still here.';
+
+  @override
+  String get proFailed =>
+      'The purchase could not be verified. Your last verified access and existing data are preserved.';
+
+  @override
+  String get proNoneFound =>
+      'No matching verified purchase was found. Any previously verified access is preserved.';
+
+  @override
+  String get proRevoked =>
+      'Pro is no longer active. Your existing plants, history and care routines remain available.';
+
+  @override
+  String get proRetryPending => 'Retry pending purchase';
+
+  @override
+  String get proRetryPendingBody =>
+      'An earlier approval request may still exist. Retrying does not cancel it and may open a new store request. No plant will save automatically. Continue?';
 }

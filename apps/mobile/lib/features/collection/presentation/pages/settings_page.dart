@@ -1,3 +1,5 @@
+import '../../../pro/presentation/pro_page.dart';
+
 import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
 
@@ -17,6 +19,15 @@ class SettingsPage extends StatelessWidget {
         children: [
           Text(s.settings, style: Theme.of(context).textTheme.headlineLarge),
           const SizedBox(height: 24),
+          if (ProHost.maybeOf(context) != null)
+            Card(
+              child: ListTile(
+                leading: const Icon(Icons.local_florist_outlined),
+                title: Text(s.proTitle),
+                trailing: const Icon(Icons.chevron_right),
+                onTap: () => openPro(context),
+              ),
+            ),
           if (ReminderHost.maybeOf(context) != null)
             Card(
               child: ListTile(

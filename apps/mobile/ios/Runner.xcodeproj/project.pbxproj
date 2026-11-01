@@ -7,6 +7,9 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+        CB6000000000000000000001 /* StoreKitIntegrationTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = CB6000000000000000000002; };
+        CB6000000000000000000003 /* Verdi.storekit in Resources */ = {isa = PBXBuildFile; fileRef = CB6000000000000000000004; };
+        CB6000000000000000000005 /* VerdiNative in Frameworks */ = {isa = PBXBuildFile; productRef = AD1000000000000000000002; };
 		1498D2341E8E89220040F4C2 /* GeneratedPluginRegistrant.m in Sources */ = {isa = PBXBuildFile; fileRef = 1498D2331E8E89220040F4C2 /* GeneratedPluginRegistrant.m */; };
 		331C808B294A63AB00263BE5 /* RunnerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 331C807B294A618700263BE5 /* RunnerTests.swift */; };
 		3B3967161E833CAA004F5970 /* AppFrameworkInfo.plist in Resources */ = {isa = PBXBuildFile; fileRef = 3B3967151E833CAA004F5970 /* AppFrameworkInfo.plist */; };
@@ -25,6 +28,7 @@
 		CB2000000000000000000005 /* MediaPlatformBridge.swift in Sources */ = {isa = PBXBuildFile; fileRef = CB2000000000000000000006 /* MediaPlatformBridge.swift */; };
 		CB3000000000000000000005 /* BackupPlatformBridge.swift in Sources */ = {isa = PBXBuildFile; fileRef = CB3000000000000000000006 /* BackupPlatformBridge.swift */; };
 		CB4000000000000000000005 /* ReminderPlatformBridge.swift in Sources */ = {isa = PBXBuildFile; fileRef = CB4000000000000000000006 /* ReminderPlatformBridge.swift */; };
+		CB5000000000000000000005 /* StorePlatformBridge.swift in Sources */ = {isa = PBXBuildFile; fileRef = CB5000000000000000000006 /* StorePlatformBridge.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -51,6 +55,8 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+        CB6000000000000000000002 /* StoreKitIntegrationTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StoreKitIntegrationTests.swift; sourceTree = "<group>"; };
+        CB6000000000000000000004 /* Verdi.storekit */ = {isa = PBXFileReference; lastKnownFileType = text; path = Verdi.storekit; sourceTree = "<group>"; };
 		0543D61C7EE51E032C486BE0 /* Pods-Runner.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Runner.release.xcconfig"; path = "Target Support Files/Pods-Runner/Pods-Runner.release.xcconfig"; sourceTree = "<group>"; };
 		1498D2321E8E86230040F4C2 /* GeneratedPluginRegistrant.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = GeneratedPluginRegistrant.h; sourceTree = "<group>"; };
 		1498D2331E8E89220040F4C2 /* GeneratedPluginRegistrant.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = GeneratedPluginRegistrant.m; sourceTree = "<group>"; };
@@ -82,6 +88,7 @@
 		CB2000000000000000000006 /* MediaPlatformBridge.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MediaPlatformBridge.swift; sourceTree = "<group>"; };
 		CB3000000000000000000006 /* BackupPlatformBridge.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BackupPlatformBridge.swift; sourceTree = "<group>"; };
 		CB4000000000000000000006 /* ReminderPlatformBridge.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReminderPlatformBridge.swift; sourceTree = "<group>"; };
+		CB5000000000000000000006 /* StorePlatformBridge.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StorePlatformBridge.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -100,6 +107,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				C0554B88D8FBED5B97698BA7 /* Pods_RunnerTests.framework in Frameworks */,
+                CB6000000000000000000005,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -110,6 +118,8 @@
 			isa = PBXGroup;
 			children = (
 				331C807B294A618700263BE5 /* RunnerTests.swift */,
+                CB6000000000000000000002,
+                CB6000000000000000000004,
 			);
 			path = RunnerTests;
 			sourceTree = "<group>";
@@ -177,6 +187,7 @@
 				CB2000000000000000000006 /* MediaPlatformBridge.swift */,
 				CB3000000000000000000006 /* BackupPlatformBridge.swift */,
 				CB4000000000000000000006 /* ReminderPlatformBridge.swift */,
+				CB5000000000000000000006 /* StorePlatformBridge.swift */,
 				7884E8672EC3CC0400C636F2 /* SceneDelegate.swift */,
 				74858FAD1ED2DC5600515810 /* Runner-Bridging-Header.h */,
 			);
@@ -209,6 +220,7 @@
 			dependencies = (
 				331C8086294A63A400263BE5 /* PBXTargetDependency */,
 			);
+			packageProductDependencies = (AD1000000000000000000002);
 			name = RunnerTests;
 			productName = RunnerTests;
 			productReference = 331C8081294A63A400263BE5 /* RunnerTests.xctest */;
@@ -287,6 +299,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+                CB6000000000000000000003,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -387,6 +400,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				331C808B294A63AB00263BE5 /* RunnerTests.swift in Sources */,
+                CB6000000000000000000001,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -401,6 +415,7 @@
 				CB2000000000000000000005 /* MediaPlatformBridge.swift in Sources */,
 				CB3000000000000000000005 /* BackupPlatformBridge.swift in Sources */,
 				CB4000000000000000000005 /* ReminderPlatformBridge.swift in Sources */,
+				CB5000000000000000000005 /* StorePlatformBridge.swift in Sources */,
 				1498D2341E8E89220040F4C2 /* GeneratedPluginRegistrant.m in Sources */,
 				7884E8682EC3CC0700C636F2 /* SceneDelegate.swift in Sources */,
 			);

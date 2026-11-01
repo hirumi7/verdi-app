@@ -14,10 +14,10 @@ Dart service isolate connect the main UI. Schema mismatch/corruption never reset
 
 The earlier foundation and isolated draft harness remain separate and tested.
 Their historical contracts appear below. Main-profile media and backup/generation
-switching are connected through the DEBUG Flutter runner; notifications, purchases
-and release remain unavailable.
+switching are connected through the DEBUG Flutter runner; reminders and Xcode-only one-time Pro are also connected. Production store
+configuration and release remain unavailable.
 
-The package has no remote dependencies. It links the OS SQLite3 library and uses
+The package pins ZIPFoundation for portable backups. It links the OS SQLite3 library and uses
 one serial Dispatch queue per connection, FULLMUTEX, WAL/FULL, foreign keys and a
 2,500 ms busy timeout. Swift tools 5.10 / language mode 5, macOS 14 and iOS 18 are
 the package's development build floors; these are not submission-toolchain claims.

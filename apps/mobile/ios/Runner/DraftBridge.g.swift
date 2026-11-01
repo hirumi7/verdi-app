@@ -1250,3 +1250,169 @@ class ReminderPlatformEventsApi: ReminderPlatformEventsApiProtocol {
     }
   }
 }
+/// Generated protocol from Pigeon that represents a handler of messages from Flutter.
+protocol StorePlatformHostApi {
+  func readState() async throws -> String
+  func refresh() async throws -> String
+  func loadOffer() async throws -> String
+  func purchase(request: String) async throws -> String
+  func restorePurchases() async throws -> String
+  func cancelIntent(intentId: String) async throws -> String
+  func retryPendingPurchase(intentId: String) async throws -> String
+}
+
+/// Generated setup class from Pigeon to handle messages through the `binaryMessenger`.
+class StorePlatformHostApiSetup {
+  static var codec: FlutterStandardMessageCodec { DraftBridgePigeonCodec.shared }
+  /// Sets up an instance of `StorePlatformHostApi` to handle messages through the `binaryMessenger`.
+  static func setUp(binaryMessenger: FlutterBinaryMessenger, api: StorePlatformHostApi?, messageChannelSuffix: String = "") {
+    let channelSuffix = messageChannelSuffix.count > 0 ? ".\(messageChannelSuffix)" : ""
+    let readStateChannel = FlutterBasicMessageChannel(name: "dev.flutter.pigeon.verdi_mobile.StorePlatformHostApi.readState\(channelSuffix)", binaryMessenger: binaryMessenger, codec: codec)
+    if let api = api {
+      readStateChannel.setMessageHandler { _, reply in
+        Task { @MainActor in
+          do {
+            let result = try await api.readState()
+            reply(wrapResult(result))
+          } catch {
+            reply(wrapError(error))
+          }
+        }
+      }
+    } else {
+      readStateChannel.setMessageHandler(nil)
+    }
+    let refreshChannel = FlutterBasicMessageChannel(name: "dev.flutter.pigeon.verdi_mobile.StorePlatformHostApi.refresh\(channelSuffix)", binaryMessenger: binaryMessenger, codec: codec)
+    if let api = api {
+      refreshChannel.setMessageHandler { _, reply in
+        Task { @MainActor in
+          do {
+            let result = try await api.refresh()
+            reply(wrapResult(result))
+          } catch {
+            reply(wrapError(error))
+          }
+        }
+      }
+    } else {
+      refreshChannel.setMessageHandler(nil)
+    }
+    let loadOfferChannel = FlutterBasicMessageChannel(name: "dev.flutter.pigeon.verdi_mobile.StorePlatformHostApi.loadOffer\(channelSuffix)", binaryMessenger: binaryMessenger, codec: codec)
+    if let api = api {
+      loadOfferChannel.setMessageHandler { _, reply in
+        Task { @MainActor in
+          do {
+            let result = try await api.loadOffer()
+            reply(wrapResult(result))
+          } catch {
+            reply(wrapError(error))
+          }
+        }
+      }
+    } else {
+      loadOfferChannel.setMessageHandler(nil)
+    }
+    let purchaseChannel = FlutterBasicMessageChannel(name: "dev.flutter.pigeon.verdi_mobile.StorePlatformHostApi.purchase\(channelSuffix)", binaryMessenger: binaryMessenger, codec: codec)
+    if let api = api {
+      purchaseChannel.setMessageHandler { message, reply in
+        let args = message as! [Any?]
+        let requestArg = args[0] as! String
+        Task { @MainActor in
+          do {
+            let result = try await api.purchase(request: requestArg)
+            reply(wrapResult(result))
+          } catch {
+            reply(wrapError(error))
+          }
+        }
+      }
+    } else {
+      purchaseChannel.setMessageHandler(nil)
+    }
+    let restorePurchasesChannel = FlutterBasicMessageChannel(name: "dev.flutter.pigeon.verdi_mobile.StorePlatformHostApi.restorePurchases\(channelSuffix)", binaryMessenger: binaryMessenger, codec: codec)
+    if let api = api {
+      restorePurchasesChannel.setMessageHandler { _, reply in
+        Task { @MainActor in
+          do {
+            let result = try await api.restorePurchases()
+            reply(wrapResult(result))
+          } catch {
+            reply(wrapError(error))
+          }
+        }
+      }
+    } else {
+      restorePurchasesChannel.setMessageHandler(nil)
+    }
+    let cancelIntentChannel = FlutterBasicMessageChannel(name: "dev.flutter.pigeon.verdi_mobile.StorePlatformHostApi.cancelIntent\(channelSuffix)", binaryMessenger: binaryMessenger, codec: codec)
+    if let api = api {
+      cancelIntentChannel.setMessageHandler { message, reply in
+        let args = message as! [Any?]
+        let intentIdArg = args[0] as! String
+        Task { @MainActor in
+          do {
+            let result = try await api.cancelIntent(intentId: intentIdArg)
+            reply(wrapResult(result))
+          } catch {
+            reply(wrapError(error))
+          }
+        }
+      }
+    } else {
+      cancelIntentChannel.setMessageHandler(nil)
+    }
+    let retryPendingPurchaseChannel = FlutterBasicMessageChannel(name: "dev.flutter.pigeon.verdi_mobile.StorePlatformHostApi.retryPendingPurchase\(channelSuffix)", binaryMessenger: binaryMessenger, codec: codec)
+    if let api = api {
+      retryPendingPurchaseChannel.setMessageHandler { message, reply in
+        let args = message as! [Any?]
+        let intentIdArg = args[0] as! String
+        Task { @MainActor in
+          do {
+            let result = try await api.retryPendingPurchase(intentId: intentIdArg)
+            reply(wrapResult(result))
+          } catch {
+            reply(wrapError(error))
+          }
+        }
+      }
+    } else {
+      retryPendingPurchaseChannel.setMessageHandler(nil)
+    }
+  }
+}
+
+/// Generated protocol from Pigeon that represents Flutter messages that can be called from Swift.
+protocol StorePlatformEventsApiProtocol {
+  @MainActor func changed() async throws
+}
+class StorePlatformEventsApi: StorePlatformEventsApiProtocol {
+  private let binaryMessenger: FlutterBinaryMessenger
+  private let messageChannelSuffix: String
+  init(binaryMessenger: FlutterBinaryMessenger, messageChannelSuffix: String = "") {
+    self.binaryMessenger = binaryMessenger
+    self.messageChannelSuffix = messageChannelSuffix.count > 0 ? ".\(messageChannelSuffix)" : ""
+  }
+  var codec: DraftBridgePigeonCodec {
+    return DraftBridgePigeonCodec.shared
+  }
+  @MainActor func changed() async throws {
+    return try await withCheckedThrowingContinuation { continuation in
+      let channelName: String = "dev.flutter.pigeon.verdi_mobile.StorePlatformEventsApi.changed\(messageChannelSuffix)"
+      let channel = FlutterBasicMessageChannel(name: channelName, binaryMessenger: binaryMessenger, codec: codec)
+      channel.sendMessage(nil) { response in
+        guard let listResponse = response as? [Any?] else {
+          continuation.resume(throwing: createConnectionError(withChannelName: channelName))
+          return
+        }
+        if listResponse.count > 1 {
+          let code: String = listResponse[0] as! String
+          let message: String? = nilOrValue(listResponse[1])
+          let details: String? = nilOrValue(listResponse[2])
+          continuation.resume(throwing: PigeonError(code: code, message: message, details: details))
+        } else {
+          continuation.resume()
+        }
+      }
+    }
+  }
+}

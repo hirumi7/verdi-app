@@ -127,7 +127,7 @@ abstract class AppStrings {
   /// No description provided for @developmentDetails.
   ///
   /// In en, this message translates to:
-  /// **'Plants, care history, journals, photos and drafts stay on this device between launches. Local reminders are best-effort and depend on notification permission and system settings. Purchases are not connected yet.'**
+  /// **'Plants, care history, journals, photos and drafts stay on this device between launches. Local reminders depend on notification permission and system settings. Pro purchases use local StoreKit testing in this preview.'**
   String get developmentDetails;
 
   /// No description provided for @noPlants.
@@ -739,7 +739,7 @@ abstract class AppStrings {
   /// No description provided for @activeLimit.
   ///
   /// In en, this message translates to:
-  /// **'The development Free limit is reached. Archive a plant to free a place; existing history stays available.'**
+  /// **'Free includes five active plants. Get Pro to add or restore more, or archive a plant. Your existing records stay available.'**
   String get activeLimit;
 
   /// No description provided for @fieldInvalid.
@@ -1971,6 +1971,138 @@ abstract class AppStrings {
   /// In en, this message translates to:
   /// **'Open Today'**
   String get remindersOpenToday;
+
+  /// No description provided for @proTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Verdi Pro'**
+  String get proTitle;
+
+  /// No description provided for @proActive.
+  ///
+  /// In en, this message translates to:
+  /// **'Room to grow'**
+  String get proActive;
+
+  /// No description provided for @proRoom.
+  ///
+  /// In en, this message translates to:
+  /// **'Make room for every plant'**
+  String get proRoom;
+
+  /// No description provided for @proBenefit.
+  ///
+  /// In en, this message translates to:
+  /// **'Pro gives you unlimited active plants in this preview.'**
+  String get proBenefit;
+
+  /// No description provided for @proFree.
+  ///
+  /// In en, this message translates to:
+  /// **'Free includes five active plants, standard care, all history, reminders and backup. Your existing plants and records stay yours.'**
+  String get proFree;
+
+  /// No description provided for @proTestNotice.
+  ///
+  /// In en, this message translates to:
+  /// **'Local StoreKit test · simulated purchase, no real charge.'**
+  String get proTestNotice;
+
+  /// No description provided for @proCached.
+  ///
+  /// In en, this message translates to:
+  /// **'Your verified purchase is available offline.'**
+  String get proCached;
+
+  /// No description provided for @proOneTime.
+  ///
+  /// In en, this message translates to:
+  /// **'One-time purchase'**
+  String get proOneTime;
+
+  /// No description provided for @proUnavailable.
+  ///
+  /// In en, this message translates to:
+  /// **'The store offer is unavailable. You can still restore purchases or continue using Free.'**
+  String get proUnavailable;
+
+  /// No description provided for @proBuy.
+  ///
+  /// In en, this message translates to:
+  /// **'Get Pro'**
+  String get proBuy;
+
+  /// No description provided for @restorePurchases.
+  ///
+  /// In en, this message translates to:
+  /// **'Restore purchases'**
+  String get restorePurchases;
+
+  /// No description provided for @proContinue.
+  ///
+  /// In en, this message translates to:
+  /// **'Continue'**
+  String get proContinue;
+
+  /// No description provided for @proContinueFree.
+  ///
+  /// In en, this message translates to:
+  /// **'Continue Free'**
+  String get proContinueFree;
+
+  /// No description provided for @proRecovery.
+  ///
+  /// In en, this message translates to:
+  /// **'The purchase result could not be confirmed. Your data is safe. Retry the status check or restore purchases before trying again.'**
+  String get proRecovery;
+
+  /// No description provided for @proPending.
+  ///
+  /// In en, this message translates to:
+  /// **'Approval is pending. You can continue using Free; approval will not save a plant automatically.'**
+  String get proPending;
+
+  /// No description provided for @proWorking.
+  ///
+  /// In en, this message translates to:
+  /// **'Checking with the store…'**
+  String get proWorking;
+
+  /// No description provided for @proCancelled.
+  ///
+  /// In en, this message translates to:
+  /// **'Purchase cancelled. Your draft is still here.'**
+  String get proCancelled;
+
+  /// No description provided for @proFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'The purchase could not be verified. Your last verified access and existing data are preserved.'**
+  String get proFailed;
+
+  /// No description provided for @proNoneFound.
+  ///
+  /// In en, this message translates to:
+  /// **'No matching verified purchase was found. Any previously verified access is preserved.'**
+  String get proNoneFound;
+
+  /// No description provided for @proRevoked.
+  ///
+  /// In en, this message translates to:
+  /// **'Pro is no longer active. Your existing plants, history and care routines remain available.'**
+  String get proRevoked;
+
+  /// No description provided for @proRetryPending.
+  ///
+  /// In en, this message translates to:
+  /// **'Retry pending purchase'**
+  String get proRetryPending;
+
+  /// No description provided for @proRetryPendingBody.
+  ///
+  /// In en, this message translates to:
+  /// **'An earlier approval request may still exist. Retrying does not cancel it and may open a new store request. No plant will save automatically. Continue?'**
+  String get proRetryPendingBody;
 }
 
 class _AppStringsDelegate extends LocalizationsDelegate<AppStrings> {

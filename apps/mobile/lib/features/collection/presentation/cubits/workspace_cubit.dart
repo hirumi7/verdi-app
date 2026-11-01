@@ -119,6 +119,8 @@ class WorkspaceCubit extends Cubit<WorkspaceState> {
   }) => _repository.timeline(id, includeVoided: includeVoided, cursor: cursor);
   Future<PreparedCommand> prepare(CoreCommand command, {String? commandId}) =>
       _repository.prepare(command, commandId: commandId);
+  Future<CommandResolution> resolveCommand(String id) =>
+      _repository.resolve(id);
   Future<CommandResolution> abandon(PreparedCommand preview) async {
     final result = await _repository.abandon(preview.intent.commandId);
     await refresh();
