@@ -66,7 +66,7 @@ final class SQLiteDatabase {
             do {
                 try database.openHandle(target, readOnly: true)
                 var migrating = false
-                do { try database.validate(schema) }
+                do { try database.validateExisting(schema,at:target) }
                 catch StorageFailure.schemaMismatch {
                     guard let previous = upgradeFrom, !migrationStatements.isEmpty else { throw StorageFailure.schemaMismatch }
                     try database.validate(previous); migrating = true
@@ -182,7 +182,7 @@ final class SQLiteDatabase {
             guard lstat(target,&info) == 0, info.st_mode & S_IFMT == S_IFREG else {throw StorageFailure.invalidPath}
             do {
                 try openHandle(target,readOnly:true)
-                try validate(schema)
+                try validateExisting(schema,at:target)
                 try closeHandle()
                 try openHandle(target,readOnly:false)
                 try validate(schema)
@@ -281,6 +281,30 @@ final class SQLiteDatabase {
             compileOptions: options, foreignKeys: integer("PRAGMA foreign_keys"), journalMode: mode,
             synchronous: integer("PRAGMA synchronous"), busyTimeoutMilliseconds: integer("PRAGMA busy_timeout")
         )
+    }
+
+    /// Only an existing native-owned path may recover a hot rollback journal.
+    /// No CREATE, configuration, migration or caller mutation runs in this phase.
+    private func validateExisting(_ schema:CompiledSchema, at path:String) throws {
+        do {try validate(schema)}
+        catch StorageFailure.sqlite(let code) where code == (SQLITE_READONLY | (3 << 8)) {
+            // SQLITE_READONLY_ROLLBACK: SQLite needs a writable handle to recover
+            // its journal. Recovery can change bytes before identity validation.
+            try closeHandle()
+            try openHandle(path,readOnly:false)
+            do {try validate(schema)}
+            catch {
+                // A supported older schema may be handled by open's migration
+                // fallback. It must validate that schema on a readonly handle.
+                let validationError = error
+                try closeHandle()
+                try openHandle(path,readOnly:true)
+                throw validationError
+            }
+            try closeHandle()
+            try openHandle(path,readOnly:true)
+            try validate(schema)
+        }
     }
 
     private func validate(_ schema: CompiledSchema) throws {

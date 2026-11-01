@@ -143,13 +143,14 @@ enum BackupArchive {
             try CoreSchema.integer(sql.query("SELECT COALESCE(sum(expanded),0)+4*COALESCE(sum(CASE WHEN path='data.json' THEN expanded ELSE 0 END),0) FROM entries")[0][0])
         }
         try BackupIO.reserve(at:root,additional:reserve)
+        let files = try MediaFiles(root:root, directoryIO:io)
         var cursor = ""
         while let row = try index.database.read({try $0.query("SELECT path,crc,compressed,expanded,method,payload FROM entries WHERE path>? ORDER BY path LIMIT 1",[.text(cursor)]).first}) {
             try cancel();let path=try CoreSchema.text(row[0]);cursor=path
             let compressed=try CoreSchema.integer(row[2]),expanded=try CoreSchema.integer(row[3]),method=try CoreSchema.integer(row[4]),payload=try CoreSchema.integer(row[5])
             let destination: URL
             if path == "data.json" || path == "manifest.json" { destination = root.appendingPathComponent(path) }
-            else { try BackupIO.canonicalMedia(path); let files = try MediaFiles(root:root); let (dir,_) = try files.parent(path,create:true); Darwin.close(dir); destination = root.appendingPathComponent(path) }
+            else { try BackupIO.canonicalMedia(path); let (dir,_) = try files.parent(path,create:true); Darwin.close(dir); destination = root.appendingPathComponent(path) }
             let writer=try BackupWriter(destination,limit:expanded,io:io)
             var checksum:uLong=0,offset:Int64=0
             func accept(_ data:Data) throws {

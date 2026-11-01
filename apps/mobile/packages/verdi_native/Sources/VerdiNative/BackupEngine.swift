@@ -35,7 +35,7 @@ final class BackupEngine {
     }
     func retainSelection(_ source:URL) throws -> String {
         let control = try control(), id = UUID().uuidString.lowercased(), root = control.root.appendingPathComponent("selections")
-        try BackupIO.directory(root);try BackupIO.excludeFromOSBackup(root)
+        try BackupIO.directory(root,io:core.backupFileIO,relativeTo:control.root);try BackupIO.excludeFromOSBackup(root)
         try control.registerArtifact(kind:"selection",key:id,owner:nil,expires:expiry())
         let size=try BackupIO.size(source);try BackupIO.require(size > 0 && size <= BackupIO.archiveLimit,"BACKUP_LIMIT")
         try BackupIO.reserve(at:root,additional:size)
@@ -293,7 +293,7 @@ final class BackupEngine {
         let zip=root.appendingPathComponent("Verdi-backup.zip")
         try BackupArchive.create(zip,dataRoot:root,mediaRoot:mediaRoot,index:index,io:core.backupFileIO,cancel:{try self.check(id)})
         try state(id,progress("validating"),control)
-        let verify=root.appendingPathComponent("verify");try BackupIO.directory(verify)
+        let verify=root.appendingPathComponent("verify");try BackupIO.directory(verify,io:core.backupFileIO,relativeTo:root)
         let validationIndex=try BackupIndex(root.appendingPathComponent("verify-index.sqlite"))
         try BackupArchive.extract(zip,to:verify,index:validationIndex,io:core.backupFileIO,cancel:{try self.check(id)})
         let verified=try BackupContent.importData(root:verify,index:validationIndex,dataset:UUID().uuidString.lowercased(),instant:clock(),cancel:{try self.check(id)})
@@ -327,7 +327,7 @@ final class BackupEngine {
         // A durable job registers the generation before any of its files are created.
         try control.db.transaction {try $0.execute("UPDATE jobs SET source_hash=?,new_generation=?,preview_json=NULL WHERE id=?",[.text(digest.0),.text(generation),.text(id)])}
         try control.registerArtifact(kind:"staging",key:generation,owner:id,expires:expiry())
-        try BackupIO.directory(root);try BackupIO.excludeFromOSBackup(root)
+        try BackupIO.directory(root,io:core.backupFileIO,relativeTo:control.generations);try BackupIO.excludeFromOSBackup(root)
         let index=try BackupIndex(root.appendingPathComponent("archive-index.sqlite"))
         try BackupArchive.extract(source,to:root,index:index,io:core.backupFileIO,cancel:{try self.check(id)})
         try state(id,progress("staging"),control)

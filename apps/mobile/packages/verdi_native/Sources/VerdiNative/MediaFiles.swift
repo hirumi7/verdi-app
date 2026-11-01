@@ -14,9 +14,9 @@ struct MediaFileInfo {
 final class MediaFiles {
     let root:URL
     let fault:((MediaFileBoundary)throws->Void)?
-    init(root:URL,fault:((MediaFileBoundary)throws->Void)?=nil) throws {
+    init(root:URL,fault:((MediaFileBoundary)throws->Void)?=nil, directoryIO:BackupFileIO = BackupFileIO()) throws {
         self.root=root;self.fault=fault
-        try FileManager.default.createDirectory(at:root,withIntermediateDirectories:true)
+        try BackupIO.directory(root,io:directoryIO)
         var info=stat();guard lstat(root.path,&info)==0,(info.st_mode&S_IFMT)==S_IFDIR else {throw CoreRepositoryError("MEDIA_PATH_INVALID")}
         try protection(root)
     }

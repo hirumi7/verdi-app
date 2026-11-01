@@ -188,3 +188,29 @@ harness; the main Flutter integration additionally covers the real document pick
 share sheet, successful generation reopening and downstream draft UI. Physical
 power-loss/protection, maximum-size resources and the exhaustive I/O fault matrix
 remain separate release gates; simulated failures are not power-loss proof.
+
+### Filesystem and capacity checks
+
+Run `python3 tools/test_backup_disk_full.py` from this package on macOS. It creates
+and fills only a disposable 256MiB APFS image, tests ZIPFoundation creation,
+MediaFiles copying and SQLite hot-journal recovery, then detaches/removes its own
+image. It requires at least 1 GiB free host space. Production reserve checks remain
+unchanged; these small-volume tests exercise component failures below admission.
+The SQLite test covers same/fresh owners, missing-file repair, wrong schema and
+identity rejection, and a supported migration after rollback.
+
+Ordinary `swift test` runs sparse ZIP preflight limits and a real 64 MiB photo
+export/restore, but explicitly skips the three isolated-volume tests and the
+opt-in 512 MiB JSON reader test. Run the latter separately:
+
+```sh
+VERDI_CAPACITY_STREAM=1 swift test -c release --filter testBackupMaximumDataStreamAndOverflow
+```
+
+Sparse 8 GiB / 12 GiB / 50,002-entry fixtures prove structural limit arithmetic, not
+valid payloads or full restore performance. The 512 MiB fixture is an empty object
+with whitespace, proving streaming/counting and overflow rejection, not large
+schema-valid import. The 64 MiB valid PNG has a large ancillary chunk and small
+pixel dimensions; it exercises original bytes, not the 100 MP decoded-pixel limit.
+Full-limit archive/restore, physical protection/power loss and exhaustive VFS
+faults remain separate checks. Do not fill a host volume to simulate disk full.

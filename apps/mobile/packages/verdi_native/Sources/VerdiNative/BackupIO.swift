@@ -3,13 +3,46 @@ import Darwin
 import CryptoKit
 
 /// Instance-owned fault seams. No hooks or paths are exposed through platform APIs.
-enum BackupFileBoundary { case write, fileSync, fullSync, close, directorySync, rename, renamed, remove }
+enum BackupFileBoundary { case write, fileSync, fullSync, close, directorySync, rename, renamed, remove, directoryCreate, directoryCreated, protection }
 final class BackupFileIO {
     let fault: ((BackupFileBoundary, URL) throws -> Void)?
     let writeOverride: ((Int32, UnsafeRawPointer, Int) -> Int)?
     init(fault: ((BackupFileBoundary, URL) throws -> Void)? = nil,
          write: ((Int32, UnsafeRawPointer, Int) -> Int)? = nil) {
         self.fault = fault; self.writeOverride = write
+    }
+    /// Walk native-owned descendants one at a time. A failed publication is synced
+    /// again on retry, including when the directory already exists.
+    func directory(_ url:URL, relativeTo trustedParent:URL? = nil) throws {
+        let target = url.standardizedFileURL
+        // Recursion requires a stable, caller-owned boundary. The default creates
+        // only one child of an existing parent, so retries cannot promote an
+        // incompletely protected intermediate directory into the trusted anchor.
+        let anchor = trustedParent?.standardizedFileURL ?? target.deletingLastPathComponent()
+        let prefix = anchor.path == "/" ? "/" : anchor.path + "/"
+        try BackupIO.require(target.path.hasPrefix(prefix) && target.path != anchor.path,"BACKUP_PATH_INVALID")
+        let parts = target.path.dropFirst(prefix.count).split(separator:"/",omittingEmptySubsequences:false)
+        try BackupIO.require(!parts.isEmpty && parts.allSatisfy{!$0.isEmpty && $0 != "." && $0 != ".."},"BACKUP_PATH_INVALID")
+        var fd = Darwin.open(anchor.path,O_RDONLY | O_DIRECTORY | O_NOFOLLOW | O_CLOEXEC)
+        try BackupIO.require(fd >= 0,"BACKUP_PATH_INVALID")
+        defer {if fd >= 0 {Darwin.close(fd)}}
+        // The nearest existing anchor may be a directory created by an earlier
+        // failed attempt. Persist its entry before creating further descendants.
+        try syncDirectory(anchor);try syncDirectory(anchor.deletingLastPathComponent())
+        var path = anchor
+        for part in parts {
+            let parent = path;path.appendPathComponent(String(part))
+            try fault?(.directoryCreate,path)
+            let created = mkdirat(fd,String(part),S_IRWXU) == 0
+            if !created && errno != EEXIST {throw StorageFailure.filesystem(errno)}
+            if created {try fault?(.directoryCreated,path)}
+            let next = openat(fd,String(part),O_RDONLY | O_DIRECTORY | O_NOFOLLOW | O_CLOEXEC)
+            try BackupIO.require(next >= 0,"BACKUP_PATH_INVALID")
+            let previous = fd;fd = next
+            try BackupIO.require(Darwin.close(previous) == 0,"IO_FAILURE")
+            try fault?(.protection,path);try BackupIO.protect(path)
+            try syncDirectory(path);try syncDirectory(parent)
+        }
     }
     func write(_ fd:Int32, _ pointer:UnsafeRawPointer, _ count:Int, at url:URL) throws -> Int {
         try fault?(.write,url)
@@ -58,11 +91,8 @@ enum BackupIO {
     static func require(_ value: Bool, _ code: String = "BACKUP_SCHEMA_INVALID") throws {
         if !value { throw CoreRepositoryError(code) }
     }
-    static func directory(_ url: URL) throws {
-        try FileManager.default.createDirectory(at: url, withIntermediateDirectories: true, attributes: [.posixPermissions: 0o700])
-        var info = stat()
-        try require(lstat(url.path, &info) == 0 && info.st_mode & S_IFMT == S_IFDIR, "BACKUP_PATH_INVALID")
-        try protect(url)
+    static func directory(_ url:URL, io:BackupFileIO = BackupFileIO(), relativeTo trustedParent:URL? = nil) throws {
+        try io.directory(url,relativeTo:trustedParent)
     }
     static func protect(_ url: URL) throws {
         #if os(iOS)

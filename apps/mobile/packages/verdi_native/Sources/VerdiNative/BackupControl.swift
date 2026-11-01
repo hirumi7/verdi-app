@@ -34,7 +34,7 @@ final class BackupControl {
         self.legacy = legacy; root = Self.location(legacy)
         generations = legacy.deletingLastPathComponent().appendingPathComponent(legacy.lastPathComponent+"-generations")
         self.io = io; self.fault = fault; self.transactionFault = transactionFault
-        try BackupIO.directory(root);try BackupIO.directory(generations)
+        try BackupIO.directory(root,io:io);try BackupIO.directory(generations,io:io)
         let target = root.appendingPathComponent("control.sqlite"), marker = root.appendingPathComponent("established"), record = root.appendingPathComponent("bootstrap.json"), staging = root.appendingPathComponent("control.pending")
         if FileManager.default.fileExists(atPath:target.path) {
             db = try SQLiteDatabase.open(at:target,schema:Self.schema,controlProfile:true)
@@ -110,7 +110,7 @@ final class BackupControl {
         let dataset = try CoreSchema.text(expected[0][0]);try CoreSchema.uuid(dataset)
         return dataset
     }
-    func jobRoot(_ id:String) throws -> URL {try CoreSchema.uuid(id);let url = root.appendingPathComponent("jobs").appendingPathComponent(id);try BackupIO.directory(url);return url}
+    func jobRoot(_ id:String) throws -> URL {try CoreSchema.uuid(id);let url = root.appendingPathComponent("jobs").appendingPathComponent(id);try BackupIO.directory(url,io:io,relativeTo:root);return url}
     func registerArtifact(kind:String,key:String,owner:String?,expires:String) throws {
         try CoreSchema.uuid(key);if let owner {try CoreSchema.uuid(owner)}
         try BackupIO.require(["selection","job","staging"].contains(kind),"FIELD_INVALID")

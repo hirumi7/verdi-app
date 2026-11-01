@@ -110,7 +110,7 @@ extension CoreRepositoryTests {
     func testBackupExportFileFaultsPreserveCollectionAndPermitNewExport() throws {
         defer{removeBackupSidecars()}
         let fixture = try recoveryFixture(), identity = dataset
-        let cases: [(BackupFileBoundary,String)] = [(.write,"data.json"),(.fileSync,"data.json"),(.fullSync,"manifest.json"),(.close,"Verdi-backup.zip"),(.directorySync,"")]
+        let cases: [(BackupFileBoundary,String)] = [(.directoryCreate,"verify"),(.directoryCreated,"verify"),(.protection,"verify"),(.write,"data.json"),(.fileSync,"data.json"),(.fullSync,"manifest.json"),(.close,"Verdi-backup.zip"),(.directorySync,"")]
         for (boundary,name) in cases {
             let latch = BackupFaultLatch()
             repo.backupFileIO = BackupFileIO(fault:{point,url in
@@ -130,7 +130,7 @@ extension CoreRepositoryTests {
     func testBackupImportFileFaultsRetrySameOperationWithoutChangingOldData() throws {
         defer{removeBackupSidecars()}
         let fixture = try recoveryFixture(), identity = dataset, original = try Data(contentsOf:fixture.oldPhoto)
-        let cases: [(BackupFileBoundary,String)] = [(.write,"png"),(.fileSync,"data.json"),(.fullSync,"png"),(.close,"initialized"),(.directorySync,"")]
+        let cases: [(BackupFileBoundary,String)] = [(.directoryCreate,""),(.directoryCreated,""),(.protection,""),(.write,"png"),(.fileSync,"data.json"),(.fullSync,"png"),(.close,"initialized"),(.directorySync,"")]
         for (boundary,name) in cases {
             let latch = BackupFaultLatch()
             repo.backupFileIO = BackupFileIO(fault:{point,url in
@@ -172,7 +172,7 @@ extension CoreRepositoryTests {
         defer{removeBackupSidecars()}
         try execute(0);try execute(1)
         let identity = dataset, rows = try allRows("plants")
-        let cases: [(BackupFileBoundary,String)] = [(.write,"bootstrap.pending"),(.fileSync,"bootstrap.pending"),(.fullSync,"control.pending"),(.rename,"bootstrap.json"),(.renamed,"bootstrap.json"),(.renamed,"control.sqlite"),(.close,"established")]
+        let cases: [(BackupFileBoundary,String)] = [(.directoryCreate,directory.lastPathComponent+"-recovery"),(.directoryCreated,directory.lastPathComponent+"-recovery"),(.protection,directory.lastPathComponent+"-recovery"),(.write,"bootstrap.pending"),(.fileSync,"bootstrap.pending"),(.fullSync,"control.pending"),(.rename,"bootstrap.json"),(.renamed,"bootstrap.json"),(.renamed,"control.sqlite"),(.close,"established")]
         for (boundary,name) in cases {
             let latch = BackupFaultLatch()
             repo.backupFileIO = BackupFileIO(fault:{point,url in

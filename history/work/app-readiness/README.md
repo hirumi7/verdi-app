@@ -1125,3 +1125,66 @@ The directory review also requires explicit stable anchors for recursive creatio
 Design docs `249972ceaa08fb948f648ec8cdd5c0a2a5c37264` passed8/8 documentation
 checks/268 tooling tests and was published before this candidate pin adoption;
 consumer validation passed. Implementation follows this exact design revision.
+
+### Filesystem and capacity implementation evidence
+
+**Author:** Codex (AI assistant). **Date:** 2026-11-01 (Asia/Jakarta).
+
+REQ-012 AC2/4/6/7 implemented against exact published docs
+`249972ceaa08fb948f648ec8cdd5c0a2a5c37264`. Related REQ-006/007/008/011/014/015/018
+preservation rules and accepted records remain unchanged. Independent reviewer
+core_readiness_review reviewed source, recovery tests and isolated-volume harness;
+the default-directory retry and hot-journal migration findings are fixed, with no
+remaining scoped source blocker.
+
+Directories now create/protect/sync each owned component from a stable explicit
+parent; the default requires an existing immediate parent. Export/import/bootstrap
+failure matrices each add create/post-create/protection failures and prove retained
+content plus retry. Extraction initializes its media root once. Real disk-full
+COMMIT exposed SQLite776 hot-journal reopening; recovery opens only the existing
+trusted path without CREATE, lets SQLite roll back, and restores readonly
+schema/identity validation before configuration or migration. It never replays the
+uncertain mutation. The real ENOSPC matrix covers same/fresh owners, missing-main
+repair, wrong schema/identity and supported migration, retained rows, new saves and
+reopen. SQLite recovery may alter bytes before identity validation, as documented.
+
+Actual final checks on macOS14.6/Xcode16.2/iOS18.3/Flutter3.47.8/Dart3.13.7:
+
+- `swift test --package-path apps/mobile/packages/verdi_native`: 135 discovered,
+  131 passed, four explicit opt-in skips, zero failures. Sparse archive/expanded/
+  per-file ±1 and entry-count boundaries, plus actual 64 MiB original PNG complete
+  export/preview/restore/reopen and all-table/hash equality are included.
+- Native `xcodebuild -scheme VerdiNative -destination 'platform=iOS Simulator,id=993B7FB1-DD39-4922-9DF9-6AB0CE25DEDD' -derivedDataPath /tmp/verdi-native-ios-build test`:
+  123 discovered, 122 passed, one opt-in skip, zero failures. Twelve macOS-only
+  tests (including the three isolated-volume tests) are excluded on iOS.
+- `python3 apps/mobile/packages/verdi_native/tools/test_backup_disk_full.py`:
+  all three real ENOSPC tests passed; its 256 MiB APFS image detached and removed.
+  The small volume correctly fails production reserve; ZIPFoundation/MediaFiles/
+  SQLite failures are component tests, not full app admission on that volume.
+- `VERDI_CAPACITY_STREAM=1 swift test --package-path apps/mobile/packages/verdi_native -c release --filter testBackupMaximumDataStreamAndOverflow` passed.
+  A separately timed `--skip-build` repeat passed in 12.47 seconds wall time
+  (test 9.977 seconds), maximum resident set size 59,604,992 bytes reported by
+  `/usr/bin/time -l`. This measures the macOS command, not iOS/import performance.
+- Main Flutter rich backup integration passed using `flutter test integration_test/backup_restore_test.dart -d CD70BD52-1239-4C9E-A998-8D8962DA0354 --no-uninstall --dart-define=VERDI_BACKUP_PHASE=rich`.
+  The retained user simulator collection was untouched; this is disposable QA data.
+
+Logs: `/tmp/verdi-capacity-native-full.log`, `verdi-capacity-native-ios.log`,
+`verdi-capacity-diskfull-final.log`, `verdi-capacity-stream.log`,
+`verdi-capacity-stream-runtime.log`, `verdi-capacity-flutter-integration.log`.
+The early isolated-volume failures reproduced the hot-journal defect; final reruns
+passed after the fix. Earlier analyzer/Dart unit evidence is inherited, not rerun;
+no Dart/UI/Pigeon/dependency source changed.
+
+Limits: sparse 8 GiB/12 GiB/50,002-entry headers prove preflight arithmetic only.
+The 512 MiB empty-object/whitespace fixture proves streaming byte limits, not
+schema-valid collection import. The 64 MiB PNG uses an ancillary chunk and small
+pixel dimensions, not a 100 MP image. Approximately 3 GiB host space and no
+available external volume prevent full maximum-size roundtrip and large-library
+performance tests. The optional request for 40 GiB writable storage remains
+unanswered. Physical protection/power loss, exhaustive VFS/internal fault coverage,
+accessibility, notifications, StoreKit and release remain open. REQ-012 is partial.
+
+Strict native `swift build -Xswiftc -warnings-as-errors` passed. The ordinary
+Flutter development app built and launched on the retained disposable QA simulator
+with `flutter run --debug -t lib/main_development.dart -d CD70BD52-1239-4C9E-A998-8D8962DA0354 --no-resident`.
+Logs: `/tmp/verdi-capacity-swift-build.log`, `verdi-capacity-normal-run.log`.
