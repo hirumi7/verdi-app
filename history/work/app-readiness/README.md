@@ -1685,3 +1685,9 @@ remaining personality/cosmetics/admin, public support/privacy configuration,
 production store/signing and compatible submission host remain open. Figma's
 obsolete subscription/fake-streak/generated-diagnosis examples were not adopted.
 This is a verified UI slice, not whole-app release readiness.
+
+Publication: app implementation `aed5f5280e4c90212397ab8a45cfd9ef7cd27910` and
+reconciled docs `4a7407a9f60f5c52503dde2a7194173bc043ec0e` are published. The app
+now adopts that delivery pin. Docs checks passed8/8 with268 tooling tests; accepted
+requirements/decisions remain byte-unchanged. Earlier design pin records the exact
+implementation authority; the new pin records verified delivery and open gates.
