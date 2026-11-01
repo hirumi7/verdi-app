@@ -1089,3 +1089,39 @@ Flutter development app also builds and launches on the disposable QA simulator
 Consumer/gitlink checks validate this exact published pin. Remaining failure,
 physical-device and release gates stay open; the current delivery does not mark
 REQ-012 or the whole app complete.
+
+### Filesystem and capacity limits — verification plan
+
+**Author:** Codex (AI assistant). **Date:** 2026-11-01 (Asia/Jakarta).
+
+Continue REQ-012 AC2/4/6/7 at docs
+`efe316478038b36e8e70cd523f51af853bc1cbd4`; current input identity matches.
+Exercise directory creation/protection/parent sync and repair; exact sparse ZIP
+preflight boundaries at8GiB compressed,12GiB expanded,50,002 entries,16MiB manifest,
+512MiB data and64MiB media, including one-byte/one-entry overflow. Sparse header
+acceptance proves preflight arithmetic only, not valid payloads or full restore.
+Run real maximum64MiB photo export/restore and an opt-in512MiB streaming-reader
+check, measuring time/memory separately. Preserve full-limit end-to-end testing
+as unverified unless sufficient storage becomes available.
+
+Host inspection found about3.1GiB free and no suitable external volume. Asked for
+an optional40GiB writable volume; continue independent checks meanwhile. Use an
+isolated256MiB APFS image for real disk-full ZIPFoundation/SQLite/MediaFiles checks
+if supported, retain its mount/image identity, and detach/clean only those test
+artifacts afterward. Never fill the host volume or reset user collections. File
+fault seams remain instance-owned and no production limits are lowered for tests.
+
+### Scoped recovery design review
+
+**Author:** Codex (AI assistant). **Date:** 2026-11-01 (Asia/Jakarta).
+
+Real ENOSPC at SQLite COMMIT produced an uncertain result and a hot rollback
+journal. Read-only reopening correctly refused SQLite776, but could not recover.
+Independent reviewer core_readiness_review approved the narrow existing-path
+journal-recovery exception, with no CREATE, command replay or settings before
+schema/identity validation. Journal rollback can change database bytes before
+identity is established; other validation errors do not permit writable recovery.
+The directory review also requires explicit stable anchors for recursive creation.
+Design docs `249972ceaa08fb948f648ec8cdd5c0a2a5c37264` passed8/8 documentation
+checks/268 tooling tests and was published before this candidate pin adoption;
+consumer validation passed. Implementation follows this exact design revision.
