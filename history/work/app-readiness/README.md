@@ -1267,7 +1267,8 @@ full accessibility, StoreKit/admin and release remain open. REQ-010 stays partia
 
 Ordinary `flutter run --debug -t lib/main_development.dart` built and launched on
 the same disposable QA simulator. The app was then terminated before the scheduled
-10:25 local reminder. At10:26 the OS lock-screen accessibility tree exposed
+10:25 local reminder. At10:26 the primary assistant observed, via the session’s Simulator computer-use
+accessibility capture, the OS lock-screen entry
 “VERDI PREVIEW … Plant-care checks … A plant-care check to review”. This proves
 one delivered notification with the app terminated, not a general delivery promise.
 Read-only snapshots of27 core tables (all except the regenerable outbox) matched
@@ -1275,4 +1276,6 @@ before/after delivery; no care/history mutation occurred. The notification inbox
 remained empty because the UI automation did not successfully open the OS card.
 Actual cold-launch notification tap/delegate delivery is therefore unverified;
 widget/native tap tests are separate evidence. Normal app launch was restored.
-Logs: `verdi-reminders-normal-run.log` and `verdi-reminders-delivery.log`.
+Logs: `verdi-reminders-normal-run.log` proves launch and
+`verdi-reminders-delivery.log` proves table equality. The notification observation
+is primary-assistant session evidence, not an assertion in those automated logs.
