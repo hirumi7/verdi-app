@@ -1993,7 +1993,7 @@ abstract class AppStrings {
   /// No description provided for @proBenefit.
   ///
   /// In en, this message translates to:
-  /// **'Pro gives you unlimited active plants and new custom care types and routines in this preview.'**
+  /// **'Pro gives you unlimited active plants, new custom care types and routines, and dated photo comparisons in this preview.'**
   String get proBenefit;
 
   /// No description provided for @proFree.
@@ -2199,6 +2199,144 @@ abstract class AppStrings {
   /// In en, this message translates to:
   /// **'Affected routines: {count}'**
   String careTypeEffects(int count);
+
+  /// No description provided for @sharePlantCard.
+  ///
+  /// In en, this message translates to:
+  /// **'Share plant card'**
+  String get sharePlantCard;
+
+  /// No description provided for @comparePhotos.
+  ///
+  /// In en, this message translates to:
+  /// **'Compare photos'**
+  String get comparePhotos;
+
+  /// No description provided for @cardPrivacy.
+  ///
+  /// In en, this message translates to:
+  /// **'Only the previewed name, species, selected images and Verdi attribution are included. Comparisons also include the photo dates. Notes, location and original image metadata stay out. Sharing may send the image to an app you choose.'**
+  String get cardPrivacy;
+
+  /// No description provided for @cardChooseTwo.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose two photos. Their recorded dates appear on the comparison.'**
+  String get cardChooseTwo;
+
+  /// No description provided for @cardNeedsTwo.
+  ///
+  /// In en, this message translates to:
+  /// **'Add at least two photos of this plant to create a comparison.'**
+  String get cardNeedsTwo;
+
+  /// No description provided for @cardUseIllustration.
+  ///
+  /// In en, this message translates to:
+  /// **'Use the plant illustration'**
+  String get cardUseIllustration;
+
+  /// No description provided for @cardPreview.
+  ///
+  /// In en, this message translates to:
+  /// **'Preview card'**
+  String get cardPreview;
+
+  /// No description provided for @cardRefresh.
+  ///
+  /// In en, this message translates to:
+  /// **'Refresh preview'**
+  String get cardRefresh;
+
+  /// No description provided for @cardSave.
+  ///
+  /// In en, this message translates to:
+  /// **'Save image'**
+  String get cardSave;
+
+  /// No description provided for @cardShare.
+  ///
+  /// In en, this message translates to:
+  /// **'Share'**
+  String get cardShare;
+
+  /// No description provided for @cardViewPro.
+  ///
+  /// In en, this message translates to:
+  /// **'View one-time Pro'**
+  String get cardViewPro;
+
+  /// No description provided for @cardReload.
+  ///
+  /// In en, this message translates to:
+  /// **'Reload photos and choices'**
+  String get cardReload;
+
+  /// No description provided for @cardRefreshRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'This preview is no longer current. Refresh it and review the image before saving or sharing.'**
+  String get cardRefreshRequired;
+
+  /// No description provided for @cardReselectRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'The collection or selected content changed. Reload and choose again.'**
+  String get cardReselectRequired;
+
+  /// No description provided for @cardMediaUnavailable.
+  ///
+  /// In en, this message translates to:
+  /// **'A selected photo is unavailable. Reload to choose another, or use the plant illustration. Your originals are unchanged.'**
+  String get cardMediaUnavailable;
+
+  /// No description provided for @cardProRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'Photo comparison is a Pro feature. You can view one-time Pro or go back; every original photo remains available. After upgrading, choose Preview card again.'**
+  String get cardProRequired;
+
+  /// No description provided for @cardPermissionDenied.
+  ///
+  /// In en, this message translates to:
+  /// **'Photos access was denied. Allow Verdi to add photos in Settings, then retry if you want to save. Your preview is still available.'**
+  String get cardPermissionDenied;
+
+  /// No description provided for @cardSaveUnknown.
+  ///
+  /// In en, this message translates to:
+  /// **'The save result is uncertain. Check Photos before choosing Save image again.'**
+  String get cardSaveUnknown;
+
+  /// No description provided for @cardSaveFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'The image could not be saved. Your preview is still available; you can retry.'**
+  String get cardSaveFailed;
+
+  /// No description provided for @cardFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'The card could not be prepared or handed off. Your originals are unchanged. Please try again.'**
+  String get cardFailed;
+
+  /// No description provided for @cardSaved.
+  ///
+  /// In en, this message translates to:
+  /// **'Image saved.'**
+  String get cardSaved;
+
+  /// No description provided for @cardHandedToOS.
+  ///
+  /// In en, this message translates to:
+  /// **'Image handed to the selected app. Verdi cannot confirm publication or delivery.'**
+  String get cardHandedToOS;
+
+  /// No description provided for @cardCancelled.
+  ///
+  /// In en, this message translates to:
+  /// **'Sharing cancelled. Your preview is still available.'**
+  String get cardCancelled;
 }
 
 class _AppStringsDelegate extends LocalizationsDelegate<AppStrings> {

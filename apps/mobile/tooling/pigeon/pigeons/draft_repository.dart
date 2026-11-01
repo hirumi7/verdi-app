@@ -220,3 +220,17 @@ abstract class StorePlatformHostApi {
 abstract class StorePlatformEventsApi {
   void changed();
 }
+
+@HostApi()
+abstract class CardPlatformHostApi {
+  @async
+  String prepareCard(String requestJson);
+  @async
+  Uint8List readCard(String token);
+  @async
+  String shareCard(String token);
+  @async
+  String saveCard(String token);
+  @async
+  void releaseCard(String token);
+}

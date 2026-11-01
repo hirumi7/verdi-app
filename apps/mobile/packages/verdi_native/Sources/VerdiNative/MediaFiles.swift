@@ -105,6 +105,35 @@ final class MediaFiles {
         let status=Darwin.close(fd);closed=true;guard status==0 else {throw CoreRepositoryError("IO_FAILURE")}
         try fault?(.parentFlush);guard fsync(dir)==0 else {throw CoreRepositoryError("IO_FAILURE")}
     }
+    func writeCard(_ data:Data,to relative:String) throws {
+        guard !data.isEmpty,data.count<=CardRenderer.maximumBytes else{throw CoreRepositoryError("CARD_GENERATION_FAILED")}
+        let (dir,name)=try parent(relative,create:true);defer{Darwin.close(dir)}
+        try fault?(.create)
+        let fd=openat(dir,name,O_WRONLY|O_CREAT|O_EXCL|O_NOFOLLOW|O_CLOEXEC,S_IRUSR|S_IWUSR)
+        guard fd>=0 else{throw CoreRepositoryError("IO_FAILURE")};defer{Darwin.close(fd)}
+        try protection(root.appendingPathComponent(relative))
+        var url=root.appendingPathComponent(relative),values=URLResourceValues();values.isExcludedFromBackup=true;try url.setResourceValues(values)
+        try data.withUnsafeBytes { raw in
+            var offset=0
+            while offset<data.count {
+                try fault?(.write)
+                let n=Darwin.write(fd,raw.baseAddress!.advanced(by:offset),data.count-offset)
+                if n<0 && errno==EINTR{continue};guard n>0 else{throw CoreRepositoryError("IO_FAILURE")};offset+=n
+            }
+        }
+        try fault?(.flush);guard fsync(fd)==0,fcntl(fd,F_FULLFSYNC)==0 else{throw CoreRepositoryError("IO_FAILURE")}
+        try fault?(.parentFlush);guard fsync(dir)==0 else{throw CoreRepositoryError("IO_FAILURE")}
+    }
+    func readCard(_ relative:String) throws -> Data {
+        let fd=try openRead(relative);defer{Darwin.close(fd)}
+        var data=Data(),buffer=[UInt8](repeating:0,count:65536)
+        while true {
+            let n=Darwin.read(fd,&buffer,buffer.count)
+            if n<0 && errno==EINTR{continue};guard n>=0 else{throw CoreRepositoryError("IO_FAILURE")};if n==0{break}
+            guard data.count+n<=CardRenderer.maximumBytes else{throw CoreRepositoryError("CARD_GENERATION_FAILED")};data.append(contentsOf:buffer.prefix(n))
+        }
+        try CardRenderer.validate(data);return data
+    }
     func inspect(_ relative:String) throws -> MediaFileInfo {
         let fd=try openRead(relative);defer{Darwin.close(fd)}
         var hash=SHA256(),buffer=[UInt8](repeating:0,count:65536),total:Int64=0
@@ -131,7 +160,7 @@ final class MediaFiles {
         guard renameatx_np(from,name,to,target,UInt32(RENAME_EXCL))==0 else {throw CoreRepositoryError("IO_FAILURE")}
         // A rename preserves the staging inode's backup exclusion attribute.
         var original=root.appendingPathComponent(destination),values=URLResourceValues()
-        values.isExcludedFromBackup=false
+        values.isExcludedFromBackup=destination.hasPrefix("exports/")
         try original.setResourceValues(values)
         let fd=try openRead(destination);defer{Darwin.close(fd)}
         guard fsync(fd)==0 else{throw CoreRepositoryError("IO_FAILURE")}

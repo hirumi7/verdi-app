@@ -1099,7 +1099,7 @@ class AppStringsEn extends AppStrings {
 
   @override
   String get proBenefit =>
-      'Pro gives you unlimited active plants and new custom care types and routines in this preview.';
+      'Pro gives you unlimited active plants, new custom care types and routines, and dated photo comparisons in this preview.';
 
   @override
   String get proFree =>
@@ -1217,4 +1217,86 @@ class AppStringsEn extends AppStrings {
   String careTypeEffects(int count) {
     return 'Affected routines: $count';
   }
+
+  @override
+  String get sharePlantCard => 'Share plant card';
+
+  @override
+  String get comparePhotos => 'Compare photos';
+
+  @override
+  String get cardPrivacy =>
+      'Only the previewed name, species, selected images and Verdi attribution are included. Comparisons also include the photo dates. Notes, location and original image metadata stay out. Sharing may send the image to an app you choose.';
+
+  @override
+  String get cardChooseTwo =>
+      'Choose two photos. Their recorded dates appear on the comparison.';
+
+  @override
+  String get cardNeedsTwo =>
+      'Add at least two photos of this plant to create a comparison.';
+
+  @override
+  String get cardUseIllustration => 'Use the plant illustration';
+
+  @override
+  String get cardPreview => 'Preview card';
+
+  @override
+  String get cardRefresh => 'Refresh preview';
+
+  @override
+  String get cardSave => 'Save image';
+
+  @override
+  String get cardShare => 'Share';
+
+  @override
+  String get cardViewPro => 'View one-time Pro';
+
+  @override
+  String get cardReload => 'Reload photos and choices';
+
+  @override
+  String get cardRefreshRequired =>
+      'This preview is no longer current. Refresh it and review the image before saving or sharing.';
+
+  @override
+  String get cardReselectRequired =>
+      'The collection or selected content changed. Reload and choose again.';
+
+  @override
+  String get cardMediaUnavailable =>
+      'A selected photo is unavailable. Reload to choose another, or use the plant illustration. Your originals are unchanged.';
+
+  @override
+  String get cardProRequired =>
+      'Photo comparison is a Pro feature. You can view one-time Pro or go back; every original photo remains available. After upgrading, choose Preview card again.';
+
+  @override
+  String get cardPermissionDenied =>
+      'Photos access was denied. Allow Verdi to add photos in Settings, then retry if you want to save. Your preview is still available.';
+
+  @override
+  String get cardSaveUnknown =>
+      'The save result is uncertain. Check Photos before choosing Save image again.';
+
+  @override
+  String get cardSaveFailed =>
+      'The image could not be saved. Your preview is still available; you can retry.';
+
+  @override
+  String get cardFailed =>
+      'The card could not be prepared or handed off. Your originals are unchanged. Please try again.';
+
+  @override
+  String get cardSaved => 'Image saved.';
+
+  @override
+  String get cardHandedToOS =>
+      'Image handed to the selected app. Verdi cannot confirm publication or delivery.';
+
+  @override
+  String get cardCancelled =>
+      'Sharing cancelled. Your preview is still available.';
 }

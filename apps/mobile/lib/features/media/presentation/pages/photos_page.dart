@@ -1,3 +1,5 @@
+import '../../../cards/presentation/card_page.dart';
+
 import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -146,6 +148,13 @@ class _PhotosPageState extends State<PhotosPage> {
           child: ListView(
             padding: const EdgeInsets.all(16),
             children: [
+              OutlinedButton.icon(
+                onPressed: busy
+                    ? null
+                    : () => openCard(context, widget.plantId, comparison: true),
+                icon: const Icon(Icons.compare),
+                label: Text(s.comparePhotos),
+              ),
               if (busy) const LinearProgressIndicator(),
               if (localError ?? state.errorCode case final String error) ...[
                 ErrorNotice(error),

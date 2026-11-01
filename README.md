@@ -158,7 +158,7 @@ as covers, replaced without changing their ID, or deleted with shared references
 updated atomically. Journal entries join care history in the plant timeline.
 Free original export uses an explicit metadata warning and the OS share sheet.
 Camera code is present; physical capture/protection tests remain outstanding.
-Optimization, comparison cards, full backup and release are separate scopes.
+Optional photo optimization and remaining release checks are separate scopes.
 
 The media integration test uses the real OS picker. Seed the bundled
 `assets/illustrations/empty-plants.png` and the distinct synthetic
@@ -236,3 +236,26 @@ then checks that existing plants/history/photos/drafts are preserved. It never
 resets a collection or initiates a purchase. Flutter widget tests separately
 verify same-command fresh confirmation after upgrade and delayed store/UI races.
 Physical StoreKit/account/protection and production configuration remain open.
+
+## Local share cards and comparisons
+
+Plant detail → Share plant card prepares a free local PNG preview from the plant's
+name/species and cover or explicit illustration. Photos → Compare photos lets a
+Pro user choose two same-plant photos with their recorded dates. Native authority
+rechecks sources and entitlement before each external handoff. Preview bytes are
+the actual exported PNG; notes, location and original metadata are excluded.
+
+Save image uses Photos add-only authorization. A lost result tells the person to
+check Photos before explicitly retrying; no external save/share retries itself.
+Passive previews do not block backup restore. Active OS operations retain their
+own file lease through preview closure/reopen until their callback ends.
+
+Run `swift test --filter Card` from the native package and `flutter test
+ test/card_test.dart` from `apps/mobile`. Main simulator `integration_test/cards_test.dart`
+requires the retained QA collection with a saved cover. Use `--no-uninstall`,
+cancel the native share sheet without sending, then answer the add-only permission
+prompt. `--dart-define=VERDI_CARD_DENIED=true` exercises a simulator with Photos
+add-only access denied. The test retains collection data; successful Save creates
+one synthetic card in that simulator's Photos library. Restore the test permission
+after a denial run. Physical recipient/save/protection and production Pro checks
+remain release evidence, separately from these development checks.

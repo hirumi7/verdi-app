@@ -472,7 +472,7 @@
   "proTitle": "Verdi Pro",
   "proActive": "Room to grow",
   "proRoom": "Make room for every plant",
-  "proBenefit": "Pro gives you unlimited active plants and new custom care types and routines in this preview.",
+  "proBenefit": "Pro gives you unlimited active plants, new custom care types and routines, and dated photo comparisons in this preview.",
   "proFree": "Free includes five active plants, standard care, all history, reminders and backup. Your existing plants and records stay yours.",
   "proTestNotice": "Local StoreKit test · simulated purchase, no real charge.",
   "proCached": "Your verified purchase is available offline.",
@@ -513,5 +513,28 @@
         "type": "int"
       }
     }
-  }
+  },
+  "sharePlantCard": "Share plant card",
+  "comparePhotos": "Compare photos",
+  "cardPrivacy": "Only the previewed name, species, selected images and Verdi attribution are included. Comparisons also include the photo dates. Notes, location and original image metadata stay out. Sharing may send the image to an app you choose.",
+  "cardChooseTwo": "Choose two photos. Their recorded dates appear on the comparison.",
+  "cardNeedsTwo": "Add at least two photos of this plant to create a comparison.",
+  "cardUseIllustration": "Use the plant illustration",
+  "cardPreview": "Preview card",
+  "cardRefresh": "Refresh preview",
+  "cardSave": "Save image",
+  "cardShare": "Share",
+  "cardViewPro": "View one-time Pro",
+  "cardReload": "Reload photos and choices",
+  "cardRefreshRequired": "This preview is no longer current. Refresh it and review the image before saving or sharing.",
+  "cardReselectRequired": "The collection or selected content changed. Reload and choose again.",
+  "cardMediaUnavailable": "A selected photo is unavailable. Reload to choose another, or use the plant illustration. Your originals are unchanged.",
+  "cardProRequired": "Photo comparison is a Pro feature. You can view one-time Pro or go back; every original photo remains available. After upgrading, choose Preview card again.",
+  "cardPermissionDenied": "Photos access was denied. Allow Verdi to add photos in Settings, then retry if you want to save. Your preview is still available.",
+  "cardSaveUnknown": "The save result is uncertain. Check Photos before choosing Save image again.",
+  "cardSaveFailed": "The image could not be saved. Your preview is still available; you can retry.",
+  "cardFailed": "The card could not be prepared or handed off. Your originals are unchanged. Please try again.",
+  "cardSaved": "Image saved.",
+  "cardHandedToOS": "Image handed to the selected app. Verdi cannot confirm publication or delivery.",
+  "cardCancelled": "Sharing cancelled. Your preview is still available."
 }

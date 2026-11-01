@@ -43,6 +43,8 @@ public final class CoreRepository {
     var backupFault: ((BackupBoundary) throws -> Void)?
     let queue = DispatchQueue(label: "verdi.native.core-repository")
     let mediaWorker = DispatchQueue(label:"verdi.native.media-files")
+    var cardPreviews:[String:CardPreview]=[:]
+    var cardOSFiles:[String:URL]=[:]
     var exportLeases:[String:Date]=[:]
     var pendingMediaFailures:[String:(session:String,code:String)]=[:]
     var mediaFiles:MediaFiles?
@@ -75,7 +77,7 @@ public final class CoreRepository {
                 if ["preparePhoto","photoPreparation","draftPreparations"].contains(operation) {try persistMediaFailures(db)}
                 let value: CanonicalValue
                 switch operation {
-                case "close": try db.close(); database = nil; sessionID = ""; grants.removeAll(); previews.removeAll(); value = .null
+                case "close": try db.close(); database = nil; sessionID = ""; cardPreviews.removeAll(); grants.removeAll(); previews.removeAll(); value = .null
                 case "preparePhoto": value = try beginPhotoPreparation(args,db)
                 case "draftPreparations":
                     let draft=try CoreSchema.string(args["draftId"])
@@ -132,7 +134,7 @@ public final class CoreRepository {
     }
     private func open(_ args: [String: CanonicalValue]) throws -> CanonicalValue {
         guard args["protocolVersion"]?.integer == 1, args["profile"]?.text == "custom_core_v1" else { throw CoreRepositoryError("PROTOCOL_INCOMPATIBLE") }
-        sessionID = ""; previews.removeAll(); grants.removeAll()
+        sessionID = ""; cardPreviews.removeAll(); previews.removeAll(); grants.removeAll()
         if let database { try database.close(); self.database = nil }
         if BackupControl.exists(installationDirectory) {
             if backupControl == nil {backupControl = try BackupControl(legacy:installationDirectory,fault:backupFault,transactionFault:backupControlFault,io:backupFileIO)}

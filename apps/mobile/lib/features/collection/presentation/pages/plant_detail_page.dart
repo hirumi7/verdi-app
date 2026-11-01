@@ -1,3 +1,4 @@
+import '../../../cards/presentation/card_page.dart';
 import 'custom_care_page.dart';
 import '../../../../core/di/injection.dart';
 import '../../data/repositories/collection_repository.dart';
@@ -208,6 +209,11 @@ class _PlantDetailPageState extends State<PlantDetailPage> {
               Wrap(
                 spacing: 8,
                 children: [
+                  OutlinedButton.icon(
+                    onPressed: () => openCard(context, widget.plantId),
+                    icon: const Icon(Icons.ios_share),
+                    label: Text(s.sharePlantCard),
+                  ),
                   if (!d.plant.archived)
                     OutlinedButton.icon(
                       onPressed: () async {

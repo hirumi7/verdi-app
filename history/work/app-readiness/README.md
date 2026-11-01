@@ -1448,3 +1448,59 @@ submission host and simulator-only testing for now; those release gates remain o
 Final ordinary `flutter build ios --simulator --debug -t lib/main_development.dart`
 also passed after the recovery corrections. The build's CocoaPods-to-SPM advisory
 is unchanged; this slice does not alter the template's native integration setup.
+
+## Local share cards and comparison — 2026-11-01
+
+**Author:** Codex (AI assistant), independently reviewed by core_readiness_review.
+
+**Date:** 2026-11-01 (Asia/Jakarta).
+
+Implemented against published design pin
+`e572b8736c515a82aa57c73374a32aad3b4af355`, covering REQ-017 and its
+REQ-014 native comparison gate; preserves REQ-006/007/011/012/015/018.
+Plant detail now prepares free 1080×1350 cards from name/species and the selected
+cover or explicit local illustration. Gallery exposes an initially unselected
+two-photo Pro comparison with chronological observation dates. Originals stay Free.
+No schema or accepted requirement changes. The development release guard remains.
+
+Native renders one bounded PNG for both preview and export, strips encoder/source
+metadata, registers temporary outputs before writing and validates source rows,
+hashes, session, dataset and capability before handoff. Worker preflight hashes
+files; the synchronous final grant checks unchanged inode/size/mtime/ctime stamps
+and trusted rows under repository/store locks. Separate passive preview and active
+OS file leases allow restore with previews and block it during active handoff.
+Expiry/reopen/preview close cannot release an OS-owned file prematurely.
+
+Save uses add-only Photos permission. “Saved” requires an actual creation request
+and successful completion. Unknown/channel/time-out replies retain the preview,
+warn to check Photos before explicit retry and never auto-repeat an external save.
+The native operation retains its file until callback even if the Flutter deadline
+expires. Pro completion preserves selection and requires explicit fresh generation.
+
+Executed: full native167 discovered/163 passed/4 existing opt-in skips; final8
+focused native card checks passed after receipt and malformed-input fixes. Native
+warnings-as-errors build passed. Flutter78 tests passed; final16 Pro/card tests
+passed after benefits copy update. Analyzer has no issues; localization and
+build_runner passed, Pigeon regeneration matches,82-file formatting check passed.
+The iOS simulator build passed. Main native UI integration passed on retained
+QA iPhone16/iOS18.3.1 with --no-uninstall: actual cover preview, native share
+cancellation, add-only prompt and successful Photos save. A second denial run
+passed with the preview and collection unchanged; the test-only add permission
+was restored afterward. Both runs retain collection revision and plant/photo/
+cover/draft identities. The successful run created one QA image in simulator Photos.
+
+Review found and fixed encoder-added PNG metadata, Photos empty-change-block
+success ambiguity, and lost-save-reply wording/deadline behavior. Test-harness
+compile and offscreen-lazy-list assertions were fixed; no failing check was waived.
+Native regressions cover source/output mutation after preflight, Pro revocation,
+file failures, passive-preview restore vs active-OS blocking, expiry/reopen,
+long Unicode and metadata rejection. Widgets cover explicit actions, missing
+comparison inputs, retained Pro selection, delayed closed-page results, denial,
+uncertain save, and375px/320% text. Physical Photos/recipient/protection and
+production StoreKit are unverified; simulator evidence does not close release.
+
+Remaining accepted work includes photo optimization, optional-off personality/
+cosmetics, privacy/help and complete accessibility, internal TanStack catalog tools,
+production profile/store registration, submission host, physical checks and
+full-limit backup/performance. The user has no compatible submission host and
+requests simulator testing for now; those release gates remain open.

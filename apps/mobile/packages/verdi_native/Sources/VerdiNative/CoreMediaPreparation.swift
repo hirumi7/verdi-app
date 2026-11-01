@@ -182,7 +182,7 @@ extension CoreRepository {
         for path in paths {
             let allowed:Bool=queue.sync {
                 exportLeases=exportLeases.filter{$0.value>now()}
-                guard !replacementAdmissionClosed,!backupReadLease,let db=database,exportLeases[path]==nil else{return false}
+                guard !replacementAdmissionClosed,!backupReadLease,let db=database,exportLeases[path]==nil,!cardFileRetained(files,path) else{return false}
                 return (try? db.read{sql in
                     try sql.query("SELECT id FROM photos WHERE content_path=?",[.text(path)]).isEmpty && sql.query("SELECT f.relative_path FROM media_files f JOIN media_preparations p ON p.id=f.preparation_id WHERE f.relative_path=? AND p.state IN ('copying','ready')",[.text(path)]).isEmpty && sql.query("SELECT id FROM media_selections WHERE relative_path=? AND state IN ('copying','ready')",[.text(path)]).isEmpty
                 }) ?? false

@@ -1416,3 +1416,105 @@ class StorePlatformEventsApi: StorePlatformEventsApiProtocol {
     }
   }
 }
+/// Generated protocol from Pigeon that represents a handler of messages from Flutter.
+protocol CardPlatformHostApi {
+  func prepareCard(requestJson: String) async throws -> String
+  func readCard(token: String) async throws -> FlutterStandardTypedData
+  func shareCard(token: String) async throws -> String
+  func saveCard(token: String) async throws -> String
+  func releaseCard(token: String) async throws
+}
+
+/// Generated setup class from Pigeon to handle messages through the `binaryMessenger`.
+class CardPlatformHostApiSetup {
+  static var codec: FlutterStandardMessageCodec { DraftBridgePigeonCodec.shared }
+  /// Sets up an instance of `CardPlatformHostApi` to handle messages through the `binaryMessenger`.
+  static func setUp(binaryMessenger: FlutterBinaryMessenger, api: CardPlatformHostApi?, messageChannelSuffix: String = "") {
+    let channelSuffix = messageChannelSuffix.count > 0 ? ".\(messageChannelSuffix)" : ""
+    let prepareCardChannel = FlutterBasicMessageChannel(name: "dev.flutter.pigeon.verdi_mobile.CardPlatformHostApi.prepareCard\(channelSuffix)", binaryMessenger: binaryMessenger, codec: codec)
+    if let api = api {
+      prepareCardChannel.setMessageHandler { message, reply in
+        let args = message as! [Any?]
+        let requestJsonArg = args[0] as! String
+        Task { @MainActor in
+          do {
+            let result = try await api.prepareCard(requestJson: requestJsonArg)
+            reply(wrapResult(result))
+          } catch {
+            reply(wrapError(error))
+          }
+        }
+      }
+    } else {
+      prepareCardChannel.setMessageHandler(nil)
+    }
+    let readCardChannel = FlutterBasicMessageChannel(name: "dev.flutter.pigeon.verdi_mobile.CardPlatformHostApi.readCard\(channelSuffix)", binaryMessenger: binaryMessenger, codec: codec)
+    if let api = api {
+      readCardChannel.setMessageHandler { message, reply in
+        let args = message as! [Any?]
+        let tokenArg = args[0] as! String
+        Task { @MainActor in
+          do {
+            let result = try await api.readCard(token: tokenArg)
+            reply(wrapResult(result))
+          } catch {
+            reply(wrapError(error))
+          }
+        }
+      }
+    } else {
+      readCardChannel.setMessageHandler(nil)
+    }
+    let shareCardChannel = FlutterBasicMessageChannel(name: "dev.flutter.pigeon.verdi_mobile.CardPlatformHostApi.shareCard\(channelSuffix)", binaryMessenger: binaryMessenger, codec: codec)
+    if let api = api {
+      shareCardChannel.setMessageHandler { message, reply in
+        let args = message as! [Any?]
+        let tokenArg = args[0] as! String
+        Task { @MainActor in
+          do {
+            let result = try await api.shareCard(token: tokenArg)
+            reply(wrapResult(result))
+          } catch {
+            reply(wrapError(error))
+          }
+        }
+      }
+    } else {
+      shareCardChannel.setMessageHandler(nil)
+    }
+    let saveCardChannel = FlutterBasicMessageChannel(name: "dev.flutter.pigeon.verdi_mobile.CardPlatformHostApi.saveCard\(channelSuffix)", binaryMessenger: binaryMessenger, codec: codec)
+    if let api = api {
+      saveCardChannel.setMessageHandler { message, reply in
+        let args = message as! [Any?]
+        let tokenArg = args[0] as! String
+        Task { @MainActor in
+          do {
+            let result = try await api.saveCard(token: tokenArg)
+            reply(wrapResult(result))
+          } catch {
+            reply(wrapError(error))
+          }
+        }
+      }
+    } else {
+      saveCardChannel.setMessageHandler(nil)
+    }
+    let releaseCardChannel = FlutterBasicMessageChannel(name: "dev.flutter.pigeon.verdi_mobile.CardPlatformHostApi.releaseCard\(channelSuffix)", binaryMessenger: binaryMessenger, codec: codec)
+    if let api = api {
+      releaseCardChannel.setMessageHandler { message, reply in
+        let args = message as! [Any?]
+        let tokenArg = args[0] as! String
+        Task { @MainActor in
+          do {
+            try await api.releaseCard(token: tokenArg)
+            reply(wrapResult(nil))
+          } catch {
+            reply(wrapError(error))
+          }
+        }
+      }
+    } else {
+      releaseCardChannel.setMessageHandler(nil)
+    }
+  }
+}
